@@ -65,7 +65,12 @@ class Level(models.Model):
     l_id = models.AutoField(primary_key=True)
     l_name = models.CharField(max_length=255)
     dpt_id = models.ForeignKey(Department, on_delete=models.CASCADE)
+    f_id = models.ForeignKey('Faculty', on_delete=models.CASCADE, default=1)
     
+    class Meta:
+        ordering = ['l_id'] 
+        unique_together = ('f_id', 'l_name')
+        
     def __str__(self):
         return self.l_name
 
