@@ -24,10 +24,24 @@ class FacultyViewSet(viewsets.ModelViewSet):
     queryset = Faculty.objects.all()
     serializer_class = FacultySerializer
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        dpt_id = self.request.query_params.get('dpt_id', None)
+        if dpt_id:
+            queryset = queryset.filter(dpt_id=dpt_id)
+        return queryset
+
 class LevelViewSet(viewsets.ModelViewSet):
     queryset = Level.objects.all()
     serializer_class = LevelSerializer
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        f_id = self.request.query_params.get('f_id', None)
+        if f_id:
+            queryset = queryset.filter(f_id=f_id)
+        return queryset
+    
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context['request'] = self.request
