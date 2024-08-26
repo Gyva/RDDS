@@ -1,6 +1,7 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 const Login = ({ onLogin }) => {
     const { register, handleSubmit, formState: { errors } } = useForm();
@@ -53,6 +54,10 @@ const Login = ({ onLogin }) => {
                             </div>
                             <button type="submit" className="btn btn-primary w-100">Login</button>
                         </form>
+                        <div className='d-flex justify-content-end'>
+                            <Link to={"/claim_password"} className='text-decoration-none text-primary'>Create account</Link>
+                        </div>
+
                     </div>
                 </div>
             </div>

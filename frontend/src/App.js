@@ -4,6 +4,7 @@ import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
 import StudentRegistrationForm from './components/StudentRegistrationForm';
 import Login from './components/Login';
+import GetPasswordForm from './components/GetPasswordForm'
 import './App.css'; // Include your global styles here
 
 const App = () => {
@@ -26,6 +27,7 @@ const App = () => {
         <Router>
             <Routes>
                 <Route path="/login" element={<Login onLogin={handleLogin} />} />
+                <Route path="/claim_password" element={<GetPasswordForm/>} />
                 <Route 
                     path="*" 
                     element={
