@@ -63,3 +63,21 @@
     padding: 15px;
     box-sizing: border-box;
 }
+/* App.css */
+.login-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh; /* Full viewport height */
+    width: 100vw; /* Full viewport width */
+    background: #f8f9fa; /* Background color (optional) */
+}
+
+.login-form {
+    max-width: 400px; /* Maximum width for the form */
+    width: 100%; /* Full width within the container */
+    padding: 20px;
+    background: #fff; /* Background color for the form (optional) */
+    border-radius: 8px; /* Rounded corners (optional) */
+    box-shadow: 0 0 10px rgba(0,0,0,0.1); /* Box shadow (optional) */
+}
