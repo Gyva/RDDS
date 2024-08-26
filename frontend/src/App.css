@@ -1,0 +1,83 @@
+.app-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+.content-wrapper {
+    flex: 1;
+    margin-left: 250px;
+    transition: margin-left 0.3s ease;
+    padding-top: 60px; /* To account for the fixed navbar */
+}
+
+.full-width {
+    margin-left: 0;
+}
+
+.main-content {
+    padding: 20px;
+    background-color: #f1f1f1;
+    min-height: calc(100vh - 60px); /* Adjust for the fixed navbar */
+}
+/* General layout */
+
+.sidebar-visible .content-wrapper {
+    width: calc(100% - 250px); /* Adjust width based on sidebar width */
+    transition: width 0.3s ease;
+}
+
+.sidebar-hidden .content-wrapper {
+    width: 100%;
+    transition: width 0.3s ease;
+}
+
+/* Adjust Navbar when Sidebar is visible */
+.sidebar-visible .main-header.navbar {
+    width: calc(100% - 250px); /* Adjust width based on sidebar width */
+    transition: width 0.3s ease;
+}
+
+.sidebar-hidden .main-header.navbar {
+    width: 100%;
+    transition: width 0.3s ease;
+}
+
+.content-wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    transition: width 0.3s ease;
+}
+
+.sidebar-visible .content-wrapper {
+    margin-left: 250px; /* Adjust according to sidebar width */
+}
+
+.sidebar-hidden .content-wrapper {
+    margin-left: 0;
+}
+
+/* Ensure form stretches and fills the container */
+.container {
+    width: 100%;
+    padding: 15px;
+    box-sizing: border-box;
+}
+/* App.css */
+.login-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh; /* Full viewport height */
+    width: 100vw; /* Full viewport width */
+    background: #f8f9fa; /* Background color (optional) */
+}
+
+.login-form {
+    max-width: 400px; /* Maximum width for the form */
+    width: 100%; /* Full width within the container */
+    padding: 20px;
+    background: #fff; /* Background color for the form (optional) */
+    border-radius: 8px; /* Rounded corners (optional) */
+    box-shadow: 0 0 10px rgba(0,0,0,0.1); /* Box shadow (optional) */
+}
