@@ -15,14 +15,14 @@ const App = () => {
     return (
         <div className={`app-container ${isSidebarVisible ? 'sidebar-visible' : 'sidebar-hidden'}`}>
             <Sidebar isVisible={isSidebarVisible} />
-            <div className={`content-wrapper ${isSidebarVisible ? '' : 'full-width'}`}>
+            <div className="content-wrapper">
                 <Navbar toggleSidebar={toggleSidebar} isVisible={isSidebarVisible} />
-                {/* Main content can go here */}
                 <div className="main-content">
                     <StudentRegistrationForm />
                 </div>
             </div>
         </div>
+
     );
 };
 

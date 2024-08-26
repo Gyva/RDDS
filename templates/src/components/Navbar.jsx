@@ -9,8 +9,8 @@ const Navbar = ({ toggleSidebar, isVisible  }) => {
     };
 
     return (
-        <nav className={`main-header navbar navbar-expand navbar-white navbar-light ${isVisible ? 'w-75' : ''}`}>
-            {/* Left navbar links */}
+<nav className={`main-header navbar navbar-expand navbar-white navbar-light ${isVisible ? 'sidebar-visible' : 'sidebar-hidden'}`}>
+{/* Left navbar links */}
             <ul className="navbar-nav ms-5">
                 <li className="nav-item">
                     <button className="nav-link sidebar-toggle" onClick={toggleSidebar}>

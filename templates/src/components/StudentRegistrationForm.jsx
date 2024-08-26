@@ -17,7 +17,6 @@ const StudentRegistrationForm = ({ contextValues }) => {
         }
     });
 
-    // Fetch departments on component mount
     useEffect(() => {
         fetch('http://127.0.0.1:8000/api/departments/')
             .then(response => response.json())
@@ -25,7 +24,6 @@ const StudentRegistrationForm = ({ contextValues }) => {
             .catch(error => console.error('Error fetching departments:', error));
     }, []);
 
-    // Fetch faculties based on selected department
     useEffect(() => {
         if (selectedDepartment) {
             fetch(`http://127.0.0.1:8000/api/faculties/?dpt_id=${selectedDepartment}`)
@@ -39,11 +37,10 @@ const StudentRegistrationForm = ({ contextValues }) => {
                 .catch(error => console.error('Error fetching faculties:', error));
         } else {
             setFaculties([]);
-            setValue('f_id', ''); // Reset faculty field if no department selected
+            setValue('f_id', '');
         }
     }, [selectedDepartment, contextValues?.f_id]);
 
-    // Fetch levels based on selected faculty
     useEffect(() => {
         if (selectedFaculty) {
             fetch(`http://127.0.0.1:8000/api/levels/?f_id=${selectedFaculty}`)
@@ -57,11 +54,10 @@ const StudentRegistrationForm = ({ contextValues }) => {
                 .catch(error => console.error('Error fetching levels:', error));
         } else {
             setLevels([]);
-            setValue('l_id', ''); // Reset level field if no faculty selected
+            setValue('l_id', '');
         }
     }, [selectedFaculty, contextValues?.l_id]);
 
-    // Handle department change and reset faculty and level
     const handleDepartmentChange = (e) => {
         const departmentId = e.target.value;
         setSelectedDepartment(departmentId);
@@ -71,7 +67,6 @@ const StudentRegistrationForm = ({ contextValues }) => {
         setValue('l_id', '');
     };
 
-    // Handle faculty change and reset level
     const handleFacultyChange = (e) => {
         const facultyId = e.target.value;
         setSelectedFaculty(facultyId);
@@ -79,18 +74,15 @@ const StudentRegistrationForm = ({ contextValues }) => {
         setValue('l_id', '');
     };
 
-    // Custom validation to check the relationship between department, faculty, and level
     const validateDepartmentAndFaculty = () => {
         const department = getValues('dpt_id');
         const faculty = getValues('f_id');
         const level = getValues('l_id');
 
-        // Ensure that faculty belongs to the selected department
         if (faculty && !faculties.find(f => f.f_id === faculty && f.dpt_id === department)) {
             return 'Selected faculty does not belong to the selected department.';
         }
 
-        // Ensure that level belongs to both the selected department and faculty
         if (level && !levels.find(l => l.l_id === level && l.dpt_id === department && l.f_id === faculty)) {
             return 'Selected level does not belong to the selected department and faculty.';
         }
@@ -98,7 +90,6 @@ const StudentRegistrationForm = ({ contextValues }) => {
         return true;
     };
 
-    // Handle form submission
     const onSubmit = (data) => {
         const validationError = validateDepartmentAndFaculty();
         if (validationError !== true) {
@@ -134,7 +125,6 @@ const StudentRegistrationForm = ({ contextValues }) => {
         <div className="container mt-5">
             <h2 className="mb-4">Student Registration Form</h2>
             <form onSubmit={handleSubmit(onSubmit)}>
-                {/* First Name */}
                 <div className="mb-3">
                     <label htmlFor="fname" className="form-label">First Name:</label>
                     <input
@@ -146,7 +136,6 @@ const StudentRegistrationForm = ({ contextValues }) => {
                     {errors.fname && <div className="invalid-feedback">{errors.fname.message}</div>}
                 </div>
 
-                {/* Last Name */}
                 <div className="mb-3">
                     <label htmlFor="lname" className="form-label">Last Name:</label>
                     <input
@@ -158,7 +147,6 @@ const StudentRegistrationForm = ({ contextValues }) => {
                     {errors.lname && <div className="invalid-feedback">{errors.lname.message}</div>}
                 </div>
 
-                {/* Date of Birth */}
                 <div className="mb-3">
                     <label htmlFor="dob" className="form-label">Date of Birth:</label>
                     <input
@@ -170,7 +158,6 @@ const StudentRegistrationForm = ({ contextValues }) => {
                     {errors.dob && <div className="invalid-feedback">{errors.dob.message}</div>}
                 </div>
 
-                {/* Email */}
                 <div className="mb-3">
                     <label htmlFor="email" className="form-label">Email:</label>
                     <input
@@ -188,7 +175,6 @@ const StudentRegistrationForm = ({ contextValues }) => {
                     {errors.email && <div className="invalid-feedback">{errors.email.message}</div>}
                 </div>
 
-                {/* Phone */}
                 <div className="mb-3">
                     <label htmlFor="phone" className="form-label">Phone:</label>
                     <input
@@ -206,7 +192,6 @@ const StudentRegistrationForm = ({ contextValues }) => {
                     {errors.phone && <div className="invalid-feedback">{errors.phone.message}</div>}
                 </div>
 
-                {/* Department */}
                 <div className="mb-3">
                     <label htmlFor="dpt_id" className="form-label">Department:</label>
                     <select
@@ -226,7 +211,6 @@ const StudentRegistrationForm = ({ contextValues }) => {
                     {errors.dpt_id && <div className="invalid-feedback">{errors.dpt_id.message}</div>}
                 </div>
 
-                {/* Faculty */}
                 <div className="mb-3">
                     <label htmlFor="f_id" className="form-label">Faculty:</label>
                     <select
@@ -246,7 +230,6 @@ const StudentRegistrationForm = ({ contextValues }) => {
                     {errors.f_id && <div className="invalid-feedback">{errors.f_id.message}</div>}
                 </div>
 
-                {/* Level */}
                 <div className="mb-3">
                     <label htmlFor="l_id" className="form-label">Level:</label>
                     <select
@@ -264,8 +247,9 @@ const StudentRegistrationForm = ({ contextValues }) => {
                     {errors.l_id && <div className="invalid-feedback">{errors.l_id.message}</div>}
                 </div>
 
-                {/* Submit Button */}
-                <button type="submit" className="btn btn-primary">Register</button>
+                <div className="text-center">
+                    <button type="submit" className="btn btn-primary">Submit</button>
+                </div>
             </form>
         </div>
     );
