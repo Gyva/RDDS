@@ -5,6 +5,7 @@ import Sidebar from './components/Sidebar';
 import StudentRegistrationForm from './components/StudentRegistrationForm';
 import Login from './components/Login';
 import GetPasswordForm from './components/GetPasswordForm'
+import SetPassword from './components/SetPassword';
 import './App.css'; // Include your global styles here
 
 const App = () => {
@@ -51,6 +52,17 @@ const App = () => {
                 />
             </Routes>
         </Router>
+        //////////-------------------------------------------------------------
+        // <div className={`app-container ${isSidebarVisible ? 'sidebar-visible' : 'sidebar-hidden'}`}>
+        //     <Sidebar isVisible={isSidebarVisible} />
+        //     <div className="content-wrapper">
+        //         <Navbar toggleSidebar={toggleSidebar} isVisible={isSidebarVisible} />
+        //         <div className="main-content">
+        //             <SetPassword />
+        //         </div>
+        //     </div>
+        // </div>
+
     );
 };
 
