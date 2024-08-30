@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import Navbar from './components/Navbar';
-import Sidebar from './components/Sidebar';
-import StudentRegistrationForm from './components/StudentRegistrationForm';
-import Login from './components/Login';
-import GetPasswordForm from './components/GetPasswordForm'
-import SetPassword from './components/SetPassword';
+import Navbar from './components/Navbar/Navbar';
+import Sidebar from './components/Sidebar/Sidebar';
+import StudentRegistrationForm from './components/Student/StudentRegistrationForm';
+import Login from './components/Login/Login';
+import GetPasswordForm from './components/Password/GetPasswordForm'
+import SetPassword from './components/Password/SetPassword';
 import './App.css'; // Include your global styles here
 
 const App = () => {
@@ -58,7 +58,7 @@ const App = () => {
         //     <div className="content-wrapper">
         //         <Navbar toggleSidebar={toggleSidebar} isVisible={isSidebarVisible} />
         //         <div className="main-content">
-        //             <SetPassword />
+        //             <StudentRegistrationForm />
         //         </div>
         //     </div>
         // </div>
