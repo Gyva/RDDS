@@ -4,6 +4,7 @@ from .serializers import DepartmentSerializer, SupervisorSerializer, FacultySeri
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
+from django.core.mail import send_mail
 
 
 class DepartmentViewSet(viewsets.ModelViewSet):
@@ -23,20 +24,70 @@ class SupervisorViewSet(viewsets.ModelViewSet):
                 raise serializers.ValidationError("A department can only have one HoD.")
         
         serializer.save()
-    
-    # Custom action for searching by reg_num
-    @action(detail=False, methods=['get'], url_path='search-by-regnum')
-    def search_by_regnum(self, request):
+
+#Search supervosior account
+
+    @action(detail=False, methods=['get'], url_path='search-supervisor')
+    def search_supervisor(self, request):
         reg_num = request.query_params.get('reg_num', None)
+
         if reg_num:
             try:
                 supervisor = Supervisor.objects.get(reg_num=reg_num)
+                # Check if the supervisor already has a linked user account
+                if supervisor.account:
+                    return Response({"error": "This supervisor already has an account."}, status=status.HTTP_400_BAD_REQUEST)
+
+                # Return the supervisor details to proceed with account creation
                 serializer = self.get_serializer(supervisor)
-                return Response(serializer.data, status=status.HTTP_200_OK)
+                return Response({
+                    "supervisor": serializer.data,
+                    "reg_num": reg_num  # Include reg_num to pass it to the frontend
+                }, status=status.HTTP_200_OK)
             except Supervisor.DoesNotExist:
                 return Response({"error": "Supervisor not found"}, status=status.HTTP_404_NOT_FOUND)
         else:
-            return Response({"error": "Please provide a Valid Registration Number"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Please provide a reg_num"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+@action(detail=False, methods=['post'], url_path='create-account-supervisor')
+def create_account_supervisor(self, request):
+    reg_num = request.data.get('reg_num', None)  # This comes from the frontend as hidden input or session storage
+    password = request.data.get('password', None)
+
+    if not reg_num:
+        return Response({"error": "Registration number is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+    if not password:
+        return Response({"error": "Password is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        supervisor = Supervisor.objects.get(reg_num=reg_num)
+
+        # Ensure supervisor doesn't already have an account
+        if supervisor.user:
+            return Response({"error": "This supervisor already has a user account."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Create the new User
+        user = User.objects.create_user(
+            username=supervisor.reg_num,  # Use reg_num as the username
+            first_name=supervisor.fname,
+            last_name=supervisor.lname,
+            email=supervisor.email,
+            password=password,  # Use the provided password
+            role='SUPERVISOR'  # Assign the role as SUPERVISOR
+        )
+
+        # Link the user account to the supervisor
+        supervisor.user = user
+        supervisor.save()
+
+        return Response({"success": "User account created successfully."}, status=status.HTTP_201_CREATED)
+
+    except Supervisor.DoesNotExist:
+        return Response({"error": "Supervisor not found"}, status=status.HTTP_404_NOT_FOUND)
 
 
 
