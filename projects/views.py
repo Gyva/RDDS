@@ -134,7 +134,7 @@ class StudentViewSet(viewsets.ModelViewSet):
         return context
 
         # Custom action for searching by reg_num
-    @action(detail=False, methods=['get'], url_path='search-stedent')
+    @action(detail=False, methods=['get'], url_path='search-student')
     def search_by_regnum(self, request):
         reg_num = request.query_params.get('reg_num', None)
         if reg_num:
