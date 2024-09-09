@@ -71,8 +71,8 @@ const GetPasswordForm = () => {
                                     {...register('regNo', {
                                         required: 'Enter your Registration number to claim a password',
                                         pattern: {
-                                            value: /^\d{2}RP\d{5}$/,
-                                            message: 'Invalid RegNumber format'
+                                            // value: /^\d{2}RP\d{5}$/,
+                                            // message: 'Invalid RegNumber format'
                                         }
                                     })}
                                     placeholder="Enter Registration Number"
@@ -87,12 +87,13 @@ const GetPasswordForm = () => {
                             <div className="alert alert-success mt-4" role="alert">
                                 <h4 className="alert-heading">Item Found</h4>
                                 <img src={searchResult.profile_pic} alt="Profile" className="img-fluid rounded mb-3" />
-                                <p><strong>Registration Number:</strong> {searchResult.reg_no}</p>
-                                <p><strong>First Name:</strong> {searchResult.fname}</p>
-                                <p><strong>Last Name:</strong> {searchResult.lname}</p>
-                                <p><strong>Date of Birth:</strong> {searchResult.dob}</p>
-                                <p><strong>Email:</strong> {formatEmail(searchResult.email)}</p>
-                                <p><strong>Phone:</strong> {searchResult.phone}</p>
+                                <p><strong>Registration Number:</strong> {searchResult.supervisor.reg_no}</p>
+                                <p><strong>First Name:</strong> {searchResult.supervisor.fname}</p>
+                                <p><strong>Last Name:</strong> {searchResult.supervisor.lname}</p>
+                                {/* <p><strong>Date of Birth:</strong> {searchResult.dob}</p> */}
+                                {/* <p><strong>Email:</strong> {formatEmail(searchResult.email)}</p> */}
+                                <p><strong>Email:</strong> {searchResult.supervisor.email}</p>
+                                <p><strong>Phone:</strong> {searchResult.supervisor.phone}</p>
                                 {/* Add more fields as needed */}
                             </div>
                         )}
