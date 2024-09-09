@@ -1,0 +1,61 @@
+* [33mcd8eadf[m[33m ([m[1;32mmaster-arrangement[m[33m)[m the master
+*   [33m71d81d2[m Resolved merge conflict in frontend/src/App.js
+[32m|[m[33m\[m  
+[32m|[m *   [33m6225146[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Merge pull request #8 from Gyva/frontend
+[32m|[m [34m|[m[35m\[m  
+[32m|[m [34m|[m [35m|[m * [33mecf66e1[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mauth-system[m[33m)[m mm: git commit -m mm:
+[32m|[m [34m|[m[32m_[m[35m|[m[32m/[m  
+[32m|[m[32m/[m[34m|[m [35m|[m   
+* [34m|[m [35m|[m [33mec94bec[m m
+[36m|[m [34m|[m [35m|[m * [33m734a812[m[33m ([m[1;31morigin/auth-system[m[33m)[m sorving student search
+[36m|[m [34m|[m [35m|[m * [33mcfe59e3[m sorving student search
+[36m|[m [34m|[m[36m_[m[35m|[m[36m/[m  
+[36m|[m[36m/[m[34m|[m [35m|[m   
+[36m|[m [34m|[m [35m|[m * [33m8417072[m[33m ([m[1;32mfrontend[m[33m)[m Switching
+[36m|[m [34m|[m [35m|[m[35m/[m  
+[36m|[m [34m|[m * [33m3323ccc[m[33m ([m[1;31morigin/frontend[m[33m)[m re-arrangement
+[36m|[m [34m|[m * [33m22c2b24[m adding set password
+[36m|[m [34m|[m [1;32m|[m * [33m9ab4d78[m[33m ([m[1;32mmain[m[33m)[m Merge branch 'auth-system' of github.com:Gyva/RDDS
+[36m|[m [34m|[m [1;32m|[m[34m/[m[36m|[m 
+[36m|[m [34m|[m[34m/[m[1;32m|[m[36m/[m  
+[36m|[m [34m|[m[36m/[m[1;32m|[m   
+[36m|[m[36m/[m[34m|[m [1;32m|[m   
+* [34m|[m [1;32m|[m [33m3b6b17a[m testing create password
+[1;34m|[m * [1;32m|[m   [33m0b9c1e6[m Merge pull request #7 from Gyva/auth-system
+[1;34m|[m [1;35m|[m[1;34m\[m [1;32m\[m  
+[1;34m|[m [1;35m|[m[1;34m/[m [1;32m/[m  
+[1;34m|[m[1;34m/[m[1;35m|[m [1;32m|[m   
+* [1;35m|[m [1;32m|[m [33m8dcd870[m first stape done - user can search year record by reg-no, next to allow them to create password
+[1;32m|[m [1;35m|[m[1;32m/[m  
+[1;32m|[m[1;32m/[m[1;35m|[m   
+* [1;35m|[m [33m93be309[m Create account
+* [1;35m|[m [33mb6d030d[m Back to reality
+* [1;35m|[m [33m0acd3ea[m[33m ([m[1;31morigin/w-frontend[m[33m, [m[1;32mw-frontend[m[33m)[m back to reality
+* [1;35m|[m [33mc8a56f4[m Login responsiveness
+* [1;35m|[m [33mecdefcb[m switched
+* [1;35m|[m [33m916ade7[m[33m ([m[1;31morigin/first-frontend[m[33m, [m[1;32mfirst-frontend[m[33m)[m fronted commint/ 2 time
+* [1;35m|[m [33mb352eb6[m fronted commint/ first time
+[1;35m|[m[1;35m/[m  
+*   [33m31b7a1c[m Merge pull request #4 from Gyva/feature/perform-backend-opp
+[31m|[m[32m\[m  
+[31m|[m * [33m921cbcd[m[33m ([m[1;31morigin/feature/perform-backend-opp[m[33m)[m Add filtering to Faculty and Level ViewSets by department and faculty
+* [32m|[m [33m4a643cf[m migration of the previous changes on Student and Supervisor model
+* [32m|[m [33m35d95f8[m adding unique on phone number on Student and Supervisor Model
+* [32m|[m [33m3328c62[m Merge pull request #3 from Gyva/feature/perform-backend-opp
+[33m|[m[32m\[m[32m|[m 
+[33m|[m * [33m7486501[m Add directory for static files
+[33m|[m * [33m659e591[m Modify project urls
+[33m|[m * [33m168d4d1[m Modify project settings
+[33m|[m * [33m8316a26[m Enhance CRUD functionality in views with context handling
+[33m|[m * [33ma208606[m Define project-related endpoints in URLs
+[33m|[m * [33maed3fe9[m Implement serializers for API
+* [34m|[m [33m0378a04[m Merge pull request #2 from Gyva/feature/add-project-model
+[35m|[m[34m\[m[34m|[m 
+[35m|[m * [33m881a730[m Modify Level and Student model
+* [36m|[m [33m96c0b06[m Merge pull request #1 from Gyva/feature/add-project-model
+[1;31m|[m[36m\[m[36m|[m 
+[1;31m|[m * [33ma635252[m Implemented project model feature
+* [1;32m|[m [33me4b7592[m Modified the readme file
+[1;32m|[m[1;32m/[m  
+* [33m1a2e306[m initial commit
+* [33mf3267d6[m Initial commit
