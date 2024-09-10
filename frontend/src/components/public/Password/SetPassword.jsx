@@ -1,10 +1,14 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
+import { useLocation } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css'; // Import Bootstrap CSS
 
 const SetPassword = () => {
     const { register, handleSubmit, formState: { errors }, watch } = useForm();
     const password = watch('password', ''); // Get the value of the password field
+
+    const location = useLocation(); // Get passed data
+    const { reg_no, fname, lname, email } = location.state || {}; // Destructure the received data
 
     const onSubmit = (data) => {
         // Handle form submission logic
@@ -17,6 +21,11 @@ const SetPassword = () => {
                 <div className="row justify-content-center">
                     <div className="col-md-6 col-lg-4">
                         <h2 className="text-center mb-4">Set your password</h2>
+                        {/* Display the passed data */}
+                        <p><strong>Registration No:</strong> {reg_no}</p>
+                        <p><strong>First Name:</strong> {fname}</p>
+                        <p><strong>Last Name:</strong> {lname}</p>
+                        <p><strong>Email:</strong> {email}</p>
                         <form onSubmit={handleSubmit(onSubmit)} className="d-flex flex-column">
                             {/* Email/Username Field */}
                             <div className="form-group mb-3">

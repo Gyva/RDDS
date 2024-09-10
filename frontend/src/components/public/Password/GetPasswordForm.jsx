@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css'; // Import Bootstrap CSS
 import './styles.css'
 
@@ -8,6 +9,7 @@ const GetPasswordForm = () => {
     const [searchResult, setSearchResult] = useState(null); // State to store the search result
     const [searchError, setSearchError] = useState(null); // State to store search error
     const [userType, setUserType] = useState('student'); // State to store the selected user type
+    const navigate = useNavigate(); 
 
     const onSubmit = async (data) => {
         try {
@@ -45,6 +47,13 @@ const GetPasswordForm = () => {
             return `${maskedPart}${visiblePart}`;
         }
         return email; // Return the email as is if there are fewer than 3 characters before the '@'
+    };
+
+    const handleClaimPassword = () => {
+        if (searchResult) {
+            // Redirect to the SetPassword component and pass the data
+            navigate('/set-password', { state: { ...searchResult.supervisor } });
+        }
     };
 
     return (
@@ -102,7 +111,7 @@ const GetPasswordForm = () => {
                                 {/* Add more fields as needed */}
                             </div>
                             <div className='d-flex justify-content-between'>
-                            <button type="submit" className="btn btn-success">Claim Password</button>
+                            <button type="submit" onClick={handleClaimPassword} className="btn btn-success">Claim Password</button>
                             <button onClick={()=>{setSearchResult(null)}} type="submit" className="btn btn-danger">Not this account? Search again</button>
                             </div>
                             </>
