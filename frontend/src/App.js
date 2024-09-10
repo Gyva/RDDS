@@ -1,16 +1,8 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-// import Navbar from './components/Navbar';
-// import Sidebar from './components/Sidebar';
-// import StudentRegistrationForm from './components/StudentRegistrationForm';
-// import Login from './components/public/Login/Login';
-// import GetPasswordForm from './components/GetPasswordForm';
-import Navbar from './components/users/Navbar';
-import Sidebar from './components/users/Sidebar';
-import StudentRegistrationForm from './components/users/registerer/Student/StudentRegistrationForm';
-// import Login from './components/Login/Login';
-// import GetPasswordForm from './components/Password/GetPasswordForm'
-// import SetPassword from './components/Password/SetPassword';
+import Login from './components/public/Login/Login'
+import GetPasswordForm from './components/public/Password/GetPasswordForm'
+
 import './App.css'; // Include your global styles here
 
 const App = () => {
@@ -30,80 +22,20 @@ const App = () => {
     };
 
     return (
-        // <Router>
-        //     <Routes>
-        //         <Route path="/login" element={<Login onLogin={handleLogin} />} />
-        //         <Route path="/claim_password" element={<GetPasswordForm />} />
-        //         <Route
-        //             path="*"
-        //             element={
-        //                 isAuthenticated ? (
-        //                     <div className={`app-container ${isSidebarVisible ? 'sidebar-visible' : 'sidebar-hidden'}`}>
-        //                         <Sidebar isVisible={isSidebarVisible} />
-        //                         <div className="content-wrapper">
-        //                             <Navbar toggleSidebar={toggleSidebar} isVisible={isSidebarVisible} />
-        //                             <div className="main-content">
-        //                                 <Routes>
-        //                                     <Route path="/register" element={<StudentRegistrationForm />} />
-        //                                     <Route path="*" element={<Navigate to="/register" />} />
-        //                                 </Routes>
-        //                             </div>
-        //                         </div>
-        //                     </div>
-        //                 ) : (
-        //                     <Navigate to="/login" />
-        //                 )
-        //             }
-        //         />
-        //     </Routes>
-        // </Router>
-
-        // <div className={`app-container ${isSidebarVisible ? 'sidebar-visible' : 'sidebar-hidden'}`}>
-        //     <Sidebar isVisible={isSidebarVisible} />
+        // <div className={`app-container`}>
         //     <div className="content-wrapper">
-        //         <Navbar toggleSidebar={toggleSidebar} isVisible={isSidebarVisible} />
         //         <div className="main-content">
-        //             <GetPasswordForm />
+        //             <Login />
         //         </div>
         //     </div>
         // </div>
-        // <Router>
-        //     <Routes>
-        //         <Route path="/login" element={<Login onLogin={handleLogin} />} />
-        //         <Route path="/claim_password" element={<GetPasswordForm/>} />
-        //         <Route 
-        //             path="*" 
-        //             element={
-        //                 isAuthenticated ? (
-        //                     <div className={`app-container ${isSidebarVisible ? 'sidebar-visible' : 'sidebar-hidden'}`}>
-        //                         {isAuthenticated && <Sidebar isVisible={isSidebarVisible} />}
-        //                         <div className="content-wrapper">
-        //                             {isAuthenticated && <Navbar toggleSidebar={toggleSidebar} isVisible={isSidebarVisible} />}
-        //                             <div className="main-content">
-        //                                 <Routes>
-        //                                     <Route path="/register" element={<StudentRegistrationForm />} />
-        //                                     <Route path="*" element={<Navigate to="/register" />} />
-        //                                 </Routes>
-        //                             </div>
-        //                         </div>
-        //                     </div>
-        //                 ) : (
-        //                     <Navigate to="/login" />
-        //                 )
-        //             }
-        //         />
-        //     </Routes>
-        // </Router>
-        //////////-------------------------------------------------------------
-        <div className={`app-container ${isSidebarVisible ? 'sidebar-visible' : 'sidebar-hidden'}`}>
-            <Sidebar isVisible={isSidebarVisible} role={'student'} />
-            <div className="content-wrapper">
-                <Navbar toggleSidebar={toggleSidebar} isVisible={isSidebarVisible}  />
-                <div className="main-content">
-                    <StudentRegistrationForm />
-                </div>
-            </div>
-        </div>
+        <Router>
+            <Routes>
+                <Route path='/' element={<Login />} />
+                <Route path='/claim_password' element={<GetPasswordForm />} />
+
+            </Routes>
+        </Router>
 
     );
 };
