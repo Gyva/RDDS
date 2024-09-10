@@ -12,7 +12,7 @@ const GetPasswordForm = () => {
         try {
             // Determine the API endpoint based on the selected user type
             const endpoint = userType === 'student' 
-                ? `http://127.0.0.1:8000/api/students/search-by-regnum/?reg_num=${data.regNo}` 
+                ? `http://127.0.0.1:8000/api/students/search-student/?reg_num=${data.regNo}` 
                 : `http://127.0.0.1:8000/api/supervisors/search-supervisor/?reg_num=${data.regNo}`;
             
             const response = await fetch(endpoint);

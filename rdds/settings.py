@@ -161,6 +161,8 @@ CORS_ALLOW_METHODS = [
 CORS_ALLOW_HEADERS = [
     "Content-Type",
     "Authorization",
-]
+]default='STUDENT'
+
+AUTH_USER_MODEL = 'projects.User'
 
 
