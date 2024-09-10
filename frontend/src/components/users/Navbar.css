@@ -43,3 +43,31 @@
 .navbar-nav .nav-link:hover {
     color: #007bff;
 }
+
+/* src/Navbar.css */
+.main-header.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1rem;
+    width: 100%;
+}
+
+.navbar-nav.ms-auto {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+}
+
+.navbar-nav .nav-item {
+    margin-left: 1rem;
+}
+
+.navbar-nav .nav-link {
+    display: flex;
+    align-items: center;
+}
+
+.sidebar-toggle {
+    cursor: pointer;
+}
