@@ -81,3 +81,56 @@
     border-radius: 8px; /* Rounded corners (optional) */
     box-shadow: 0 0 10px rgba(0,0,0,0.1); /* Box shadow (optional) */
 }
+/* App.css */
+.app-container {
+    display: flex;
+    height: 100vh;
+}
+
+.content-wrapper {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    transition: margin-left 0.3s ease-in-out;
+}
+
+.sidebar-visible .content-wrapper {
+    margin-left: 250px; /* Adjust according to sidebar width */
+}
+
+.sidebar-hidden .content-wrapper {
+    margin-left: 0;
+}
+
+.main-header.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1rem;
+    width: 100%;
+}
+
+.navbar-nav.ms-auto {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+}
+
+.navbar-nav .nav-item {
+    margin-left: 1rem;
+}
+
+.navbar-nav .nav-link {
+    display: flex;
+    align-items: center;
+}
+
+.sidebar-toggle {
+    cursor: pointer;
+}
+
+.main-content {
+    flex: 1;
+    padding: 1rem;
+    overflow-y: auto;
+}
