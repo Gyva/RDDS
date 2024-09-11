@@ -1,6 +1,6 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css'; // Import Bootstrap CSS
 
 const SetPassword = () => {
@@ -14,19 +14,40 @@ const SetPassword = () => {
         // Handle form submission logic
         console.log('Form submitted:', data);
     };
+    const navigate = useNavigate()
 
     return (
         <div className="d-flex align-items-center justify-content-center vh-100">
+            
             <div className="container">
+            <button onClick={() => navigate(-1)}>{`<`}Back</button>
                 <div className="row justify-content-center">
                     <div className="col-md-6 col-lg-4">
                         <h2 className="text-center mb-4">Set your password</h2>
                         {/* Display the passed data */}
-                        <p><strong>Registration No:</strong> {reg_no}</p>
+                        {/* <p><strong>Registration No:</strong> {reg_no}</p>
                         <p><strong>First Name:</strong> {fname}</p>
                         <p><strong>Last Name:</strong> {lname}</p>
-                        <p><strong>Email:</strong> {email}</p>
+                        <p><strong>Email:</strong> {email}</p> */}
                         <form onSubmit={handleSubmit(onSubmit)} className="d-flex flex-column">
+                            {/* Reg_no Field */}
+                            <div className="form-group mb-3">
+                                <input
+                                    type="text"
+                                    className={`form-control ${errors.reg_no ? 'is-invalid' : ''}`}
+                                    name="reg_no"
+                                    {...register('reg_no', {
+                                        required: 'Reg_no is required',
+                                        // pattern: {
+                                        //     value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, // Basic email validation
+                                        //     message: 'Invalid email format'
+                                        // }
+                                    })}
+                                    value={reg_no}
+                                    readOnly
+                                />
+                                {errors.username && <div className="invalid-feedback">{errors.username.message}</div>}
+                            </div>
                             {/* Email/Username Field */}
                             <div className="form-group mb-3">
                                 <input
@@ -40,7 +61,8 @@ const SetPassword = () => {
                                             message: 'Invalid email format'
                                         }
                                     })}
-                                    placeholder="Enter Email/Username"
+                                    value={email}
+                                    readOnly
                                 />
                                 {errors.username && <div className="invalid-feedback">{errors.username.message}</div>}
                             </div>

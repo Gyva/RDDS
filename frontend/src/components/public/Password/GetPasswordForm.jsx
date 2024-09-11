@@ -9,7 +9,7 @@ const GetPasswordForm = () => {
     const [searchResult, setSearchResult] = useState(null); // State to store the search result
     const [searchError, setSearchError] = useState(null); // State to store search error
     const [userType, setUserType] = useState('student'); // State to store the selected user type
-    const navigate = useNavigate(); 
+    const navigate = useNavigate();
 
     const onSubmit = async (data) => {
         try {
@@ -40,7 +40,7 @@ const GetPasswordForm = () => {
 
     // Function to mask the email except for the last 3 characters before '@'
     const formatEmail = (email) => {
-        const atIndex = email.indexOf('@');
+        const atIndex = email?.indexOf('@');
         if (atIndex > 3) {
             const maskedPart = '*'.repeat(atIndex - 2); // Replace characters before the last 3 with asterisks
             const visiblePart = email.slice(atIndex - 2); // Last 3 characters and the domain
@@ -51,10 +51,20 @@ const GetPasswordForm = () => {
 
     const handleClaimPassword = () => {
         if (searchResult) {
-            // Redirect to the SetPassword component and pass the data
-            navigate('/set-password', { state: { ...searchResult.supervisor } });
+            if (searchResult.account === null) {
+                // Redirect to SetPassword and pass searchResult if account exists
+                navigate('/set-password', { state: { ...searchResult } });
+            } else if (searchResult.supervisor?.account === null) {
+                // Redirect to SetPassword and pass searchResult.supervisor if supervisor account exists
+                navigate('/set-password', { state: { ...searchResult.supervisor, reg_no :searchResult.reg_num } });
+            }
+            else{
+                {navigate('/')}
+            }
         }
     };
+    
+    
 
     return (
         <div className="d-flex align-items-center justify-content-center vh-100">
@@ -86,13 +96,13 @@ const GetPasswordForm = () => {
                                         // }
                                     })}
                                     placeholder="Search: Type your Registrastion Number"
-                                    
+
                                 />
                                 {errors.regNo && <div className="invalid-feedback">{errors.regNo.message}</div>}
                             </div>
                             <div className="form-group mb-3 me-2">
                                 {searchResult ? ("")
-                                 : <button type="submit" className="btn btn-primary">Verify Info</button>}
+                                    : <button type="submit" className="btn btn-primary">Verify Info</button>}
                             </div>
 
                         </form>
@@ -100,20 +110,21 @@ const GetPasswordForm = () => {
                         {/* Display search result or error message */}
                         {searchResult && (
                             <>
-                            <div className="alert alert-success mt-4" role="alert">
-                                <h4 className="alert-heading">Account Found</h4>
-                                <img src={searchResult.profile_pic} alt="Profile" className="img-fluid rounded mb-3" />
-                                {/* <p><strong>Registration Number:</strong> {searchResult.supervisor.reg_no}</p> */}
-                                <p><strong>First Name:</strong> {searchResult.supervisor.fname}</p>
-                                <p><strong>Last Name:</strong> {searchResult.supervisor.lname}</p>
-                                <p><strong>Email:</strong> {formatEmail(searchResult.supervisor.email)}</p>
-                                <p><strong>Phone:</strong> {searchResult.supervisor.phone}</p>
-                                {/* Add more fields as needed */}
-                            </div>
-                            <div className='d-flex justify-content-between'>
-                            <button type="submit" onClick={handleClaimPassword} className="btn btn-success">Claim Password</button>
-                            <button onClick={()=>{setSearchResult(null)}} type="submit" className="btn btn-danger">Not this account? Search again</button>
-                            </div>
+                                <div className="alert alert-success mt-4" role="alert">
+                                    <h4 className="alert-heading">Account Found</h4>
+                                    <img src={searchResult.profile_pic} alt="Profile" className="img-fluid rounded mb-3" />
+                                    {/* <p><strong>Registration Number:</strong> {searchResult.supervisor.reg_no}</p> */}
+                                    <p><strong>First Name:</strong> {searchResult.supervisor?.fname || searchResult.fname}</p>
+                                    <p><strong>Last Name:</strong> {searchResult.supervisor?.lname || searchResult.lname}</p>
+                                    <p><strong>Email:</strong> {formatEmail(searchResult.supervisor?.email) || formatEmail(searchResult.email)}</p>
+                                    <p><strong>Phone:</strong> {searchResult.supervisor?.phone || searchResult.phone}</p>
+
+                                    {/* Add more fields as needed */}
+                                </div>
+                                <div className='d-flex justify-content-between'>
+                                <button onClick={handleClaimPassword} className="btn btn-success">Claim Password</button>
+                                <button onClick={() => { setSearchResult(null) }} type="submit" className="btn btn-danger">Not this account? Search again</button>
+                                </div>
                             </>
                         )}
 
