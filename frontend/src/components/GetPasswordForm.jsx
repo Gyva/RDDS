@@ -70,10 +70,10 @@ const GetPasswordForm = () => {
                                     name="reg_no"
                                     {...register('regNo', {
                                         required: 'Enter your Registration number to claim a password',
-                                        pattern: {
-                                            // value: /^\d{2}RP\d{5}$/,
-                                            // message: 'Invalid RegNumber format'
-                                        }
+                                        // pattern: {
+                                        //     // value: /^\d{2}RP\d{5}$/,
+                                        //     // message: 'Invalid RegNumber format'
+                                        // }
                                     })}
                                     placeholder="Enter Registration Number"
                                 />
