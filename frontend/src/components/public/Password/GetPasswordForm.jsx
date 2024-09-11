@@ -14,8 +14,10 @@ const GetPasswordForm = () => {
     const onSubmit = async (data) => {
         try {
             // Determine the API endpoint based on the selected user type
-            const endpoint = userType === 'student'
-                ? `http://127.0.0.1:8000/api/students/search-by-regnum/?reg_num=${data.regNo}`
+
+            const endpoint = userType === 'student' 
+                ? `http://127.0.0.1:8000/api/students/search-student/?reg_num=${data.regNo}` 
+
                 : `http://127.0.0.1:8000/api/supervisors/search-supervisor/?reg_num=${data.regNo}`;
 
             const response = await fetch(endpoint);
@@ -91,8 +93,9 @@ const GetPasswordForm = () => {
                                     {...register('regNo', {
                                         required: 'Enter your Registration number to claim a password',
                                         // pattern: {
-                                        //     value: /^\d{2}RP\d{5}$/,
-                                        //     message: 'Invalid RegNumber format'
+                                        //     // value: /^\d{2}RP\d{5}$/,
+                                        //     // message: 'Invalid RegNumber format'
+
                                         // }
                                     })}
                                     placeholder="Search: Type your Registrastion Number"
@@ -109,6 +112,7 @@ const GetPasswordForm = () => {
 
                         {/* Display search result or error message */}
                         {searchResult && (
+
                             <>
                                 <div className="alert alert-success mt-4" role="alert">
                                     <h4 className="alert-heading">Account Found</h4>
@@ -126,6 +130,7 @@ const GetPasswordForm = () => {
                                 <button onClick={() => { setSearchResult(null) }} type="submit" className="btn btn-danger">Not this account? Search again</button>
                                 </div>
                             </>
+
                         )}
 
                         {searchError && (

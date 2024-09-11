@@ -163,4 +163,8 @@ CORS_ALLOW_HEADERS = [
     "Authorization",
 ]
 
+default='STUDENT'
+
+AUTH_USER_MODEL = 'projects.User'
+
 
