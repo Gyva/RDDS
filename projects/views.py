@@ -1,5 +1,5 @@
 from rest_framework import viewsets, serializers
-from .models import Department, Supervisor, Faculty, Level, Student
+from .models import Department, Supervisor, Faculty, Level, Student, User
 from .serializers import DepartmentSerializer, SupervisorSerializer, FacultySerializer, LevelSerializer, StudentSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -133,16 +133,25 @@ class StudentViewSet(viewsets.ModelViewSet):
         context['f_id'] = request.data.get('f_id') if request.data else None
         return context
 
-        # Custom action for searching by reg_num
+        # Custom action for searching student by reg_num
     @action(detail=False, methods=['get'], url_path='search-student')
-    def search_by_regnum(self, request):
+    def search_student(self, request):
         reg_num = request.query_params.get('reg_num', None)
+
         if reg_num:
             try:
                 student = Student.objects.get(reg_no=reg_num)
+                # Check if the student already has a linked user account
+                if student.account:
+                    return Response({"error": "This student already has an account."}, status=status.HTTP_400_BAD_REQUEST)
+
+                # Return the student details to proceed with account creation
                 serializer = self.get_serializer(student)
-                return Response(serializer.data, status=status.HTTP_200_OK)
+                return Response({
+                    "student": serializer.data,
+                    "reg_num": reg_num  # Include reg_num to pass it to the frontend
+                }, status=status.HTTP_200_OK)
             except Student.DoesNotExist:
-                return Response({"error": "Student not found"}, status=status.HTTP_404_NOT_FOUND)
+                return Response({"error": "student not found"}, status=status.HTTP_404_NOT_FOUND)
         else:
-            return Response({"error": "Please provide a Valid Registration Number"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Please provide a reg_num"}, status=status.HTTP_400_BAD_REQUEST)
