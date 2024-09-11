@@ -1,20 +1,25 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css'; // Import Bootstrap CSS
+import './styles.css'
 
 const GetPasswordForm = () => {
     const { register, handleSubmit, formState: { errors } } = useForm();
     const [searchResult, setSearchResult] = useState(null); // State to store the search result
     const [searchError, setSearchError] = useState(null); // State to store search error
     const [userType, setUserType] = useState('student'); // State to store the selected user type
+    const navigate = useNavigate();
 
     const onSubmit = async (data) => {
         try {
             // Determine the API endpoint based on the selected user type
+
             const endpoint = userType === 'student' 
                 ? `http://127.0.0.1:8000/api/students/search-student/?reg_num=${data.regNo}` 
+
                 : `http://127.0.0.1:8000/api/supervisors/search-supervisor/?reg_num=${data.regNo}`;
-            
+
             const response = await fetch(endpoint);
             const result = await response.json();
 
@@ -37,14 +42,31 @@ const GetPasswordForm = () => {
 
     // Function to mask the email except for the last 3 characters before '@'
     const formatEmail = (email) => {
-        const atIndex = email.indexOf('@');
+        const atIndex = email?.indexOf('@');
         if (atIndex > 3) {
-            const maskedPart = '*'.repeat(atIndex - 3); // Replace characters before the last 3 with asterisks
-            const visiblePart = email.slice(atIndex - 3); // Last 3 characters and the domain
+            const maskedPart = '*'.repeat(atIndex - 2); // Replace characters before the last 3 with asterisks
+            const visiblePart = email.slice(atIndex - 2); // Last 3 characters and the domain
             return `${maskedPart}${visiblePart}`;
         }
         return email; // Return the email as is if there are fewer than 3 characters before the '@'
     };
+
+    const handleClaimPassword = () => {
+        if (searchResult) {
+            if (searchResult.account === null) {
+                // Redirect to SetPassword and pass searchResult if account exists
+                navigate('/set-password', { state: { ...searchResult } });
+            } else if (searchResult.supervisor?.account === null) {
+                // Redirect to SetPassword and pass searchResult.supervisor if supervisor account exists
+                navigate('/set-password', { state: { ...searchResult.supervisor, reg_no :searchResult.reg_num } });
+            }
+            else{
+                {navigate('/')}
+            }
+        }
+    };
+    
+    
 
     return (
         <div className="d-flex align-items-center justify-content-center vh-100">
@@ -55,7 +77,7 @@ const GetPasswordForm = () => {
                         <form onSubmit={handleSubmit(onSubmit)} className="d-flex align-items-center">
                             <div className="form-group mb-3 me-2">
                                 <select
-                                    className="form-select"
+                                    className={`form-select ${searchResult ? `block-input` : ``}`}
                                     value={userType}
                                     onChange={(e) => setUserType(e.target.value)}
                                 >
@@ -66,36 +88,49 @@ const GetPasswordForm = () => {
                             <div className="form-group mb-3 me-2">
                                 <input
                                     type="text"
-                                    className={`form-control ${errors.regNo ? 'is-invalid' : ''}`}
+                                    className={`form-control ${errors.regNo ? 'is-invalid' : ''}  ${searchResult ? `block-input` : ``}`}
                                     name="reg_no"
                                     {...register('regNo', {
                                         required: 'Enter your Registration number to claim a password',
                                         // pattern: {
                                         //     // value: /^\d{2}RP\d{5}$/,
                                         //     // message: 'Invalid RegNumber format'
+
                                         // }
                                     })}
-                                    placeholder="Enter Registration Number"
+                                    placeholder="Search: Type your Registrastion Number"
+
                                 />
                                 {errors.regNo && <div className="invalid-feedback">{errors.regNo.message}</div>}
                             </div>
-                            <button type="submit" className="btn btn-primary">Claim a Password</button>
+                            <div className="form-group mb-3 me-2">
+                                {searchResult ? ("")
+                                    : <button type="submit" className="btn btn-primary">Verify Info</button>}
+                            </div>
+
                         </form>
 
                         {/* Display search result or error message */}
                         {searchResult && (
-                            <div className="alert alert-success mt-4" role="alert">
-                                <h4 className="alert-heading">Item Found</h4>
-                                <img src={searchResult.profile_pic} alt="Profile" className="img-fluid rounded mb-3" />
-                                <p><strong>Registration Number:</strong> {searchResult.supervisor.reg_no}</p>
-                                <p><strong>First Name:</strong> {searchResult.supervisor.fname}</p>
-                                <p><strong>Last Name:</strong> {searchResult.supervisor.lname}</p>
-                                {/* <p><strong>Date of Birth:</strong> {searchResult.dob}</p> */}
-                                {/* <p><strong>Email:</strong> {formatEmail(searchResult.email)}</p> */}
-                                <p><strong>Email:</strong> {searchResult.supervisor.email}</p>
-                                <p><strong>Phone:</strong> {searchResult.supervisor.phone}</p>
-                                {/* Add more fields as needed */}
-                            </div>
+
+                            <>
+                                <div className="alert alert-success mt-4" role="alert">
+                                    <h4 className="alert-heading">Account Found</h4>
+                                    <img src={searchResult.profile_pic} alt="Profile" className="img-fluid rounded mb-3" />
+                                    {/* <p><strong>Registration Number:</strong> {searchResult.supervisor.reg_no}</p> */}
+                                    <p><strong>First Name:</strong> {searchResult.supervisor?.fname || searchResult.fname}</p>
+                                    <p><strong>Last Name:</strong> {searchResult.supervisor?.lname || searchResult.lname}</p>
+                                    <p><strong>Email:</strong> {formatEmail(searchResult.supervisor?.email) || formatEmail(searchResult.email)}</p>
+                                    <p><strong>Phone:</strong> {searchResult.supervisor?.phone || searchResult.phone}</p>
+
+                                    {/* Add more fields as needed */}
+                                </div>
+                                <div className='d-flex justify-content-between'>
+                                <button onClick={handleClaimPassword} className="btn btn-success">Claim Password</button>
+                                <button onClick={() => { setSearchResult(null) }} type="submit" className="btn btn-danger">Not this account? Search again</button>
+                                </div>
+                            </>
+
                         )}
 
                         {searchError && (

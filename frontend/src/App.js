@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import Navbar from './components/Navbar';
-import Sidebar from './components/Sidebar';
-import StudentRegistrationForm from './components/StudentRegistrationForm';
-import Login from './components/Login';
-import GetPasswordForm from './components/GetPasswordForm';
+import Login from './components/public/Login/Login'
+import GetPasswordForm from './components/public/Password/GetPasswordForm'
+import SetPassword from './components/public/Password/SetPassword'
+
 import './App.css'; // Include your global styles here
 
 const App = () => {
@@ -24,43 +23,22 @@ const App = () => {
     };
 
     return (
-        // <Router>
-        //     <Routes>
-        //         <Route path="/login" element={<Login onLogin={handleLogin} />} />
-        //         <Route path="/claim_password" element={<GetPasswordForm />} />
-        //         <Route
-        //             path="*"
-        //             element={
-        //                 isAuthenticated ? (
-        //                     <div className={`app-container ${isSidebarVisible ? 'sidebar-visible' : 'sidebar-hidden'}`}>
-        //                         <Sidebar isVisible={isSidebarVisible} />
-        //                         <div className="content-wrapper">
-        //                             <Navbar toggleSidebar={toggleSidebar} isVisible={isSidebarVisible} />
-        //                             <div className="main-content">
-        //                                 <Routes>
-        //                                     <Route path="/register" element={<StudentRegistrationForm />} />
-        //                                     <Route path="*" element={<Navigate to="/register" />} />
-        //                                 </Routes>
-        //                             </div>
-        //                         </div>
-        //                     </div>
-        //                 ) : (
-        //                     <Navigate to="/login" />
-        //                 )
-        //             }
-        //         />
-        //     </Routes>
-        // </Router>
+        // <div className={`app-container`}>
+        //     <div className="content-wrapper">
+        //         <div className="main-content">
+        //             <Login />
+        //         </div>
+        //     </div>
+        // </div>
+        <Router>
+            <Routes>
+                <Route path='/' element={<Login />} />
+                <Route path='/claim_password' element={<GetPasswordForm />} />
+                <Route path="/set-password" element={<SetPassword />} />
 
-        <div className={`app-container ${isSidebarVisible ? 'sidebar-visible' : 'sidebar-hidden'}`}>
-            <Sidebar isVisible={isSidebarVisible} />
-            <div className="content-wrapper">
-                <Navbar toggleSidebar={toggleSidebar} isVisible={isSidebarVisible} />
-                <div className="main-content">
-                    <GetPasswordForm />
-                </div>
-            </div>
-        </div>
+            </Routes>
+        </Router>
+
     );
 };
 
