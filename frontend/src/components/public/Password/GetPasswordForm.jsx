@@ -53,9 +53,9 @@ const GetPasswordForm = () => {
 
     const handleClaimPassword = () => {
         if (searchResult) {
-            if (searchResult.account === null) {
+            if (searchResult.student?.account === null) {
                 // Redirect to SetPassword and pass searchResult if account exists
-                navigate('/set-password', { state: { ...searchResult } });
+                navigate('/set-password', { state: { ...searchResult.student } });
             } else if (searchResult.supervisor?.account === null) {
                 // Redirect to SetPassword and pass searchResult.supervisor if supervisor account exists
                 navigate('/set-password', { state: { ...searchResult.supervisor, reg_no :searchResult.reg_num } });
@@ -115,13 +115,13 @@ const GetPasswordForm = () => {
 
                             <>
                                 <div className="alert alert-success mt-4" role="alert">
-                                    <h4 className="alert-heading">Account Found</h4>
+                                    <h4 className="alert-heading">Data Found</h4>
                                     <img src={searchResult.profile_pic} alt="Profile" className="img-fluid rounded mb-3" />
                                     {/* <p><strong>Registration Number:</strong> {searchResult.supervisor.reg_no}</p> */}
-                                    <p><strong>First Name:</strong> {searchResult.supervisor?.fname || searchResult.fname}</p>
-                                    <p><strong>Last Name:</strong> {searchResult.supervisor?.lname || searchResult.lname}</p>
-                                    <p><strong>Email:</strong> {formatEmail(searchResult.supervisor?.email) || formatEmail(searchResult.email)}</p>
-                                    <p><strong>Phone:</strong> {searchResult.supervisor?.phone || searchResult.phone}</p>
+                                    <p><strong>First Name:</strong> {searchResult.supervisor?.fname || searchResult.student?.fname}</p>
+                                    <p><strong>Last Name:</strong> {searchResult.supervisor?.lname || searchResult.student?.lname}</p>
+                                    <p><strong>Email:</strong> {formatEmail(searchResult.supervisor?.email) || formatEmail(searchResult.student?.email)}</p>
+                                    <p><strong>Phone:</strong> {searchResult.supervisor?.phone || searchResult.student?.phone}</p>
 
                                     {/* Add more fields as needed */}
                                 </div>

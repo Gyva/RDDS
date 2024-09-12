@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-d
 import Login from './components/public/Login/Login'
 import GetPasswordForm from './components/public/Password/GetPasswordForm'
 import SetPassword from './components/public/Password/SetPassword'
+import Navbar from './components/users/Navbar'
+import Sidebar from './components/users/Sidebar'
 
 import './App.css'; // Include your global styles here
 
@@ -23,20 +25,26 @@ const App = () => {
     };
 
     return (
-        // <div className={`app-container`}>
-        //     <div className="content-wrapper">
-        //         <div className="main-content">
+        // 
+        //         
         //             <Login />
         //         </div>
         //     </div>
         // </div>
         <Router>
+            <div className={`app-container`}>
+                <Sidebar isVisible={true} role={'student'}/>
+             <div className="content-wrapper">
+                <Navbar/>
+             <div className="main-content">
             <Routes>
                 <Route path='/' element={<Login />} />
                 <Route path='/claim_password' element={<GetPasswordForm />} />
                 <Route path="/set-password" element={<SetPassword />} />
-
+            
             </Routes>
+            </div>
+            </div></div>
         </Router>
 
     );

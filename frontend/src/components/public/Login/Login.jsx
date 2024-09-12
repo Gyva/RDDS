@@ -25,19 +25,19 @@ const Login = ({ onLogin }) => {
                         <h2 className="text-center mb-4">Login</h2>
                         <form onSubmit={handleSubmit(onSubmit)} className="d-flex flex-column">
                             <div className="form-group mb-3">
-                                <label htmlFor="email">Email:</label>
+                                <label htmlFor="email">Email/RegNo:</label>
                                 <input
                                     type="text"
                                     id="email"
                                     className={`form-control ${errors.email ? 'is-invalid' : ''}`}
                                     {...register('email', {
-                                        required: 'Email address is required',
+                                        required: 'Email address or RegNumber is required',
                                         pattern: {
                                             value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
                                             message: 'Invalid email address'
                                         }
                                     })}
-                                    placeholder="Enter your email"
+                                    placeholder="Enter your email/RegNo"
                                 />
                                 {errors.email && <div className="invalid-feedback">{errors.email.message}</div>}
                             </div>

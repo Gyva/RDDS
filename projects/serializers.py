@@ -62,7 +62,7 @@ class StudentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Student
-        fields =['st_id', 'reg_no', 'fname', 'lname', 'dob', 'email', 'phone', 'dpt_id', 'f_id', 'l_id', 'profile_pic']
+        fields =['st_id', 'reg_no', 'fname', 'lname', 'dob', 'email', 'phone', 'dpt_id', 'f_id', 'l_id', 'profile_pic','account']
 
     def __init__(self, *args, **kwargs):
         super(StudentSerializer, self).__init__(*args, **kwargs)
