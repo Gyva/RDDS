@@ -109,3 +109,8 @@ class StudentSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Selected level does not belong to the selected faculty.")
 
         return data
+    
+    def validate_reg_no(self, value):
+        if Student.objects.filter(reg_no=value).exists():
+            raise serializers.ValidationError("A student with this registration number already exists.")
+        return value

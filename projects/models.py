@@ -1,10 +1,10 @@
 import os
 import uuid
-from django.db import models
+from django.db import models, IntegrityError, transaction
 from django.core.validators import FileExtensionValidator
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
-
+from django.db.models import Max
 
 # Function to generate a unique profile picture filename
 def unique_image_path(instance, filename):
@@ -16,6 +16,31 @@ def unique_image_path(instance, filename):
         return os.path.join('static/student/', unique_filename)
 
 # Department Model
+class User(AbstractUser):
+    ROLE_CHOICES = (
+        ('SUPERVISOR', 'Supervisor'),
+        ('STUDENT', 'Student'),
+        ('REGISTER', 'Register'),
+        ('ADMIN', 'Admin'),
+    )
+
+    role = models.CharField(max_length=25, choices=ROLE_CHOICES, default='STUDENT')
+    groups = models.ManyToManyField(
+        "auth.Group",
+        related_name="custom_user_set",  # Custom related_name to avoid conflict
+        blank=True,
+        verbose_name="groups",
+        help_text="The groups this user belongs to.",
+    )
+    
+    user_permissions = models.ManyToManyField(
+        "auth.Permission",
+        related_name="custom_user_set",  # Custom related_name to avoid conflict
+        blank=True,
+        verbose_name="user permissions",
+        help_text="Specific permissions for this user.",
+    )
+    
 class Department(models.Model):
     dpt_id = models.AutoField(primary_key=True)
     dpt_name = models.CharField(max_length=255)
@@ -42,7 +67,7 @@ class Supervisor(models.Model):
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
     
     # New field to link Supervisor to a user account
-    account = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+    account = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         if not self.reg_num:
@@ -95,44 +120,32 @@ class Student(models.Model):
     profile_pic = models.ImageField(upload_to=unique_image_path, validators=[FileExtensionValidator(['jpg', 'jpeg', 'png'])])
     
     # New field to link Student to a user account
-    account = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+    account = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True)
     
     def save(self, *args, **kwargs):
         if not self.reg_no:
-            last_student = Student.objects.all().order_by('st_id').last()
-            if last_student:
-                num_part = int(last_student.reg_no[2:7]) + 1
-            else:
-                num_part = 0
-            self.reg_no = f"24rp{num_part:05d}"
+            # Use a transaction to ensure atomicity
+            with transaction.atomic():
+                # Ensure the generated reg_no is unique
+                while True:
+                    # Get the highest registration number
+                    last_student = Student.objects.aggregate(Max('reg_no'))['reg_no__max']
+                    
+                    if last_student and last_student[2:7].isdigit():
+                        num_part = int(last_student[2:7]) + 1
+                    else:
+                        num_part = 0
+                        
+                    # Generate new reg_no
+                    new_reg_no = f"24rp{num_part:05d}"
+                    
+                    # Check if the generated reg_no already exists
+                    if not Student.objects.filter(reg_no=new_reg_no).exists():
+                        self.reg_no = new_reg_no
+                        break
+                        
         super(Student, self).save(*args, **kwargs)
     
     def __str__(self):
         return f'{self.fname} {self.lname}'
 
-
-
-class User(AbstractUser):
-    ROLE_CHOICES = (
-        ('SUPERVISOR', 'Supervisor'),
-        ('STUDENT', 'Student'),
-        ('REGISTER', 'Register'),
-        ('ADMIN', 'Admin'),
-    )
-
-    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='STUDENT')
-    groups = models.ManyToManyField(
-        "auth.Group",
-        related_name="custom_user_set",  # Custom related_name to avoid conflict
-        blank=True,
-        verbose_name="groups",
-        help_text="The groups this user belongs to.",
-    )
-    
-    user_permissions = models.ManyToManyField(
-        "auth.Permission",
-        related_name="custom_user_set",  # Custom related_name to avoid conflict
-        blank=True,
-        verbose_name="user permissions",
-        help_text="Specific permissions for this user.",
-    )
