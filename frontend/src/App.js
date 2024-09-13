@@ -1,33 +1,34 @@
 import React, { useState } from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Login from './components/public/Login/Login';
 import GetPasswordForm from './components/public/Password/GetPasswordForm';
 import SetPassword from './components/public/Password/SetPassword';
 import Navbar from './components/users/Navbar';
 import Sidebar from './components/users/Sidebar';
-
-import './App.css'; // Include your global styles here
+import './App.css'; // Import the CSS styles here
 
 const App = () => {
-    const [isSidebarVisible, setIsSidebarVisible] = useState(true);  // Track sidebar visibility
+    const [isSidebarVisible, setIsSidebarVisible] = useState(true);
 
+    // Toggle Sidebar visibility
     const toggleSidebar = () => {
         setIsSidebarVisible(!isSidebarVisible);
     };
 
     return (
         <Router>
-            <div className={`app-container ${isSidebarVisible ? 'sidebar-visible' : 'sidebar-hidden'}`}>
-                {isSidebarVisible && <Sidebar isVisible={true} role={'student'} />}  {/* Render sidebar conditionally */}
+            <div className="app-container">
+                {/* Sidebar component */}
+                <Sidebar isVisible={isSidebarVisible} role={'student'} />
                 
-                <div className="content-wrapper">
-                    <Navbar toggleSidebar={toggleSidebar} /> {/* Pass toggleSidebar to Navbar */}
-                    
+                {/* Main content wrapper */}
+                <div className={`content-wrapper ${isSidebarVisible ? 'sidebar-visible' : 'sidebar-hidden'}`}>
+                    <Navbar toggleSidebar={toggleSidebar} isVisible={isSidebarVisible} />
                     <div className="main-content">
                         <Routes>
-                            <Route path="/" element={<Login />} />
-                            <Route path="/claim_password" element={<GetPasswordForm />} />
-                            <Route path="/set-password" element={<SetPassword />} />
+                            <Route path='/' element={<Login />} />
+                            <Route path='/claim_password' element={<GetPasswordForm />} />
+                            <Route path='/set-password' element={<SetPassword />} />
                         </Routes>
                     </div>
                 </div>

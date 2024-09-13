@@ -135,15 +135,15 @@ const Sidebar = ({ isVisible, role }) => {
       {/* Sidebar */}
       <div className="sidebar">
         {/* Sidebar user panel */}
-        <div className="user-panel">
-          <div className="image">
+        <div className="user-panel d-flex justify-content-between">
+          <div className="image ms-3">
             <img src="" alt="User" />
           </div>
-          <div className="info">
-            <a href="/profile">KWIZERA Ferdinand</a>
+          <div className="info me-3 fw-100">
+            <p >KWIZERA Ferdinand</p>
           </div>
         </div>
-
+        <hr className='text-secondary' />
         {/* Sidebar Menu */}
         <nav>
           <ul className="nav">

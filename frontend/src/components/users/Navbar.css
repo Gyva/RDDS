@@ -1,3 +1,4 @@
+/* General layout and styling for Navbar */
 .main-header.navbar {
     background-color: #f8f9fa;
     border-bottom: 1px solid #dee2e6;
@@ -13,23 +14,28 @@
     transition: left 0.3s ease;
 }
 
+/* Adjusting Navbar when Sidebar is visible */
 .sidebar-visible .main-header.navbar {
     left: 250px;
 }
 
+/* Full width when Sidebar is hidden */
 .sidebar-hidden .main-header.navbar {
     left: 0;
 }
 
+/* Sidebar toggle button styling */
 .nav-link.sidebar-toggle {
     color: #007bff;
     cursor: pointer;
 }
 
+/* Navbar link styles */
 .navbar-nav .nav-link {
     color: #343a40;
 }
 
+/* Navbar flat button styles */
 .navbar-nav .btn-flat {
     background-color: #007bff;
     color: white;
@@ -44,7 +50,7 @@
     color: #007bff;
 }
 
-/* src/Navbar.css */
+/* Aligning navbar elements */
 .main-header.navbar {
     display: flex;
     justify-content: space-between;
@@ -68,6 +74,7 @@
     align-items: center;
 }
 
+/* Sidebar toggle cursor */
 .sidebar-toggle {
     cursor: pointer;
 }

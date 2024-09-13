@@ -12,7 +12,7 @@ const Navbar = ({ toggleSidebar, isVisible }) => {
     };
 
     return (
-        <nav className={`main-header navbar navbar-expand navbar-white navbar-light ${isVisible ? 'sidebar-visible' : 'sidebar-hidden'}`}>
+        <nav className={`main-header navbar navbar-expand navbar-white navbar-light`}>
             {/* Left navbar links */}
             <ul className="navbar-nav ms-5">
                 <li className="nav-item">
@@ -25,7 +25,7 @@ const Navbar = ({ toggleSidebar, isVisible }) => {
                 </li>
             </ul>
             {/* Right navbar links */}
-            <ul className="navbar-nav me-5">
+            <ul className="navbar-nav me-5 fixed">
                 <li className="">
                     <p className="nav-link btn btn-default btn-flat" onClick={() => navigateToPage('#')}>2023 - 2024</p>
                 </li>

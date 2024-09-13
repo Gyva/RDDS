@@ -1,4 +1,4 @@
-/* General layout */
+/* General layout */ 
 .app-container {
     display: flex;
     height: 100vh;
@@ -23,15 +23,19 @@
 /* Adjust Navbar when Sidebar is visible */
 .sidebar-visible .main-header.navbar {
     width: calc(100% - 250px); /* Adjust width based on sidebar width */
-    transition: width 0.3s ease;
+    transition: width 0.1s ease;
 }
 
 .sidebar-hidden .main-header.navbar {
     width: 100%;
-    transition: width 0.3s ease;
+    transition: width 0.1s ease;
+}
+.sidebar-hidden .main-content{
+    margin-left: 0px; 
 }
 
 .main-content {
+    margin-left: 250px;
     padding: 20px;
     background-color: #f1f1f1;
     min-height: calc(100vh - 60px); /* Adjust for the fixed navbar */
