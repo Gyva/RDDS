@@ -1,19 +1,11 @@
 import os
 import uuid
-from django.db import models, IntegrityError, transaction
+from django.db import models
 from django.core.validators import FileExtensionValidator
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
-from django.db.models import Max
+# from django.db.models import MaxIntegrityError, transaction
 
-# Function to generate a unique profile picture filename
-def unique_image_path(instance, filename):
-    ext = filename.split('.')[-1]
-    unique_filename = f"{uuid.uuid4().hex}.{ext}"
-    if isinstance(instance, Supervisor):
-        return os.path.join('static/supervisor/', unique_filename)
-    elif isinstance(instance, Student):
-        return os.path.join('static/student/', unique_filename)
 
 # Department Model
 class User(AbstractUser):
@@ -40,7 +32,15 @@ class User(AbstractUser):
         verbose_name="user permissions",
         help_text="Specific permissions for this user.",
     )
-    
+
+# Function to generate a unique profile picture filename
+def unique_image_path(instance, filename):
+    ext = filename.split('.')[-1]
+    unique_filename = f"{uuid.uuid4().hex}.{ext}"
+    if isinstance(instance, Supervisor):
+        return os.path.join('static/supervisor/', unique_filename)
+    elif isinstance(instance, Student):
+        return os.path.join('static/student/', unique_filename)
 class Department(models.Model):
     dpt_id = models.AutoField(primary_key=True)
     dpt_name = models.CharField(max_length=255)
@@ -67,7 +67,7 @@ class Supervisor(models.Model):
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
     
     # New field to link Supervisor to a user account
-    account = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True)
+    account = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         if not self.reg_num:
@@ -120,30 +120,16 @@ class Student(models.Model):
     profile_pic = models.ImageField(upload_to=unique_image_path, validators=[FileExtensionValidator(['jpg', 'jpeg', 'png'])])
     
     # New field to link Student to a user account
-    account = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True)
+    account = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
     
     def save(self, *args, **kwargs):
         if not self.reg_no:
-            # Use a transaction to ensure atomicity
-            with transaction.atomic():
-                # Ensure the generated reg_no is unique
-                while True:
-                    # Get the highest registration number
-                    last_student = Student.objects.aggregate(Max('reg_no'))['reg_no__max']
-                    
-                    if last_student and last_student[2:7].isdigit():
-                        num_part = int(last_student[2:7]) + 1
-                    else:
-                        num_part = 0
-                        
-                    # Generate new reg_no
-                    new_reg_no = f"24rp{num_part:05d}"
-                    
-                    # Check if the generated reg_no already exists
-                    if not Student.objects.filter(reg_no=new_reg_no).exists():
-                        self.reg_no = new_reg_no
-                        break
-                        
+            last_stu = Student.objects.all().order_by('st_id').last()
+            if last_stu:
+                stud_num = int(last_stu.reg_no[4:]) + 1
+            else:
+                stud_num = 0
+            self.reg_no = f"24rp{stud_num:05d}"
         super(Student, self).save(*args, **kwargs)
     
     def __str__(self):
