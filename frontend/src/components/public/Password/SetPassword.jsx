@@ -2,69 +2,84 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { useLocation, useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css'; // Import Bootstrap CSS
+import axios from 'axios'
 
 const SetPassword = () => {
-    const { register, handleSubmit, formState: { errors }, watch } = useForm();
+    const { register, handleSubmit, formState: { errors }, watch, setError } = useForm();
     const password = watch('password', ''); // Get the value of the password field
-
+    const navigate = useNavigate();
     const location = useLocation(); // Get passed data
-    const { reg_no, fname, lname, email } = location.state || {}; // Destructure the received data
+    const { reg_no, fname, lname, email, isStudent } = location.state || {}; // Destructure the received data, including role
 
-    const onSubmit = (data) => {
-        // Handle form submission logic
-        console.log('Form submitted:', data);
-    };
-    const navigate = useNavigate()
+    const onSubmit = async (data) => {
+        try {
+            const endpoint = location.state?.st_id
+                ? 'http://127.0.0.1:8000/api/students/create-account-student/'
+                : 'http://127.0.0.1:8000/api/supervisors/create-account-supervisor/';
+        
+            const response = await axios.post(
+                endpoint,
+                {
+                    reg_num: reg_no,
+                    password: data.password,
+                    confirm_password: data.confirmPassword,
+                },
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                    },
+                }
+            );
+        
+            if (response.status === 201) {
+                alert("Account created successfully!");
+                navigate('/'); // Redirect after successful creation
+            } else {
+                // Handle API errors and display them
+                const errorMessage = response.data.error || 'An unknown error occurred.';
+                setError('server', { type: 'server', message: errorMessage });
+            }
+        } catch (error) {
+            if (error.response && error.response.data.error) {
+                setError('server', { type: 'server', message: error.response.data.error });
+            } else {
+                setError('server', { type: 'server', message: error.message });
+            }
+        }
+    }    
 
     return (
+        
         <div className="d-flex align-items-center justify-content-center vh-100">
-            
+           {/* { console.log(location.state)} */}
             <div className="container">
-            <button onClick={() => navigate(-1)}>{`<`}Back</button>
+                <button onClick={() => navigate(-1)}>{`<`}Back</button>
                 <div className="row justify-content-center">
                     <div className="col-md-6 col-lg-4">
                         <h2 className="text-center mb-4">Set your password</h2>
-                        {/* Display the passed data */}
-                        {/* <p><strong>Registration No:</strong> {reg_no}</p>
-                        <p><strong>First Name:</strong> {fname}</p>
-                        <p><strong>Last Name:</strong> {lname}</p>
-                        <p><strong>Email:</strong> {email}</p> */}
+                        {/* Form for setting password */}
                         <form onSubmit={handleSubmit(onSubmit)} className="d-flex flex-column">
                             {/* Reg_no Field */}
                             <div className="form-group mb-3">
                                 <input
                                     type="text"
-                                    className={`form-control ${errors.reg_no ? 'is-invalid' : ''}`}
+                                    className="form-control"
                                     name="reg_no"
-                                    {...register('reg_no', {
-                                        required: 'Reg_no is required',
-                                        // pattern: {
-                                        //     value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, // Basic email validation
-                                        //     message: 'Invalid email format'
-                                        // }
-                                    })}
                                     value={reg_no}
                                     readOnly
                                 />
-                                {errors.username && <div className="invalid-feedback">{errors.username.message}</div>}
                             </div>
-                            {/* Email/Username Field */}
+
+                            {/* Email Field */}
                             <div className="form-group mb-3">
                                 <input
                                     type="text"
-                                    className={`form-control ${errors.username ? 'is-invalid' : ''}`}
-                                    name="username"
-                                    {...register('username', {
-                                        required: 'Email/Username is required',
-                                        pattern: {
-                                            value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, // Basic email validation
-                                            message: 'Invalid email format'
-                                        }
-                                    })}
+                                    className="form-control"
+                                    name="email"
                                     value={email}
                                     readOnly
                                 />
-                                {errors.username && <div className="invalid-feedback">{errors.username.message}</div>}
                             </div>
 
                             {/* Password Field */}
@@ -103,6 +118,9 @@ const SetPassword = () => {
                                 )}
                             </div>
 
+                            {/* Display server errors */}
+                            {errors.server && <div className="alert alert-danger">{errors.server.message}</div>}
+
                             {/* Submit Button */}
                             <button type="submit" className="btn btn-primary w-100">Register</button>
                         </form>
@@ -111,6 +129,7 @@ const SetPassword = () => {
             </div>
         </div>
     );
-}
+};
+
 
 export default SetPassword;

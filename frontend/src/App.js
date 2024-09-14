@@ -17,22 +17,23 @@ const App = () => {
 
     return (
         <Router>
-            <div className="app-container">
-                {/* Sidebar component */}
-                <Sidebar isVisible={isSidebarVisible} role={'student'} />
-                
-                {/* Main content wrapper */}
-                <div className={`content-wrapper ${isSidebarVisible ? 'sidebar-visible' : 'sidebar-hidden'}`}>
-                    <Navbar toggleSidebar={toggleSidebar} isVisible={isSidebarVisible} />
-                    <div className="main-content">
-                        <Routes>
+            <Routes>
                             <Route path='/' element={<Login />} />
                             <Route path='/claim_password' element={<GetPasswordForm />} />
                             <Route path='/set-password' element={<SetPassword />} />
                         </Routes>
-                    </div>
-                </div>
-            </div>
+            {/* <div className="app-container"> */}
+                {/* Sidebar component */}
+                {/* <Sidebar isVisible={isSidebarVisible} role={'student'} /> */}
+                
+                {/* Main content wrapper */}
+                {/* <div className={`content-wrapper ${isSidebarVisible ? 'sidebar-visible' : 'sidebar-hidden'}`}> */}
+                    {/* <Navbar toggleSidebar={toggleSidebar} isVisible={isSidebarVisible} /> */}
+                    {/* <div className="main-content"> */}
+                        
+                    {/* </div> */}
+                {/* </div> */}
+            {/* </div> */}
         </Router>
     );
 };
