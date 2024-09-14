@@ -3,13 +3,19 @@ from .models import Department, Supervisor, Faculty, Level, Student, User
 from .serializers import DepartmentSerializer, SupervisorSerializer, FacultySerializer, LevelSerializer, StudentSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework import status
 from django.core.mail import send_mail
+from rest_framework import status
+from django.contrib.auth.hashers import make_password
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
+from django.contrib.auth import get_user_model
 
 
 class DepartmentViewSet(viewsets.ModelViewSet):
     queryset = Department.objects.all()
     serializer_class = DepartmentSerializer
+
+User = get_user_model()
 
 class SupervisorViewSet(viewsets.ModelViewSet):
     queryset = Supervisor.objects.all()
@@ -25,8 +31,6 @@ class SupervisorViewSet(viewsets.ModelViewSet):
         
         serializer.save()
 
-#Search supervosior account
-
     @action(detail=False, methods=['get'], url_path='search-supervisor')
     def search_supervisor(self, request):
         reg_num = request.query_params.get('reg_num', None)
@@ -34,8 +38,8 @@ class SupervisorViewSet(viewsets.ModelViewSet):
         if reg_num:
             try:
                 supervisor = Supervisor.objects.get(reg_num=reg_num)
-                # Check if the supervisor already has a linked user account
-                if supervisor.account:
+                #check if the student already has a linked user account
+                if hasattr(supervisor, 'account') and supervisor.account:
                     return Response({"error": "This supervisor already has an account."}, status=status.HTTP_400_BAD_REQUEST)
 
                 # Return the supervisor details to proceed with account creation
@@ -49,47 +53,52 @@ class SupervisorViewSet(viewsets.ModelViewSet):
         else:
             return Response({"error": "Please provide a reg_num"}, status=status.HTTP_400_BAD_REQUEST)
 
+    @action(detail=False, methods=['post'], url_path='create-account-supervisor')
+    def create_account_supervisor(self, request):
+        reg_num = request.data.get('reg_num', None)
+        password = request.data.get('password', None)
+        confirm_password = request.data.get('confirm_password', None)
 
+        if not reg_num:
+            return Response({"error": "Registration number is required."}, status=status.HTTP_400_BAD_REQUEST)
 
+        if not password or not confirm_password:
+            return Response({"error": "Both password and confirm password are required."}, status=status.HTTP_400_BAD_REQUEST)
 
-@action(detail=False, methods=['post'], url_path='create-account-supervisor')
-def create_account_supervisor(self, request):
-    reg_num = request.data.get('reg_num', None)  # This comes from the frontend as hidden input or session storage
-    password = request.data.get('password', None)
+        if password != confirm_password:
+            return Response({"error": "Passwords do not match."}, status=status.HTTP_400_BAD_REQUEST)
 
-    if not reg_num:
-        return Response({"error": "Registration number is required."}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            # Validate the password strength
+            try:
+                validate_password(password)
+            except ValidationError as e:
+                return Response({"error": e.messages}, status=status.HTTP_400_BAD_REQUEST)
 
-    if not password:
-        return Response({"error": "Password is required."}, status=status.HTTP_400_BAD_REQUEST)
+            supervisor = Supervisor.objects.get(reg_num=reg_num)
+            if supervisor.account:
+                return Response({"error": "This supervisor already has a user account."}, status=status.HTTP_400_BAD_REQUEST)
 
-    try:
-        supervisor = Supervisor.objects.get(reg_num=reg_num)
+            # Create User with hashed password
+            user = User.objects.create_user(
+                username=supervisor.reg_num,
+                first_name=supervisor.fname,
+                last_name=supervisor.lname,
+                email=supervisor.email,
+                password=password,
+                role = "SUPERVISOR"
+            )
 
-        # Ensure supervisor doesn't already have an account
-        if supervisor.user:
-            return Response({"error": "This supervisor already has a user account."}, status=status.HTTP_400_BAD_REQUEST)
+            # Link the created user to the supervisor
+            supervisor.account = user
+            supervisor.save()
 
-        # Create the new User
-        user = User.objects.create_user(
-            username=supervisor.reg_num,  # Use reg_num as the username
-            first_name=supervisor.fname,
-            last_name=supervisor.lname,
-            email=supervisor.email,
-            password=password,  # Use the provided password
-            role='SUPERVISOR'  # Assign the role as SUPERVISOR
-        )
+            return Response({"success": "Supervisor account created successfully."}, status=status.HTTP_201_CREATED)
 
-        # Link the user account to the supervisor
-        supervisor.user = user
-        supervisor.save()
-
-        return Response({"success": "User account created successfully."}, status=status.HTTP_201_CREATED)
-
-    except Supervisor.DoesNotExist:
-        return Response({"error": "Supervisor not found"}, status=status.HTTP_404_NOT_FOUND)
-
-
+        except Supervisor.DoesNotExist:
+            return Response({"error": "Supervisor not found."}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class FacultyViewSet(viewsets.ModelViewSet):
     queryset = Faculty.objects.all()
@@ -141,8 +150,8 @@ class StudentViewSet(viewsets.ModelViewSet):
         if reg_num:
             try:
                 student = Student.objects.get(reg_no=reg_num)
-                # Check if the student already has a linked user account
-                if student.account:
+                #check if the student already has a linked user account
+                if hasattr(student, 'account') and student.account:
                     return Response({"error": "This student already has an account."}, status=status.HTTP_400_BAD_REQUEST)
 
                 # Return the student details to proceed with account creation
@@ -155,3 +164,50 @@ class StudentViewSet(viewsets.ModelViewSet):
                 return Response({"error": "student not found"}, status=status.HTTP_404_NOT_FOUND)
         else:
             return Response({"error": "Please provide a reg_num"}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['post'], url_path='create-account-student')
+    def create_account_student(self, request):
+        reg_num = request.data.get('reg_num', None)
+        password = request.data.get('password', None)
+        confirm_password = request.data.get('confirm_password', None)
+
+        if not reg_num:
+            return Response({"error": "Registration number is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not password or not confirm_password:
+            return Response({"error": "Both password and confirm password are required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if password != confirm_password:
+            return Response({"error": "Passwords do not match."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # Validate the password strength
+            try:
+                validate_password(password)
+            except ValidationError as e:
+                return Response({"error": e.messages}, status=status.HTTP_400_BAD_REQUEST)
+
+            student = Student.objects.get(reg_no=reg_num)
+            if student.account:
+                return Response({"error": "This student already has a user account."}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Create User with hashed password
+            user = User.objects.create_user(
+                username=student.reg_no,
+                first_name=student.fname,
+                last_name=student.lname,
+                email=student.email,
+                password=password,
+                role = "STUDENT"
+            )
+
+            # Link the created user to the student
+            student.account = user
+            student.save()
+
+            return Response({"success": "student account created successfully."}, status=status.HTTP_201_CREATED)
+
+        except Student.DoesNotExist:
+            return Response({"error": "student not found."}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -4,7 +4,34 @@ from django.db import models
 from django.core.validators import FileExtensionValidator
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+# from django.db.models import MaxIntegrityError, transaction
 
+
+# Department Model
+class User(AbstractUser):
+    ROLE_CHOICES = (
+        ('SUPERVISOR', 'Supervisor'),
+        ('STUDENT', 'Student'),
+        ('REGISTER', 'Register'),
+        ('ADMIN', 'Admin'),
+    )
+
+    role = models.CharField(max_length=25, choices=ROLE_CHOICES, default='STUDENT')
+    groups = models.ManyToManyField(
+        "auth.Group",
+        related_name="custom_user_set",  # Custom related_name to avoid conflict
+        blank=True,
+        verbose_name="groups",
+        help_text="The groups this user belongs to.",
+    )
+    
+    user_permissions = models.ManyToManyField(
+        "auth.Permission",
+        related_name="custom_user_set",  # Custom related_name to avoid conflict
+        blank=True,
+        verbose_name="user permissions",
+        help_text="Specific permissions for this user.",
+    )
 
 # Function to generate a unique profile picture filename
 def unique_image_path(instance, filename):
@@ -14,8 +41,6 @@ def unique_image_path(instance, filename):
         return os.path.join('static/supervisor/', unique_filename)
     elif isinstance(instance, Student):
         return os.path.join('static/student/', unique_filename)
-
-# Department Model
 class Department(models.Model):
     dpt_id = models.AutoField(primary_key=True)
     dpt_name = models.CharField(max_length=255)
@@ -42,7 +67,7 @@ class Supervisor(models.Model):
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
     
     # New field to link Supervisor to a user account
-    account = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+    account = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         if not self.reg_num:
@@ -95,44 +120,18 @@ class Student(models.Model):
     profile_pic = models.ImageField(upload_to=unique_image_path, validators=[FileExtensionValidator(['jpg', 'jpeg', 'png'])])
     
     # New field to link Student to a user account
-    account = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+    account = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
     
     def save(self, *args, **kwargs):
         if not self.reg_no:
-            last_student = Student.objects.all().order_by('st_id').last()
-            if last_student:
-                num_part = int(last_student.reg_no[2:7]) + 1
+            last_stu = Student.objects.all().order_by('st_id').last()
+            if last_stu:
+                stud_num = int(last_stu.reg_no[4:]) + 1
             else:
-                num_part = 0
-            self.reg_no = f"24rp{num_part:05d}"
+                stud_num = 0
+            self.reg_no = f"24rp{stud_num:05d}"
         super(Student, self).save(*args, **kwargs)
     
     def __str__(self):
         return f'{self.fname} {self.lname}'
 
-
-
-class User(AbstractUser):
-    ROLE_CHOICES = (
-        ('SUPERVISOR', 'Supervisor'),
-        ('STUDENT', 'Student'),
-        ('REGISTER', 'Register'),
-        ('ADMIN', 'Admin'),
-    )
-
-    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='STUDENT')
-    groups = models.ManyToManyField(
-        "auth.Group",
-        related_name="custom_user_set",  # Custom related_name to avoid conflict
-        blank=True,
-        verbose_name="groups",
-        help_text="The groups this user belongs to.",
-    )
-    
-    user_permissions = models.ManyToManyField(
-        "auth.Permission",
-        related_name="custom_user_set",  # Custom related_name to avoid conflict
-        blank=True,
-        verbose_name="user permissions",
-        help_text="Specific permissions for this user.",
-    )
