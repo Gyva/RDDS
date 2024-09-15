@@ -355,7 +355,7 @@ CREATE TABLE `django_migrations` (
   `name` varchar(255) NOT NULL,
   `applied` datetime(6) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -392,7 +392,8 @@ INSERT INTO `django_migrations` VALUES
 (25,'projects','0003_alter_level_options','2024-08-22 15:28:41.320186'),
 (26,'projects','0004_alter_student_phone_alter_supervisor_phone_and_more','2024-08-28 07:55:05.313298'),
 (27,'projects','0005_student_user_supervisor_account_user','2024-08-28 07:55:05.528852'),
-(28,'projects','0006_rename_user_student_account','2024-08-28 07:55:05.623877');
+(28,'projects','0006_rename_user_student_account','2024-08-28 07:55:05.623877'),
+(29,'projects','0007_alter_user_role','2024-09-12 21:23:48.614703');
 /*!40000 ALTER TABLE `django_migrations` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -419,6 +420,7 @@ CREATE TABLE `django_session` (
 LOCK TABLES `django_session` WRITE;
 /*!40000 ALTER TABLE `django_session` DISABLE KEYS */;
 INSERT INTO `django_session` VALUES
+('hdar3fyfzxoihcmh37e1oatb9sfebq69','.eJxVjMsOwiAQRf-FtSE8BVy67zeQgRmkaiAp7cr479qkC93ec859sQjbWuM2aIkzsguTgZ1-xwT5QW0neId26zz3ti5z4rvCDzr41JGe18P9O6gw6rdWhoLXTihEX0woRVEAbwVBgiANaSvQ6oyUUBslnSMRvHBgrZfOnA17fwAJ8jeL:1sp9tm:vb5HB725T-YyitVDGFOqQZ92yqk6UE4b3mwRU3T_2PA','2024-09-27 17:15:58.994206'),
 ('ovol631phktm21hoyloweer9mnga05f3','.eJxVjEEOwiAQRe_C2hAYQIpL956BDMNUqgaS0q6Md7dNutDte-__t4i4LiWunec4ZXERWpx-WUJ6ct1FfmC9N0mtLvOU5J7Iw3Z5a5lf16P9OyjYy7YGlYI-QwrgwHil2SIqD4O3HALnkXC0Gsgr8prMBjLbwWZnTALljBOfL8b4N2M:1sjEAX:mKDrOz9uYUEEkJlJPPlT1aBSe-UXrUxKzeeep4K0bV0','2024-09-11 08:36:45.055045');
 /*!40000 ALTER TABLE `django_session` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -543,15 +545,14 @@ CREATE TABLE `projects_student` (
   UNIQUE KEY `reg_no` (`reg_no`),
   UNIQUE KEY `email` (`email`),
   UNIQUE KEY `projects_student_phone_1cb17134_uniq` (`phone`),
-  UNIQUE KEY `user_id` (`account_id`),
   KEY `projects_student_dpt_id_id_c6192fa9_fk_projects_` (`dpt_id_id`),
   KEY `projects_student_f_id_id_cd8ff21c_fk_projects_faculty_f_id` (`f_id_id`),
   KEY `projects_student_l_id_id_cc8daad7_fk_projects_level_l_id` (`l_id_id`),
-  CONSTRAINT `projects_student_account_id_53f11505_fk_auth_user_id` FOREIGN KEY (`account_id`) REFERENCES `auth_user` (`id`),
+  KEY `projects_student_account_id_53f11505` (`account_id`),
   CONSTRAINT `projects_student_dpt_id_id_c6192fa9_fk_projects_` FOREIGN KEY (`dpt_id_id`) REFERENCES `projects_department` (`dpt_id`),
   CONSTRAINT `projects_student_f_id_id_cd8ff21c_fk_projects_faculty_f_id` FOREIGN KEY (`f_id_id`) REFERENCES `projects_faculty` (`f_id`),
   CONSTRAINT `projects_student_l_id_id_cc8daad7_fk_projects_level_l_id` FOREIGN KEY (`l_id_id`) REFERENCES `projects_level` (`l_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -561,7 +562,9 @@ CREATE TABLE `projects_student` (
 LOCK TABLES `projects_student` WRITE;
 /*!40000 ALTER TABLE `projects_student` DISABLE KEYS */;
 INSERT INTO `projects_student` VALUES
-(1,'24rp00000','UMWERE','Chriss','2024-08-22','respinho2014@gmail.com','0784389611','static/student/a099d88dc1684f4cb5a0748c02f4d8bf.jpeg',1,3,3,NULL);
+(1,'24rp00000','UMWERE','Chriss','2024-08-22','respinho2014@gmail.com','0784389611','static/student/a099d88dc1684f4cb5a0748c02f4d8bf.jpeg',1,3,3,20),
+(11,'24rp00001','Murenzi','laurent','2012-06-13','respinho20yf14@gmail.com','0784389682','static/student/d5fc223990c741bd8ed86708b386c575.jpg',1,4,13,18),
+(13,'24rp00002','Murenzi','laurent','2012-06-13','respinho20yf13@gmail.com','0784389689','static/student/48439986b36e4386afd308fbee9d8bcb.jpg',1,4,13,NULL);
 /*!40000 ALTER TABLE `projects_student` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -588,11 +591,10 @@ CREATE TABLE `projects_supervisor` (
   UNIQUE KEY `reg_num` (`reg_num`),
   UNIQUE KEY `email` (`email`),
   UNIQUE KEY `projects_supervisor_phone_88cd2953_uniq` (`phone`),
-  UNIQUE KEY `account_id` (`account_id`),
   KEY `projects_supervisor_dpt_id_id_146afe94_fk_projects_` (`dpt_id_id`),
-  CONSTRAINT `projects_supervisor_account_id_edd3632a_fk_auth_user_id` FOREIGN KEY (`account_id`) REFERENCES `auth_user` (`id`),
+  KEY `projects_supervisor_account_id_edd3632a` (`account_id`),
   CONSTRAINT `projects_supervisor_dpt_id_id_146afe94_fk_projects_` FOREIGN KEY (`dpt_id_id`) REFERENCES `projects_department` (`dpt_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -602,9 +604,10 @@ CREATE TABLE `projects_supervisor` (
 LOCK TABLES `projects_supervisor` WRITE;
 /*!40000 ALTER TABLE `projects_supervisor` DISABLE KEYS */;
 INSERT INTO `projects_supervisor` VALUES
-(1,'sup00000','UMWERE','Chriss','umwerechr97@gmail.com','0784389611','static/supervisor/d3b53f11c6d64aa098faf431444569fd.jpg','multimedia','HoD',1,NULL),
+(1,'sup00000','UMWERE','Chriss','umwerechr97@gmail.com','0784389611','static/supervisor/d3b53f11c6d64aa098faf431444569fd.jpg','multimedia','HoD',1,21),
 (2,'sup00001','UMWERE','Chriss','musabekizito@gmail.com','UMWERE12','static/supervisor/c2a59f31046c4ab49038d64fddb30cc4.jpg','multimedia','Lecturer',1,NULL),
-(3,'sup00002','Kamana','mugabo','mugabo@gmail.com','0783897546','static/supervisor/414a2ab39b1f491a8f6ffa02167a7d5d.png','maintanance','Lecturer',1,NULL);
+(3,'sup00002','Kamana','mugabo','mugabo@gmail.com','0783897546','static/supervisor/414a2ab39b1f491a8f6ffa02167a7d5d.png','maintanance','Lecturer',1,17),
+(4,'sup00003','Kamana','mugabo','nshimiyejeandedieu2000@gmail.com','0784389609','static/supervisor/4b31bd13c5124984b5193b4810a17814.jpg','maintanance','Lecturer',2,NULL);
 /*!40000 ALTER TABLE `projects_supervisor` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -627,10 +630,10 @@ CREATE TABLE `projects_user` (
   `is_staff` tinyint(1) NOT NULL,
   `is_active` tinyint(1) NOT NULL,
   `date_joined` datetime(6) NOT NULL,
-  `role` varchar(10) NOT NULL,
+  `role` varchar(25) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -639,6 +642,12 @@ CREATE TABLE `projects_user` (
 
 LOCK TABLES `projects_user` WRITE;
 /*!40000 ALTER TABLE `projects_user` DISABLE KEYS */;
+INSERT INTO `projects_user` VALUES
+(17,'pbkdf2_sha256$870000$ilqPNKMTf5dUk6N2eJjrPS$kjl9nMBATYMNmmf1ETi9ZHAQ4Ift3JCUbOsu3RKMikE=',NULL,0,'sup00002','Kamana','mugabo','mugabo@gmail.com',0,1,'2024-09-13 11:12:44.851231','SUPERVISOR'),
+(18,'pbkdf2_sha256$870000$oYpcWcZP2bbDvi72pKmAbk$uzcezBaOR6eMY3JJjof3Uh9nl83DeoTbJj0Z/88uCBI=',NULL,0,'24rp00001','Murenzi','laurent','respinho20yf14@gmail.com',0,1,'2024-09-13 15:17:58.281900','STUDENT'),
+(19,'pbkdf2_sha256$870000$e0sTMyXmS3yfYVg9KKkgRr$bWH38ew6/LtHI+4KkdJmWFBJf00C/jL2eD+M77lINNg=','2024-09-13 17:15:58.991964',1,'umuhire','','','umuhire@gmail.com',1,1,'2024-09-13 17:15:23.054661','STUDENT'),
+(20,'pbkdf2_sha256$870000$RtclMX2TkAwgWx1G5HUCkL$BJhGYqNl51Um6ZU4xr+6EaM/XBKW+BuM/jxpWtUFeBg=',NULL,0,'24rp00000','UMWERE','Chriss','respinho2014@gmail.com',0,1,'2024-09-14 22:04:51.112083','STUDENT'),
+(21,'pbkdf2_sha256$870000$0Du68DP7j7veM9ge16cs4q$1uDOzKbPJoKJlDjKd5ohKyg3HxIz1CUBY3n49yIlsmE=',NULL,0,'sup00000','UMWERE','Chriss','umwerechr97@gmail.com',0,1,'2024-09-14 22:07:21.098824','SUPERVISOR');
 /*!40000 ALTER TABLE `projects_user` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -707,4 +716,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-09-11 13:27:35
+-- Dump completed on 2024-09-15  0:15:21

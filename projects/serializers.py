@@ -1,6 +1,28 @@
 from rest_framework import serializers
-from .models import Department, Supervisor, Faculty, Level, Student
+from .models import Department, Supervisor, Faculty, Level, Student, User
+from django.contrib.auth import authenticate
 
+class LoginSerializer(serializers.Serializer):
+    username = serializers.CharField(required=True)  # Handle both email and registration number
+    password = serializers.CharField(required=True, write_only=True)
+
+    def validate(self, data):
+        username_or_email = data.get('username')
+        password = data.get('password')
+
+        # Check if the user exists based on username or email
+        user = User.objects.filter(username=username_or_email).first() or \
+               User.objects.filter(email=username_or_email).first()
+
+        if user and user.check_password(password):
+            # If authentication is successful
+            return {
+                'id': user.id,
+                'username': user.username,
+                'role': user.role
+            }
+        else:
+            raise serializers.ValidationError('Invalid credentials.')
 class DepartmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Department
@@ -17,8 +39,8 @@ class SupervisorSerializer(serializers.ModelSerializer):
     def validate_phone(self, value):
         if not value.isdigit():
             raise serializers.ValidationError("Phone number must contain only digits.")
-        if not (value.startswith('078') or value.startswith('073') or value.startswith('072')):
-            raise serializers.ValidationError("Phone number must start with 078, 073, or 072.")
+        if not (value.startswith('078') or value.startswith('079') or value.startswith('073') or value.startswith('072')):
+            raise serializers.ValidationError("Phone number must start with 078, 079, 073, or 072.")
         if len(value) != 10:
             raise serializers.ValidationError("Phone number must be exactly 10 digits long.")
         return value

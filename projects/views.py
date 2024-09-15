@@ -1,6 +1,6 @@
 from rest_framework import viewsets, serializers
 from .models import Department, Supervisor, Faculty, Level, Student, User
-from .serializers import DepartmentSerializer, SupervisorSerializer, FacultySerializer, LevelSerializer, StudentSerializer
+from .serializers import DepartmentSerializer, SupervisorSerializer, FacultySerializer, LevelSerializer, StudentSerializer, LoginSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.core.mail import send_mail
@@ -8,15 +8,36 @@ from rest_framework import status
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, login
+from rest_framework.decorators import api_view
 
+# Login view
+@api_view(['POST'])
+def login_view(request):
+    serializer = LoginSerializer(data=request.data)
+    if serializer.is_valid():
+        user_data = serializer.validated_data
 
+        # Log the user in (without session handling as it's token-based)
+        user = User.objects.get(username=user_data['username'])
+        login(request, user)
+
+        return Response({
+            'id': user_data['id'],
+            'username': user_data['username'],
+            'role': user_data['role']
+        }, status=status.HTTP_200_OK)
+
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# Department view
 class DepartmentViewSet(viewsets.ModelViewSet):
     queryset = Department.objects.all()
     serializer_class = DepartmentSerializer
 
 User = get_user_model()
 
+# Supervisor view
 class SupervisorViewSet(viewsets.ModelViewSet):
     queryset = Supervisor.objects.all()
     serializer_class = SupervisorSerializer
@@ -100,6 +121,7 @@ class SupervisorViewSet(viewsets.ModelViewSet):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+# Faculty view
 class FacultyViewSet(viewsets.ModelViewSet):
     queryset = Faculty.objects.all()
     serializer_class = FacultySerializer
@@ -111,6 +133,7 @@ class FacultyViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(dpt_id=dpt_id)
         return queryset
 
+# Level view
 class LevelViewSet(viewsets.ModelViewSet):
     queryset = Level.objects.all()
     serializer_class = LevelSerializer
@@ -127,7 +150,7 @@ class LevelViewSet(viewsets.ModelViewSet):
         context['request'] = self.request
         return context
 
-
+# Student view
 class StudentViewSet(viewsets.ModelViewSet):
     queryset = Student.objects.all()
     serializer_class = StudentSerializer

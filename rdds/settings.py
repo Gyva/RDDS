@@ -175,3 +175,6 @@ default='STUDENT'
 AUTH_USER_MODEL = 'projects.User'
 
 
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',  # default
+)
