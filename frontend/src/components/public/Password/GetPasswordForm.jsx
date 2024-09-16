@@ -37,6 +37,7 @@ const GetPasswordForm = () => {
             setSearchResult(null);
             setSearchError(error.message);
             console.error('Search error:', error.message);
+            console.log(error.message)
         }
     };
 

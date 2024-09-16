@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import './Navbar.css'; // Import the CSS file
+import { AuthContext } from '../../contexts/AuthContext';
 
 const Navbar = ({ toggleSidebar, isVisible }) => {
+    const {logout} = useContext(AuthContext)
     const handleLogout = (e) => {
         e.preventDefault();
         document.getElementById('logout-form').submit();
@@ -30,7 +32,7 @@ const Navbar = ({ toggleSidebar, isVisible }) => {
                     <p className="nav-link btn btn-default btn-flat" onClick={() => navigateToPage('#')}>2023 - 2024</p>
                 </li>
                 <li>
-                    <p className="nav-link" onClick={handleLogout}>
+                    <p className="nav-link" onClick={logout}>
                         Logout <i className="fas fa-sign-out-alt"></i>
                     </p>
                 </li>

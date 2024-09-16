@@ -1,19 +1,37 @@
-import React from 'react';
+import React, { useState,useContext } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-import { Link } from 'react-router-dom';
+import { AuthContext } from '../../../contexts/AuthContext';
 
-const Login = ({ onLogin }) => {
+const Login = () => {
     const { register, handleSubmit, formState: { errors } } = useForm();
-    const navigate = useNavigate();
+    const { login } = useContext(AuthContext); // Get login function from context
+    const [errMsg, setErrMsg] = useState(null);
 
-    const onSubmit = (data) => {
-        // Simulate login process and authentication
-        if (data.email === 'test@example.com' && data.password === 'password') {
-            onLogin(); // Set authentication status to true
-            navigate('/register'); // Redirect to the protected route
-        } else {
-            alert('Invalid credentials');
+    const onSubmit = async (data) => {
+        try {
+            const response = await fetch('http://127.0.0.1:8000/api/login/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username: data.email, // Assuming email field holds the username/regno
+                    password: data.password,
+                }),
+            });
+            const result = await response.json();
+            console.log(result)
+            if (response.ok) {
+                login(result.id, result.role); // Call the context login function
+                setErrMsg('You are logged')
+            } else {
+                setErrMsg(result?.non_field_errors ? result?.non_field_errors : 'Failed to login')
+
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            alert('An error occurred during login');
         }
     };
 
@@ -23,6 +41,7 @@ const Login = ({ onLogin }) => {
                 <div className="row justify-content-center">
                     <div className="col-md-6 col-lg-4">
                         <h2 className="text-center mb-4">Login</h2>
+                        {errMsg ? <p className='alert alert-danger'>{errMsg}</p> : ''}
                         <form onSubmit={handleSubmit(onSubmit)} className="d-flex flex-column">
                             <div className="form-group mb-3">
                                 <label htmlFor="email">Email/RegNo:</label>
@@ -32,10 +51,6 @@ const Login = ({ onLogin }) => {
                                     className={`form-control ${errors.email ? 'is-invalid' : ''}`}
                                     {...register('email', {
                                         required: 'Email address or RegNumber is required',
-                                        pattern: {
-                                            value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                                            message: 'Invalid email address'
-                                        }
                                     })}
                                     placeholder="Enter your email/RegNo"
                                 />
@@ -54,10 +69,6 @@ const Login = ({ onLogin }) => {
                             </div>
                             <button type="submit" className="btn btn-primary w-100">Login</button>
                         </form>
-                        <div className='d-flex justify-content-end'>
-                            <Link to={"/claim_password"} className='text-decoration-none text-primary'>Create account</Link>
-                        </div>
-
                     </div>
                 </div>
             </div>
