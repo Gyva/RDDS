@@ -420,7 +420,8 @@ CREATE TABLE `django_session` (
 LOCK TABLES `django_session` WRITE;
 /*!40000 ALTER TABLE `django_session` DISABLE KEYS */;
 INSERT INTO `django_session` VALUES
-('hdar3fyfzxoihcmh37e1oatb9sfebq69','.eJxVjMsOwiAQRf-FtSE8BVy67zeQgRmkaiAp7cr479qkC93ec859sQjbWuM2aIkzsguTgZ1-xwT5QW0neId26zz3ti5z4rvCDzr41JGe18P9O6gw6rdWhoLXTihEX0woRVEAbwVBgiANaSvQ6oyUUBslnSMRvHBgrZfOnA17fwAJ8jeL:1sp9tm:vb5HB725T-YyitVDGFOqQZ92yqk6UE4b3mwRU3T_2PA','2024-09-27 17:15:58.994206'),
+('9kaaxjj5liqzulf602e8mnjmpivf4cyg','.eJxVjDsOwjAQBe_iGlkbfzaGkj5nsHa9Dg4gR4qTCnF3iJQC2jcz76UibWuJW8tLnERdlOnU6XdkSo9cdyJ3qrdZp7muy8R6V_RBmx5myc_r4f4dFGrlWwfIcvZWOhcCMXvhHnsbOBB6REA2xiVgl4GyMWxHIhscih0hWUqg3h8ArTgc:1spoWh:_4vLx8OS7FZxFNelwjcTi0OM2E44F8ALAPfH2khHOKc','2024-09-29 12:38:51.182570'),
+('mfuszmkyrhj43y2367b9t2rrwvponvho','.eJxVjMsOgjAUBf-la9PQ0tJbl-79BnJfWNRAQmFl_HclYaHbMzPnZXrc1tJvVZd-FHM23pvT70jID512InecbrPleVqXkeyu2INWe51Fn5fD_TsoWMu3BuCg4lUlEw8hMjYxgSeS1rnsW0cASbATdJg7bVyARiQIt5ESp8G8PyZiOMM:1spwn4:-mFDVLlEIcqMORG2HjXnb5cSInvzuVRimRPU588Yl30','2024-09-29 21:28:18.816485'),
 ('ovol631phktm21hoyloweer9mnga05f3','.eJxVjEEOwiAQRe_C2hAYQIpL956BDMNUqgaS0q6Md7dNutDte-__t4i4LiWunec4ZXERWpx-WUJ6ct1FfmC9N0mtLvOU5J7Iw3Z5a5lf16P9OyjYy7YGlYI-QwrgwHil2SIqD4O3HALnkXC0Gsgr8prMBjLbwWZnTALljBOfL8b4N2M:1sjEAX:mKDrOz9uYUEEkJlJPPlT1aBSe-UXrUxKzeeep4K0bV0','2024-09-11 08:36:45.055045');
 /*!40000 ALTER TABLE `django_session` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -564,7 +565,7 @@ LOCK TABLES `projects_student` WRITE;
 INSERT INTO `projects_student` VALUES
 (1,'24rp00000','UMWERE','Chriss','2024-08-22','respinho2014@gmail.com','0784389611','static/student/a099d88dc1684f4cb5a0748c02f4d8bf.jpeg',1,3,3,20),
 (11,'24rp00001','Murenzi','laurent','2012-06-13','respinho20yf14@gmail.com','0784389682','static/student/d5fc223990c741bd8ed86708b386c575.jpg',1,4,13,18),
-(13,'24rp00002','Murenzi','laurent','2012-06-13','respinho20yf13@gmail.com','0784389689','static/student/48439986b36e4386afd308fbee9d8bcb.jpg',1,4,13,NULL);
+(13,'24rp00002','Murenzi','laurent','2012-06-13','respinho20yf13@gmail.com','0784389689','static/student/48439986b36e4386afd308fbee9d8bcb.jpg',1,4,13,22);
 /*!40000 ALTER TABLE `projects_student` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -633,7 +634,7 @@ CREATE TABLE `projects_user` (
   `role` varchar(25) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`)
-) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -643,11 +644,12 @@ CREATE TABLE `projects_user` (
 LOCK TABLES `projects_user` WRITE;
 /*!40000 ALTER TABLE `projects_user` DISABLE KEYS */;
 INSERT INTO `projects_user` VALUES
-(17,'pbkdf2_sha256$870000$ilqPNKMTf5dUk6N2eJjrPS$kjl9nMBATYMNmmf1ETi9ZHAQ4Ift3JCUbOsu3RKMikE=',NULL,0,'sup00002','Kamana','mugabo','mugabo@gmail.com',0,1,'2024-09-13 11:12:44.851231','SUPERVISOR'),
+(17,'pbkdf2_sha256$870000$ilqPNKMTf5dUk6N2eJjrPS$kjl9nMBATYMNmmf1ETi9ZHAQ4Ift3JCUbOsu3RKMikE=','2024-09-15 13:07:55.370478',0,'sup00002','Kamana','mugabo','mugabo@gmail.com',0,1,'2024-09-13 11:12:44.851231','SUPERVISOR'),
 (18,'pbkdf2_sha256$870000$oYpcWcZP2bbDvi72pKmAbk$uzcezBaOR6eMY3JJjof3Uh9nl83DeoTbJj0Z/88uCBI=',NULL,0,'24rp00001','Murenzi','laurent','respinho20yf14@gmail.com',0,1,'2024-09-13 15:17:58.281900','STUDENT'),
 (19,'pbkdf2_sha256$870000$e0sTMyXmS3yfYVg9KKkgRr$bWH38ew6/LtHI+4KkdJmWFBJf00C/jL2eD+M77lINNg=','2024-09-13 17:15:58.991964',1,'umuhire','','','umuhire@gmail.com',1,1,'2024-09-13 17:15:23.054661','STUDENT'),
-(20,'pbkdf2_sha256$870000$RtclMX2TkAwgWx1G5HUCkL$BJhGYqNl51Um6ZU4xr+6EaM/XBKW+BuM/jxpWtUFeBg=',NULL,0,'24rp00000','UMWERE','Chriss','respinho2014@gmail.com',0,1,'2024-09-14 22:04:51.112083','STUDENT'),
-(21,'pbkdf2_sha256$870000$0Du68DP7j7veM9ge16cs4q$1uDOzKbPJoKJlDjKd5ohKyg3HxIz1CUBY3n49yIlsmE=',NULL,0,'sup00000','UMWERE','Chriss','umwerechr97@gmail.com',0,1,'2024-09-14 22:07:21.098824','SUPERVISOR');
+(20,'pbkdf2_sha256$870000$RtclMX2TkAwgWx1G5HUCkL$BJhGYqNl51Um6ZU4xr+6EaM/XBKW+BuM/jxpWtUFeBg=','2024-09-15 12:51:35.359760',0,'24rp00000','UMWERE','Chriss','respinho2014@gmail.com',0,1,'2024-09-14 22:04:51.112083','STUDENT'),
+(21,'pbkdf2_sha256$870000$0Du68DP7j7veM9ge16cs4q$1uDOzKbPJoKJlDjKd5ohKyg3HxIz1CUBY3n49yIlsmE=','2024-09-15 12:48:58.896848',0,'sup00000','UMWERE','Chriss','umwerechr97@gmail.com',0,1,'2024-09-14 22:07:21.098824','SUPERVISOR'),
+(22,'pbkdf2_sha256$870000$b1J1jxh0Rv0JhIHpG7gwKp$zXfaM8kXYz4/0gcGNIK9QaT1tT0u3FltzbSJ6FTLs9Q=','2024-09-15 21:28:18.810974',0,'24rp00002','Murenzi','laurent','respinho20yf13@gmail.com',0,1,'2024-09-15 21:26:51.600018','STUDENT');
 /*!40000 ALTER TABLE `projects_user` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -716,4 +718,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-09-15  0:15:21
+-- Dump completed on 2024-09-16 10:42:09

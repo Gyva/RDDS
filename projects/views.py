@@ -1,6 +1,6 @@
 from rest_framework import viewsets, serializers
 from .models import Department, Supervisor, Faculty, Level, Student, User
-from .serializers import DepartmentSerializer, SupervisorSerializer, FacultySerializer, LevelSerializer, StudentSerializer, LoginSerializer
+from .serializers import DepartmentSerializer, SupervisorSerializer, FacultySerializer, LevelSerializer, StudentSerializer, LoginSerializer, PasswordResetSerializer, PasswordResetConfirmSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.core.mail import send_mail
@@ -10,6 +10,7 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model, login
 from rest_framework.decorators import api_view
+from rest_framework.views import APIView
 
 # Login view
 @api_view(['POST'])
@@ -29,6 +30,24 @@ def login_view(request):
         }, status=status.HTTP_200_OK)
 
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+#Password resetview
+class PasswordResetView(APIView):
+    def post(self, request):
+        serializer = PasswordResetSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'message': 'Password reset email sent.'}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+#Password reset confirmation view   
+class PasswordResetConfirmView(APIView):
+    def post(self, request):
+        serializer = PasswordResetConfirmSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'message': 'Password has been reset successfully.'}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # Department view
 class DepartmentViewSet(viewsets.ModelViewSet):

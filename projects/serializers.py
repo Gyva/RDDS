@@ -1,6 +1,13 @@
 from rest_framework import serializers
 from .models import Department, Supervisor, Faculty, Level, Student, User
 from django.contrib.auth import authenticate
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.core.mail import send_mail
+from django.conf import settings
+from django.contrib.auth.password_validation import validate_password
+from django.utils.http import urlsafe_base64_decode
 
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField(required=True)  # Handle both email and registration number
@@ -131,3 +138,79 @@ class StudentSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Selected level does not belong to the selected faculty.")
 
         return data
+    
+#Reset password serializer
+class PasswordResetSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    username = serializers.CharField()
+
+    def validate(self, data):
+        email = data.get('email')
+        username = data.get('username')
+        
+        try:
+            user = User.objects.get(email=email, username=username)
+        except User.DoesNotExist:
+            raise serializers.ValidationError("No user found with the provided email and username combination.")
+        
+        self.context['user'] = user
+        return data
+
+    def save(self):      
+        user = self.context['user']
+        # Generate password reset token
+        token_generator = PasswordResetTokenGenerator()
+        token = token_generator.make_token(user)
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+
+        # Create password reset URL
+        reset_url = f"http://localhost:3000/reset-password/{uid}/{token}/"
+
+        # Send password reset email
+        subject = "Password Reset Request"
+        message = f"Hi {user.username}, click the link below to reset your password and please don't reply to this email: {reset_url}"
+        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email])
+
+        return user
+    
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    uidb64 = serializers.CharField()
+    token = serializers.CharField()
+    new_password = serializers.CharField(write_only=True)
+    confirm_new_password = serializers.CharField(write_only=True)
+
+    def validate(self, data):
+        uid = data.get('uidb64')
+        token = data.get('token')
+        new_password = data.get('new_password')
+        confirm_new_password = data.get('confirm_new_password')
+
+        if new_password != confirm_new_password:
+            raise serializers.ValidationError("The two password fields didn't match.")
+
+        try:
+            uid = urlsafe_base64_decode(uid).decode()
+            user = User.objects.get(pk=uid)
+        except (User.DoesNotExist, ValueError, TypeError, OverflowError):
+            raise serializers.ValidationError("Invalid reset link.")
+
+        token_generator = PasswordResetTokenGenerator()
+        if not token_generator.check_token(user, token):
+            raise serializers.ValidationError("Invalid or expired token.")
+
+        return data
+
+    def save(self):
+        uid = self.validated_data['uidb64']
+        user = User.objects.get(pk=urlsafe_base64_decode(uid).decode())
+
+        # Validate the new password
+        new_password = self.validated_data['new_password']
+        validate_password(new_password, user)
+
+        # Set the new password
+        user.set_password(new_password)
+        user.save()
+
+        return user
+    
