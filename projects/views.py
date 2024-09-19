@@ -176,9 +176,16 @@ class FacultyViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = super().get_queryset()
+        # Get faculty by specific ID
+        f_id = self.request.query_params.get('f_id', None)
+        if f_id:
+            queryset = queryset.filter(f_id=f_id)
+        
+        # Filter by department if provided
         dpt_id = self.request.query_params.get('dpt_id', None)
         if dpt_id:
             queryset = queryset.filter(dpt_id=dpt_id)
+        
         return queryset
 
 # Level view
@@ -188,9 +195,17 @@ class LevelViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = super().get_queryset()
+        
+        # Get level by specific ID
+        l_id = self.request.query_params.get('l_id', None)
+        if l_id:
+            queryset = queryset.filter(l_id=l_id)
+        
+        # Filter by faculty if provided
         f_id = self.request.query_params.get('f_id', None)
         if f_id:
             queryset = queryset.filter(f_id=f_id)
+        
         return queryset
     
     def get_serializer_context(self):
