@@ -1,6 +1,6 @@
 from rest_framework import viewsets, serializers
 from .models import Department, Supervisor, Faculty, Level, Student, User
-from .serializers import DepartmentSerializer, SupervisorSerializer, FacultySerializer, LevelSerializer, StudentSerializer, LoginSerializer, PasswordResetSerializer, PasswordResetConfirmSerializer
+from .serializers import DepartmentSerializer, SupervisorSerializer, FacultySerializer, LevelSerializer, StudentSerializer, LoginSerializer, PasswordResetSerializer, PasswordResetConfirmSerializer, ChangePasswordSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.core.mail import send_mail
@@ -11,6 +11,9 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model, login
 from rest_framework.decorators import api_view
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from django.contrib.auth import authenticate
+from rest_framework_simplejwt.tokens import RefreshToken
 
 # Login view
 @api_view(['POST'])
@@ -18,18 +21,32 @@ def login_view(request):
     serializer = LoginSerializer(data=request.data)
     if serializer.is_valid():
         user_data = serializer.validated_data
-
-        # Log the user in (without session handling as it's token-based)
         user = User.objects.get(username=user_data['username'])
-        login(request, user)
+
+        # Generate JWT tokens
+        refresh = RefreshToken.for_user(user)
+        access_token = str(refresh.access_token)
 
         return Response({
             'id': user_data['id'],
             'username': user_data['username'],
-            'role': user_data['role']
+            'role': user_data['role'],
+            'access_token': access_token,  # Access token for authentication
+            'refresh_token': str(refresh),  # Refresh token to get new access tokens
         }, status=status.HTTP_200_OK)
 
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# Change passwordview
+class ChangePasswordView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = ChangePasswordSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "Password has been changed successfully."}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 #Password resetview
 class PasswordResetView(APIView):

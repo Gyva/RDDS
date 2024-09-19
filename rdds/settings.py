@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -29,7 +30,6 @@ INSTALLED_APPS = [
     'projects',
     'rest_framework',
     'corsheaders',
-    # 'rest_framework.authtoken',
 ]
 
 MIDDLEWARE = [
@@ -80,25 +80,27 @@ DATABASES = {
 }
 
 
-# REST_FRAMEWORK = {
-
-#     'DEFAULT_PERMISSION_CLASSES': [
-#         # 'rest_framework.permissions.IsAuthenticated',
-#     ],
-#     # 'DEFAULT_AUTHENTICATION_CLASSES': [
-#     #     'rest_framework.authentication.BasicAuthentication',
-#     #     'rest_framework.authentication.SessionAuthentication',
-#     # ],
-#     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-#     'PAGE_SIZE': 10,
-# }
-# settings.py
 REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',  # Use JWT Authentication
+    ],
     'DEFAULT_PARSER_CLASSES': [
         'rest_framework.parsers.JSONParser',
     ]
 }
 
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),  # Adjust as necessary
+    'REFRESH_TOKEN_LIFETIME': timedelta(minutes=30),  # Adjust as necessary
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'SIGNING_KEY': SECRET_KEY,
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators

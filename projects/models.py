@@ -4,10 +4,8 @@ from django.db import models
 from django.core.validators import FileExtensionValidator
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
-# from django.db.models import MaxIntegrityError, transaction
 
 
-# Department Model
 class User(AbstractUser):
     ROLE_CHOICES = (
         ('SUPERVISOR', 'Supervisor'),
@@ -33,8 +31,8 @@ class User(AbstractUser):
         verbose_name="user permissions",
         help_text="Specific permissions for this user.",
     )
-
 # Function to generate a unique profile picture filename
+
 def unique_image_path(instance, filename):
     ext = filename.split('.')[-1]
     unique_filename = f"{uuid.uuid4().hex}.{ext}"
@@ -42,6 +40,8 @@ def unique_image_path(instance, filename):
         return os.path.join('static/supervisor/', unique_filename)
     elif isinstance(instance, Student):
         return os.path.join('static/student/', unique_filename)
+
+# Department Model
 class Department(models.Model):
     dpt_id = models.AutoField(primary_key=True)
     dpt_name = models.CharField(max_length=255)

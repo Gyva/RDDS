@@ -30,6 +30,8 @@ class LoginSerializer(serializers.Serializer):
             }
         else:
             raise serializers.ValidationError('Invalid credentials.')
+
+# Department serializer
 class DepartmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Department
@@ -214,3 +216,34 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
 
         return user
     
+# Change password serializer
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(write_only=True)
+    new_password = serializers.CharField(write_only=True)
+    confirm_new_password = serializers.CharField(write_only=True)
+
+    def validate(self, data):
+        user = self.context['request'].user
+
+        # Check if the old password is correct
+        if not user.check_password(data['old_password']):
+            raise serializers.ValidationError({"old_password": "Old password is incorrect."})
+
+        # Validate that new password and confirm password match
+        if data['new_password'] != data['confirm_new_password']:
+            raise serializers.ValidationError({"confirm_new_password": "New passwords do not match."})
+
+        return data
+
+    def save(self, **kwargs):
+        user = self.context['request'].user
+        new_password = self.validated_data['new_password']
+
+        # Validate new password using Django's built-in password validation
+        validate_password(new_password, user)
+
+        # Set the new password
+        user.set_password(new_password)
+        user.save()
+
+        return user
