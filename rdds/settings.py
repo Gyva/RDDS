@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     'projects',
     'rest_framework',
     'corsheaders',
+    'rest_framework_simplejwt.token_blacklist',
 ]
 
 MIDDLEWARE = [
@@ -94,7 +95,7 @@ REST_FRAMEWORK = {
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),  # Adjust as necessary
-    'REFRESH_TOKEN_LIFETIME': timedelta(minutes=30),  # Adjust as necessary
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),  # Adjust as necessary
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
     'AUTH_HEADER_TYPES': ('Bearer',),
