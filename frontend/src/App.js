@@ -9,6 +9,9 @@ import './App.css'; // Import the CSS styles here
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Dashboard from './components/users/Dashboard';
+import DepartmentsDisplay from './components/users/Hod/Departments/DepartmentsDisplay';
+import FacultiesDisplay from './components/users/Hod/Faculties/FacultiesDisplay';
+import LevelsDisplay from './components/users/Hod/Levels/LevelsDisplay';
 
 function App() {
     const [isSidebarVisible, setIsSidebarVisible] = useState(true);
@@ -37,7 +40,13 @@ function App() {
                                 <Navbar toggleSidebar={toggleSidebar} isVisible={isSidebarVisible} />
                                 <div className="main-content">
                                 <Routes>
-                                    <Route path='/dashboard' element={<Dashboard/>} />
+                                    <Route path='/dashboard' element={<DepartmentsDisplay/>} />
+                                    <Route path='/departments' element={<DepartmentsDisplay/>} />
+                                    <Route path='/faculties' element={<FacultiesDisplay/>} />
+                                    
+                                </Routes>
+                                <Routes>
+                                <Route path='/levels' element={<LevelsDisplay/>} />
                                 </Routes>
                                 </div>
                             </div>
