@@ -1,6 +1,6 @@
 from rest_framework import viewsets, serializers
-from .models import Department, Supervisor, Faculty, Level, Student, User
-from .serializers import DepartmentSerializer, SupervisorSerializer, FacultySerializer, LevelSerializer, StudentSerializer, LoginSerializer, PasswordResetSerializer, PasswordResetConfirmSerializer, ChangePasswordSerializer
+from .models import Department, Supervisor, Faculty, Level, Student, User, Project
+from .serializers import DepartmentSerializer, SupervisorSerializer, FacultySerializer, LevelSerializer, StudentSerializer, LoginSerializer, PasswordResetSerializer, PasswordResetConfirmSerializer, ChangePasswordSerializer, ProjectSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.core.mail import send_mail
@@ -297,3 +297,42 @@ class StudentViewSet(viewsets.ModelViewSet):
             return Response({"error": "student not found."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+# Project viewset
+class ProjectViewSet(viewsets.ModelViewSet):
+    queryset = Project.objects.all()
+    serializer_class = ProjectSerializer
+    permission_classes = [IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        user = request.user
+        
+        if not (user.role == 'STUDENT' or user.role == 'SUPERVISOR'):
+            return Response({"detail": "Unauthorized"}, status=status.HTTP_403_FORBIDDEN)
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        # Create project object without saving to validate uniqueness
+        project = Project(
+            title=serializer.validated_data.get('title'),
+            case_study=serializer.validated_data.get('case_study'),
+            abstract=serializer.validated_data.get('abstract')
+        )
+        
+         # Set department and assign user based on role
+        if user.role == 'STUDENT':
+            student = Student.objects.get(account=user)
+            project.department = student.dpt_id
+            project.student = student
+        elif user.role == 'SUPERVISOR':
+            supervisor = Supervisor.objects.get(account=user)
+            project.department = supervisor.dpt_id
+            project.supervisor = supervisor
+
+        # Run the AI uniqueness check
+        if project.is_unique():
+            project.save()
+            return Response({"detail": "Project successfully submitted and passed the uniqueness check!"}, status=status.HTTP_201_CREATED)
+        else:
+            return Response({"detail": "Project submission failed. The title or abstract is too similar to an existing project. Please innovate or provide more improvements."}, status=status.HTTP_400_BAD_REQUEST)
