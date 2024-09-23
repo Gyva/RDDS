@@ -11,34 +11,36 @@ const LevelsDisplay = () => {
     const [departments, setDepartments] = useState({});
     const [selectedLevel, setSelectedLevel] = useState(null);
     const [newLevelName, setNewLevelName] = useState('');
+    const [newFacultyId, setNewFacultyId] = useState('');
+    const [newDepartmentId, setNewDepartmentId] = useState('');
+    const [filteredFaculties, setFilteredFaculties] = useState([]); // Holds faculties filtered by department
     const [showUpdateModal, setShowUpdateModal] = useState(false);
     const [successAlerts, setSuccessAlerts] = useState(null);
     const [errorAlerts, setErrorAlerts] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
-    const [rowsPerPage] = useState(5); // Number of rows per page
+    const [rowsPerPage] = useState(5);
 
     const navigate = useNavigate();
 
-    // Fetch all faculties, levels, and departments on component mount
+    // Fetch all faculties and departments on component mount
     useEffect(() => {
         fetchFaculties();
         fetchDepartments();
     }, []);
 
+    // Fetch faculties from the API
     const fetchFaculties = async () => {
         try {
             const response = await axios.get('http://127.0.0.1:8000/api/faculties/');
             setFaculties(response.data);
-            // Fetch levels for each faculty
-            response.data.forEach(faculty => {
-                fetchLevels(faculty.f_id);
-            });
         } catch (error) {
             console.error('Error fetching faculties:', error);
+            setSuccessAlerts('')
             setErrorAlerts('Failed to fetch faculties');
         }
     };
 
+    // Fetch levels by faculty ID
     const fetchLevels = async (f_id) => {
         try {
             const response = await axios.get(`http://127.0.0.1:8000/api/levels/?f_id=${f_id}`);
@@ -53,6 +55,7 @@ const LevelsDisplay = () => {
         }
     };
 
+    // Fetch all departments
     const fetchDepartments = async () => {
         try {
             const response = await axios.get('http://127.0.0.1:8000/api/departments/');
@@ -66,32 +69,71 @@ const LevelsDisplay = () => {
         }
     };
 
+    // Fetch levels whenever faculties are loaded
+    useEffect(() => {
+        if (faculties.length > 0) {
+            faculties.forEach(faculty => fetchLevels(faculty.f_id));
+        }
+    }, [faculties]);
+
+    // Update level data via API
     const handleUpdateLevel = async () => {
         try {
             await axios.put(`http://127.0.0.1:8000/api/levels/${selectedLevel.l_id}/`, {
-                l_name: newLevelName
+                l_name: newLevelName,
+                f_id: newFacultyId,
+                dpt_id: newDepartmentId
             });
+            setErrorAlerts('');
             setSuccessAlerts('Level updated successfully');
             setShowUpdateModal(false);
             fetchFaculties(); // Reload faculties to get updated levels
         } catch (error) {
             console.error('Error updating level:', error);
+            setSuccessAlerts('');
             setErrorAlerts('Failed to update the level');
         }
     };
 
+    // Delete level by ID
     const deleteThisLevel = async (id) => {
         const confirmDelete = window.confirm("Are you sure you want to delete this level?");
         if (confirmDelete) {
             try {
                 await axios.delete(`http://127.0.0.1:8000/api/levels/${id}/`);
+                setErrorAlerts('');
                 setSuccessAlerts('Level deleted successfully');
                 fetchFaculties(); // Reload faculties to get updated levels
             } catch (error) {
                 console.error('Error deleting level:', error);
+                setSuccessAlerts('');
                 setErrorAlerts('Failed to delete level');
             }
         }
+    };
+
+    // Open modal and populate fields
+    const openUpdateModal = (level) => {
+        setSelectedLevel(level);
+        setNewLevelName(level.l_name);
+        setNewDepartmentId(level.dpt_id);
+        setNewFacultyId(level.f_id); // Pre-populate the faculty
+        filterFacultiesByDepartment(level.dpt_id); // Filter faculties based on department
+        setShowUpdateModal(true);
+    };
+
+    // Handle department change and update corresponding faculties
+    const handleDepartmentChange = (e) => {
+        const selectedDepartmentId = e.target.value;
+        setNewDepartmentId(selectedDepartmentId);
+        filterFacultiesByDepartment(selectedDepartmentId); // Filter faculties based on department selection
+        setNewFacultyId(''); // Reset faculty when department changes
+    };
+
+    // Filter faculties by the selected department
+    const filterFacultiesByDepartment = (departmentId) => {
+        const filtered = faculties.filter(faculty => faculty.dpt_id === parseInt(departmentId));
+        setFilteredFaculties(filtered);
     };
 
     // Pagination logic
@@ -133,11 +175,7 @@ const LevelsDisplay = () => {
                                 <td>{departments[faculties.find(f => f.f_id === parseInt(level.f_id))?.dpt_id] || 'Loading...'}</td>
                                 <td>
                                     <button
-                                        onClick={() => {
-                                            setSelectedLevel(level);
-                                            setNewLevelName(level.l_name);
-                                            setShowUpdateModal(true);
-                                        }}
+                                        onClick={() => openUpdateModal(level)}
                                         className='btn btn-warning'
                                     >
                                         <i className="fas fa-pencil-alt"></i> Update
@@ -186,16 +224,57 @@ const LevelsDisplay = () => {
                                 <button type="button" className="btn-close" onClick={() => setShowUpdateModal(false)}></button>
                             </div>
                             <div className="modal-body">
+                                <label htmlFor="levelName">Level Name</label>
                                 <input
+                                    id="levelName"
                                     type="text"
-                                    className="form-control"
+                                    className="form-control mb-3"
                                     value={newLevelName}
                                     onChange={(e) => setNewLevelName(e.target.value)}
                                 />
+
+                                <label htmlFor="departmentSelect">Department</label>
+                                <select
+                                    id="departmentSelect"
+                                    className="form-control mb-3"
+                                    value={newDepartmentId}
+                                    onChange={handleDepartmentChange}
+                                >
+                                    <option value="">Select Department</option>
+                                    {Object.entries(departments).map(([id, name]) => (
+                                        <option key={id} value={id}>{name}</option>
+                                    ))}
+                                </select>
+
+                                <label htmlFor="facultySelect">Faculty</label>
+                                <select
+                                    id="facultySelect"
+                                    className="form-control mb-3"
+                                    value={newFacultyId}
+                                    onChange={(e) => setNewFacultyId(e.target.value)}
+                                    disabled={!newDepartmentId}
+                                >
+                                    <option value="">Select Faculty</option>
+                                    {filteredFaculties.map(faculty => (
+                                        <option key={faculty.f_id} value={faculty.f_id}>{faculty.f_name}</option>
+                                    ))}
+                                </select>
                             </div>
                             <div className="modal-footer">
-                                <button type="button" className="btn btn-secondary" onClick={() => setShowUpdateModal(false)}>Close</button>
-                                <button type="button" className="btn btn-primary" onClick={handleUpdateLevel}>Update</button>
+                                <button
+                                    type="button"
+                                    className="btn btn-secondary"
+                                    onClick={() => setShowUpdateModal(false)}
+                                >
+                                    Close
+                                </button>
+                                <button
+                                    type="button"
+                                    className="btn btn-primary"
+                                    onClick={handleUpdateLevel}
+                                >
+                                    Save changes
+                                </button>
                             </div>
                         </div>
                     </div>

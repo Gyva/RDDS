@@ -1,60 +1,81 @@
-import React, { useState,useContext } from 'react';
+import React, { useState, useContext, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
-import { AuthContext } from '../../../contexts/AuthContext';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { AuthContext } from '../../../contexts/AuthProvider';
+import Cookies from 'js-cookie';
+import axios from 'axios';
 
-const Login = () => {
-    const { register, handleSubmit, formState: { errors } } = useForm();
-    const { login } = useContext(AuthContext); // Get login function from context
-    const [errMsg, setErrMsg] = useState(null);
+const Login = (e) => {
+   const {register, handleSubmit, formState: {errors}} = useForm();
+   const { setAuth } = useContext(AuthContext);
+    const userRef = useRef();
+    const errRef = useRef();
+
+    const [user, setUser] = useState('');
+    const [pwd, setPwd] = useState('');
+    const [errMsg, setErrMsg] = useState('');
+    const [success, setSuccess] = useState(false);
+
+   
 
     const onSubmit = async (data) => {
-        try {
-            const response = await fetch('http://127.0.0.1:8000/api/login/', {
-                method: 'POST',
+        const URL = "http://127.0.0.1:8000/api/login/";
+            
+            const response = await axios.post(URL, {
+                username: data.username,
+                password: data.password,
+            }, {
                 headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    username: data.email, // Assuming email field holds the username/regno
-                    password: data.password,
-                }),
+                    'Content-Type': 'application/json'
+                }
             });
-            const result = await response.json();
-            console.log(result)
-            if (response.ok) {
-                login(result.id, result.role); // Call the context login function
-                setErrMsg('You are logged')
-            } else {
-                setErrMsg(result?.non_field_errors ? result?.non_field_errors : 'Failed to login')
+        
+        try {
+            
 
+            if(response.ok){
+                Cookies.set('User',response.data.id, {expires : 7})
+                Cookies.set('role', response.data.role, {expires: 7})
+                Cookies.set('token', response.data.access_token, {expires: 7})
+                Cookies.set('refresh_token',response.data.refresh_token, {expires: 7})
+
+                alert('Login successfully')
             }
+            if(response.status === 400){
+                setErrMsg(response.data.non_field_errors[0]) 
+            }
+            
+            else{
+             
+            }
+
+           
         } catch (error) {
-            console.error('Login error:', error);
-            alert('An error occurred during login');
+            setErrMsg(response.data.non_field_errors[0])
+            
         }
     };
-
+    
     return (
         <div className="d-flex align-items-center justify-content-center vh-100">
             <div className="container">
                 <div className="row justify-content-center">
                     <div className="col-md-6 col-lg-4">
                         <h2 className="text-center mb-4">Login</h2>
-                        {errMsg ? <p className='alert alert-danger'>{errMsg}</p> : ''}
+                        {errMsg && <p className='alert alert-danger'>{errMsg}</p>}
                         <form onSubmit={handleSubmit(onSubmit)} className="d-flex flex-column">
                             <div className="form-group mb-3">
-                                <label htmlFor="email">Email/RegNo:</label>
+                                <label htmlFor="username">Email/RegNo:</label>
                                 <input
                                     type="text"
-                                    id="email"
-                                    className={`form-control ${errors.email ? 'is-invalid' : ''}`}
-                                    {...register('email', {
-                                        required: 'Email address or RegNumber is required',
+                                    id="username"
+                                    className={`form-control ${errors.username ? 'is-invalid' : ''}`}
+                                    {...register('username', {
+                                        required: 'email address or RegNumber is required',
                                     })}
                                     placeholder="Enter your email/RegNo"
                                 />
-                                {errors.email && <div className="invalid-feedback">{errors.email.message}</div>}
+                                {errors.username && <div className="invalid-feedback">{errors.username.message}</div>}
                             </div>
                             <div className="form-group mb-3">
                                 <label htmlFor="password">Password:</label>
@@ -64,6 +85,7 @@ const Login = () => {
                                     className={`form-control ${errors.password ? 'is-invalid' : ''}`}
                                     {...register('password', { required: 'Password is required' })}
                                     placeholder="Enter your password"
+                                    
                                 />
                                 {errors.password && <div className="invalid-feedback">{errors.password.message}</div>}
                             </div>

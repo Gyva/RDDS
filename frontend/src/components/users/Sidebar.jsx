@@ -2,10 +2,10 @@ import React, { useContext } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import './Sidebar.css'; // Ensure this CSS file exists
-import { AuthContext } from '../../contexts/AuthContext';
+import { AuthContext } from '../../contexts/AuthProvider';
 
 const Sidebar = ({ isVisible, role }) => {
-  const {logout,loggedUser}  = useContext(AuthContext)
+  // const {logout,loggedUser}  = useContext(AuthContext)
   const commonMenus = (
     <>
       <li className="nav-item">
@@ -131,7 +131,7 @@ const Sidebar = ({ isVisible, role }) => {
       {/* Brand Logo */}
       <p className="brand-link cursor-pointer">
         <img src="" alt="RP" className="brand-image cursor-pointer" style={{ opacity: '.8' }} />
-        <span className="brand-text cursor-pointer">{loggedUser}</span>
+        <span className="brand-text cursor-pointer">USER</span>
       </p>
 
       {/* Sidebar */}
