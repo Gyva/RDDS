@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Department, Supervisor, Faculty, Level, Student, User
+from .models import Department, Supervisor, Faculty, Level, Student, User, Project
 from django.contrib.auth import authenticate
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.http import urlsafe_base64_encode
@@ -247,3 +247,21 @@ class ChangePasswordSerializer(serializers.Serializer):
         user.save()
 
         return user
+
+# Project serializer
+class ProjectSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Project
+        fields = ['title', 'case_study', 'abstract', 'collaborators']
+
+    def create(self, validated_data):
+        request = self.context.get('request', None)
+        user = request.user
+        validated_data['department'] = user.profile.department
+
+        if user.is_student:
+            validated_data['student'] = user.student_profile
+        elif user.is_supervisor:
+            validated_data['supervisor'] = user.supervisor_profile
+
+        return super().create(validated_data)

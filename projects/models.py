@@ -136,3 +136,32 @@ class Student(models.Model):
     def __str__(self):
         return f'{self.fname} {self.lname}'
 
+#project model
+class Project(models.Model):
+    project_id = models.AutoField(primary_key=True)
+    student = models.ForeignKey(Student, on_delete=models.SET_NULL, null=True, blank=True)  # Student submitting the project
+    title = models.CharField(max_length=200, unique=True, editable=True)
+    case_study = models.CharField(max_length=200)
+    abstract = models.TextField()
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)  # Automatically set from student or supervisor
+    supervisor = models.ForeignKey(Supervisor, on_delete=models.SET_NULL, null=True, blank=True)  # Supervisor's project won't have a student
+    check_status = models.BooleanField(default=False)  # AI uniqueness test
+    approval_status = models.BooleanField(default=False)  # Approval by supervisor/admin
+    completion_status = models.BooleanField(default=False)
+    collaborators = models.ManyToManyField(Student, related_name='collaborated_projects', blank=True)  # Collaborators can join after approval
+
+    def can_student_submit(self, student):
+        has_approved_project = Project.objects.filter(student=student, approval_status=True).exists()
+        return not has_approved_project
+
+    def is_unique(self):
+        # AI uniqueness check logic
+        from .utils import check_project_uniqueness
+        return check_project_uniqueness(self.title, self.abstract)
+
+    def save(self, *args, **kwargs):
+        if self.is_unique():
+            self.check_status = True
+        else:
+            self.check_status = False
+        super().save(*args, **kwargs)
