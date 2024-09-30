@@ -13,7 +13,7 @@
 }
 
 .sidebar-visible .content-wrapper {
-    margin-left: 250px; /* Adjust according to sidebar width */
+    position: absolute; /* Adjust according to sidebar width */
 }
 
 .sidebar-hidden .content-wrapper {
@@ -58,4 +58,10 @@
     background: #fff;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+@media (max-width: 768px) {
+    .main-content {
+        width: 100%;
+    } /* Close the block properly */
+    
 }

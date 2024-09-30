@@ -62,7 +62,8 @@ class Supervisor(models.Model):
     lname = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
     phone = models.CharField(unique=True, max_length=15)
-    profile_pic = models.ImageField(upload_to=unique_image_path, validators=[FileExtensionValidator(['jpg', 'jpeg', 'png'])])
+    profile_pic = models.ImageField(upload_to=unique_image_path, validators=[FileExtensionValidator(['jpg', 'jpeg', 'png'])], blank=True, 
+    null=True)
     specialization = models.CharField(max_length=255)
     dpt_id = models.ForeignKey(Department, on_delete=models.CASCADE)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)

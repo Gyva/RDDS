@@ -156,6 +156,7 @@ CORS_ALLOW_METHODS = [
     "PATCH",
     "DELETE",
 ]
+CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOW_HEADERS = [
     "Content-Type",

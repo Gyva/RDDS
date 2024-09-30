@@ -252,7 +252,7 @@ class ChangePasswordSerializer(serializers.Serializer):
 class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
-        fields = ['title', 'case_study', 'abstract', 'collaborators']
+        fields = ['project_id','title', 'case_study', 'abstract', 'collaborators']
 
     def create(self, validated_data):
         request = self.context.get('request', None)

@@ -13,6 +13,7 @@ const DepartmentsDisplay = () => {
     const [newFacultyName, setNewFacultyName] = useState('');
     const [showUpdateModal, setShowUpdateModal] = useState(false);
     const [showAddFacultyModal, setShowAddFacultyModal] = useState(false);
+    const [showAddDepartmentModal, setShowAddDepartmentModal] = useState(false); // State for Add Department Modal
     const [successAlerts, setSuccessAlerts] = useState(null);
     const [errorAlerts, setErrorAlerts] = useState(null);
     const [facultiesCount, setFacultiesCount] = useState({});
@@ -30,7 +31,6 @@ const DepartmentsDisplay = () => {
         try {
             const response = await axios.get('http://127.0.0.1:8000/api/departments/');
             setDepartments(response.data);
-            // Fetch faculties count for each department
             response.data.forEach(department => {
                 fetchFacultiesCount(department.dpt_id);
             });
@@ -57,7 +57,6 @@ const DepartmentsDisplay = () => {
 
     const deleteThisDepartment = async (id) => {
         const confirmDelete = window.confirm("Are you sure you want to delete this department?");
-
         if (confirmDelete) {
             try {
                 await axios.delete(`http://127.0.0.1:8000/api/departments/${id}/`);
@@ -99,6 +98,20 @@ const DepartmentsDisplay = () => {
         }
     };
 
+    const handleAddDepartment = async () => {
+        try {
+            await axios.post(`http://127.0.0.1:8000/api/departments/`, {
+                dpt_name: newDepartmentName
+            });
+            setSuccessAlerts('Department added successfully');
+            setShowAddDepartmentModal(false);
+            fetchDepartments();
+        } catch (error) {
+            console.error('Error adding department:', error);
+            setErrorAlerts('Failed to add department');
+        }
+    };
+
     // Pagination logic
     const indexOfLastRow = currentPage * rowsPerPage;
     const indexOfFirstRow = indexOfLastRow - rowsPerPage;
@@ -117,6 +130,15 @@ const DepartmentsDisplay = () => {
         <div className="container mt-5">
             {successAlerts && (<span className='flex justify-content-end text-success'>{successAlerts}</span>)}
             {errorAlerts && (<span className='flex justify-content-end text-danger'>{errorAlerts}</span>)}
+            
+            {/* Button to open Add Department Modal */}
+            <button 
+                className="btn btn-success mb-3 float-end"
+                onClick={() => setShowAddDepartmentModal(true)}
+            >
+                <i className="fas fa-plus"></i> Add Department
+            </button>
+            
             <h2 className="mb-3 text-center">Departments Information</h2>
             <div className="table-responsive">
                 <table className="table table-bordered table-hover">
@@ -124,7 +146,7 @@ const DepartmentsDisplay = () => {
                         <tr>
                             <th>#</th>
                             <th>Departments</th>
-                            <th onClick={()=>{navigate('/faculties')}}>N<sup>o</sup> of <span >Faculties</span></th>
+                            <th onClick={()=>{navigate('/faculties')}}>N<sup>o</sup> of <span>Faculties</span></th>
                             <th colSpan={3}>Actions</th>
                         </tr>
                     </thead>
@@ -133,7 +155,7 @@ const DepartmentsDisplay = () => {
                             <tr key={dpt.dpt_id}>
                                 <td>{indexOfFirstRow + index + 1}</td>
                                 <td>{dpt.dpt_name}</td>
-                                <td>{facultiesCount[dpt.dpt_id] || 'Loading...'}</td>
+                                <td>{facultiesCount[dpt.dpt_id] || '0'}</td>
                                 <td>
                                     <button
                                         onClick={() => {
@@ -208,8 +230,20 @@ const DepartmentsDisplay = () => {
                                 />
                             </div>
                             <div className="modal-footer">
-                                <button type="button" className="btn btn-secondary" onClick={() => setShowUpdateModal(false)}>Close</button>
-                                <button type="button" className="btn btn-primary" onClick={handleUpdateDepartment}>Update</button>
+                                <button
+                                    type="button"
+                                    className="btn btn-secondary"
+                                    onClick={() => setShowUpdateModal(false)}
+                                >
+                                    Close
+                                </button>
+                                <button
+                                    type="button"
+                                    className="btn btn-primary"
+                                    onClick={handleUpdateDepartment}
+                                >
+                                    Save changes
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -222,21 +256,72 @@ const DepartmentsDisplay = () => {
                     <div className="modal-dialog">
                         <div className="modal-content">
                             <div className="modal-header">
-                                <h5 className="modal-title">Adding Faculty to Department</h5>
+                                <h5 className="modal-title">Add New Faculty</h5>
                                 <button type="button" className="btn-close" onClick={() => setShowAddFacultyModal(false)}></button>
                             </div>
                             <div className="modal-body">
                                 <input
                                     type="text"
                                     className="form-control"
-                                    placeholder="Faculty Name"
                                     value={newFacultyName}
+                                    placeholder='Faculty Name'
                                     onChange={(e) => setNewFacultyName(e.target.value)}
                                 />
                             </div>
                             <div className="modal-footer">
-                                <button type="button" className="btn btn-secondary" onClick={() => setShowAddFacultyModal(false)}>Close</button>
-                                <button type="button" className="btn btn-primary" onClick={() => handleAddFaculty(selectedDepartment.dpt_id)}>Add Faculty</button>
+                                <button
+                                    type="button"
+                                    className="btn btn-secondary"
+                                    onClick={() => setShowAddFacultyModal(false)}
+                                >
+                                    Close
+                                </button>
+                                <button
+                                    type="button"
+                                    className="btn btn-primary"
+                                    onClick={() => handleAddFaculty(selectedDepartment.dpt_id)}
+                                >
+                                    Add Faculty
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Add Department Modal */}
+            {showAddDepartmentModal && (
+                <div className="modal show d-block custom-modal-position" tabIndex="-1">
+                    <div className="modal-dialog">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">Add New Department</h5>
+                                <button type="button" className="btn-close" onClick={() => setShowAddDepartmentModal(false)}></button>
+                            </div>
+                            <div className="modal-body">
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    value={newDepartmentName}
+                                    placeholder='Department Name'
+                                    onChange={(e) => setNewDepartmentName(e.target.value)}
+                                />
+                            </div>
+                            <div className="modal-footer">
+                                <button
+                                    type="button"
+                                    className="btn btn-secondary"
+                                    onClick={() => setShowAddDepartmentModal(false)}
+                                >
+                                    Close
+                                </button>
+                                <button
+                                    type="button"
+                                    className="btn btn-primary"
+                                    onClick={handleAddDepartment}
+                                >
+                                    Add Department
+                                </button>
                             </div>
                         </div>
                     </div>
