@@ -1,16 +1,91 @@
 from rest_framework import viewsets, serializers
-from .models import Department, Supervisor, Faculty, Level, Student, User
-from .serializers import DepartmentSerializer, SupervisorSerializer, FacultySerializer, LevelSerializer, StudentSerializer
+from .models import Department, Supervisor, Faculty, Level, Student, User, Project
+from .serializers import DepartmentSerializer, SupervisorSerializer, FacultySerializer, LevelSerializer, StudentSerializer, LoginSerializer, PasswordResetSerializer, PasswordResetConfirmSerializer, ChangePasswordSerializer, ProjectSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework import status
 from django.core.mail import send_mail
+from rest_framework import status
+from django.contrib.auth.hashers import make_password
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
+from django.contrib.auth import get_user_model, login
+from rest_framework.decorators import api_view
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from django.contrib.auth import authenticate
+from rest_framework_simplejwt.tokens import RefreshToken
 
+# Login view
+@api_view(['POST'])
+def login_view(request):
+    serializer = LoginSerializer(data=request.data)
+    if serializer.is_valid():
+        user_data = serializer.validated_data
+        user = User.objects.get(username=user_data['username'])
 
+        # Generate JWT tokens
+        refresh = RefreshToken.for_user(user)
+        access_token = str(refresh.access_token)
+
+        return Response({
+            'id': user_data['id'],
+            'username': user_data['username'],
+            'role': user_data['role'],
+            'access_token': access_token,  # Access token for authentication
+            'refresh_token': str(refresh),  # Refresh token to get new access tokens
+        }, status=status.HTTP_200_OK)
+
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+#  Logout view
+class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            refresh_token = request.data.get('refresh')
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+            return Response({"message": "Successfully logged out."}, status=200)
+        except Exception as e:
+            return Response({"error": str(e)}, status=400)
+# Change passwordview
+class ChangePasswordView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = ChangePasswordSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "Password has been changed successfully."}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+#Password resetview
+class PasswordResetView(APIView):
+    def post(self, request):
+        serializer = PasswordResetSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'message': 'Password reset email sent.'}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+#Password reset confirmation view   
+class PasswordResetConfirmView(APIView):
+    def post(self, request):
+        serializer = PasswordResetConfirmSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'message': 'Password has been reset successfully.'}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# Department view
 class DepartmentViewSet(viewsets.ModelViewSet):
     queryset = Department.objects.all()
     serializer_class = DepartmentSerializer
 
+User = get_user_model()
+
+# Supervisor view
 class SupervisorViewSet(viewsets.ModelViewSet):
     queryset = Supervisor.objects.all()
     serializer_class = SupervisorSerializer
@@ -25,8 +100,6 @@ class SupervisorViewSet(viewsets.ModelViewSet):
         
         serializer.save()
 
-#Search supervosior account
-
     @action(detail=False, methods=['get'], url_path='search-supervisor')
     def search_supervisor(self, request):
         reg_num = request.query_params.get('reg_num', None)
@@ -34,8 +107,8 @@ class SupervisorViewSet(viewsets.ModelViewSet):
         if reg_num:
             try:
                 supervisor = Supervisor.objects.get(reg_num=reg_num)
-                # Check if the supervisor already has a linked user account
-                if supervisor.account:
+                #check if the student already has a linked user account
+                if hasattr(supervisor, 'account') and supervisor.account:
                     return Response({"error": "This supervisor already has an account."}, status=status.HTTP_400_BAD_REQUEST)
 
                 # Return the supervisor details to proceed with account creation
@@ -49,68 +122,90 @@ class SupervisorViewSet(viewsets.ModelViewSet):
         else:
             return Response({"error": "Please provide a reg_num"}, status=status.HTTP_400_BAD_REQUEST)
 
+    @action(detail=False, methods=['post'], url_path='create-account-supervisor')
+    def create_account_supervisor(self, request):
+        reg_num = request.data.get('reg_num', None)
+        password = request.data.get('password', None)
+        confirm_password = request.data.get('confirm_password', None)
 
+        if not reg_num:
+            return Response({"error": "Registration number is required."}, status=status.HTTP_400_BAD_REQUEST)
 
+        if not password or not confirm_password:
+            return Response({"error": "Both password and confirm password are required."}, status=status.HTTP_400_BAD_REQUEST)
 
-@action(detail=False, methods=['post'], url_path='create-account-supervisor')
-def create_account_supervisor(self, request):
-    reg_num = request.data.get('reg_num', None)  # This comes from the frontend as hidden input or session storage
-    password = request.data.get('password', None)
+        if password != confirm_password:
+            return Response({"error": "Passwords do not match."}, status=status.HTTP_400_BAD_REQUEST)
 
-    if not reg_num:
-        return Response({"error": "Registration number is required."}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            # Validate the password strength
+            try:
+                validate_password(password)
+            except ValidationError as e:
+                return Response({"error": e.messages}, status=status.HTTP_400_BAD_REQUEST)
 
-    if not password:
-        return Response({"error": "Password is required."}, status=status.HTTP_400_BAD_REQUEST)
+            supervisor = Supervisor.objects.get(reg_num=reg_num)
+            if supervisor.account:
+                return Response({"error": "This supervisor already has a user account."}, status=status.HTTP_400_BAD_REQUEST)
 
-    try:
-        supervisor = Supervisor.objects.get(reg_num=reg_num)
+            # Create User with hashed password
+            user = User.objects.create_user(
+                username=supervisor.reg_num,
+                first_name=supervisor.fname,
+                last_name=supervisor.lname,
+                email=supervisor.email,
+                password=password,
+                role = "SUPERVISOR"
+            )
 
-        # Ensure supervisor doesn't already have an account
-        if supervisor.user:
-            return Response({"error": "This supervisor already has a user account."}, status=status.HTTP_400_BAD_REQUEST)
+            # Link the created user to the supervisor
+            supervisor.account = user
+            supervisor.save()
 
-        # Create the new User
-        user = User.objects.create_user(
-            username=supervisor.reg_num,  # Use reg_num as the username
-            first_name=supervisor.fname,
-            last_name=supervisor.lname,
-            email=supervisor.email,
-            password=password,  # Use the provided password
-            role='SUPERVISOR'  # Assign the role as SUPERVISOR
-        )
+            return Response({"success": "Supervisor account created successfully."}, status=status.HTTP_201_CREATED)
 
-        # Link the user account to the supervisor
-        supervisor.user = user
-        supervisor.save()
+        except Supervisor.DoesNotExist:
+            return Response({"error": "Supervisor not found."}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        return Response({"success": "User account created successfully."}, status=status.HTTP_201_CREATED)
-
-    except Supervisor.DoesNotExist:
-        return Response({"error": "Supervisor not found"}, status=status.HTTP_404_NOT_FOUND)
-
-
-
+# Faculty view
 class FacultyViewSet(viewsets.ModelViewSet):
     queryset = Faculty.objects.all()
     serializer_class = FacultySerializer
 
     def get_queryset(self):
         queryset = super().get_queryset()
+        # Get faculty by specific ID
+        f_id = self.request.query_params.get('f_id', None)
+        if f_id:
+            queryset = queryset.filter(f_id=f_id)
+        
+        # Filter by department if provided
         dpt_id = self.request.query_params.get('dpt_id', None)
         if dpt_id:
             queryset = queryset.filter(dpt_id=dpt_id)
+        
         return queryset
 
+# Level view
 class LevelViewSet(viewsets.ModelViewSet):
     queryset = Level.objects.all()
     serializer_class = LevelSerializer
 
     def get_queryset(self):
         queryset = super().get_queryset()
+        
+        # Get level by specific ID
+        l_id = self.request.query_params.get('l_id', None)
+        if l_id:
+            queryset = queryset.filter(l_id=l_id)
+        
+        # Filter by faculty if provided
         f_id = self.request.query_params.get('f_id', None)
         if f_id:
             queryset = queryset.filter(f_id=f_id)
+        
         return queryset
     
     def get_serializer_context(self):
@@ -118,7 +213,7 @@ class LevelViewSet(viewsets.ModelViewSet):
         context['request'] = self.request
         return context
 
-
+# Student view
 class StudentViewSet(viewsets.ModelViewSet):
     queryset = Student.objects.all()
     serializer_class = StudentSerializer
@@ -141,8 +236,8 @@ class StudentViewSet(viewsets.ModelViewSet):
         if reg_num:
             try:
                 student = Student.objects.get(reg_no=reg_num)
-                # Check if the student already has a linked user account
-                if student.account:
+                #check if the student already has a linked user account
+                if hasattr(student, 'account') and student.account:
                     return Response({"error": "This student already has an account."}, status=status.HTTP_400_BAD_REQUEST)
 
                 # Return the student details to proceed with account creation
@@ -155,3 +250,89 @@ class StudentViewSet(viewsets.ModelViewSet):
                 return Response({"error": "student not found"}, status=status.HTTP_404_NOT_FOUND)
         else:
             return Response({"error": "Please provide a reg_num"}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['post'], url_path='create-account-student')
+    def create_account_student(self, request):
+        reg_num = request.data.get('reg_num', None)
+        password = request.data.get('password', None)
+        confirm_password = request.data.get('confirm_password', None)
+
+        if not reg_num:
+            return Response({"error": "Registration number is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not password or not confirm_password:
+            return Response({"error": "Both password and confirm password are required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if password != confirm_password:
+            return Response({"error": "Passwords do not match."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # Validate the password strength
+            try:
+                validate_password(password)
+            except ValidationError as e:
+                return Response({"error": e.messages}, status=status.HTTP_400_BAD_REQUEST)
+
+            student = Student.objects.get(reg_no=reg_num)
+            if student.account:
+                return Response({"error": "This student already has a user account."}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Create User with hashed password
+            user = User.objects.create_user(
+                username=student.reg_no,
+                first_name=student.fname,
+                last_name=student.lname,
+                email=student.email,
+                password=password,
+                role = "STUDENT"
+            )
+
+            # Link the created user to the student
+            student.account = user
+            student.save()
+
+            return Response({"success": "student account created successfully."}, status=status.HTTP_201_CREATED)
+
+        except Student.DoesNotExist:
+            return Response({"error": "student not found."}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+# Project viewset
+class ProjectViewSet(viewsets.ModelViewSet):
+    queryset = Project.objects.all()
+    serializer_class = ProjectSerializer
+    permission_classes = [IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        user = request.user
+        
+        if not (user.role == 'STUDENT' or user.role == 'SUPERVISOR'):
+            return Response({"detail": "Unauthorized"}, status=status.HTTP_403_FORBIDDEN)
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        # Create project object without saving to validate uniqueness
+        project = Project(
+            title=serializer.validated_data.get('title'),
+            case_study=serializer.validated_data.get('case_study'),
+            abstract=serializer.validated_data.get('abstract')
+        )
+        
+         # Set department and assign user based on role
+        if user.role == 'STUDENT':
+            student = Student.objects.get(account=user)
+            project.department = student.dpt_id
+            project.student = student
+        elif user.role == 'SUPERVISOR':
+            supervisor = Supervisor.objects.get(account=user)
+            project.department = supervisor.dpt_id
+            project.supervisor = supervisor
+
+        # Run the AI uniqueness check
+        if project.is_unique():
+            project.save()
+            return Response({"detail": "Project successfully submitted and passed the uniqueness check!"}, status=status.HTTP_201_CREATED)
+        else:
+            return Response({"detail": "Project submission failed. The title or abstract is too similar to an existing project. Please innovate or provide more improvements."}, status=status.HTTP_400_BAD_REQUEST)

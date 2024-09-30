@@ -30,13 +30,14 @@ const GetPasswordForm = () => {
             } else {
                 // If the search fails, display an error message
                 setSearchResult(null);
-                setSearchError('Item not found');
+                setSearchError(result.error);
             }
         } catch (error) {
             // Handle any network errors
             setSearchResult(null);
-            setSearchError('An error occurred while searching');
-            console.error('Search error:', error);
+            setSearchError(error.message);
+            console.error('Search error:', error.message);
+            console.log(error.message)
         }
     };
 
@@ -54,17 +55,18 @@ const GetPasswordForm = () => {
     const handleClaimPassword = () => {
         if (searchResult) {
             if (searchResult.student?.account === null) {
-                // Redirect to SetPassword and pass searchResult if account exists
-                navigate('/set-password', { state: { ...searchResult.student } });
+                // Redirect to SetPassword and pass searchResult if student account does not exist
+                navigate('/set-password', { state: { ...searchResult.student, isStudent: 'yes' } });
             } else if (searchResult.supervisor?.account === null) {
-                // Redirect to SetPassword and pass searchResult.supervisor if supervisor account exists
-                navigate('/set-password', { state: { ...searchResult.supervisor, reg_no :searchResult.reg_num } });
-            }
-            else{
-                {navigate('/')}
+                // Redirect to SetPassword and pass searchResult if supervisor account does not exist
+                navigate('/set-password', { state: { ...searchResult.supervisor, reg_no: searchResult.reg_num, isStudent: 'no' } });
+            } else {
+                // If both student and supervisor accounts exist, redirect to homepage
+                navigate('/');
             }
         }
     };
+    
     
     
 

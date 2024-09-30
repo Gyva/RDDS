@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Information</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .table {
+            font-size: 0.9rem;
+        }
+
+        .table thead {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .table th, .table td {
+            text-align: center;
+        }
+
+        .table th {
+            border-bottom: 2px solid #ccc;
+        }
+
+        .modal-body img {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 15px;
+        }
+
+        .modal-body .card-title {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container mt-5">
+        <h2 class="mb-3 text-center">Student Information</h2>
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead style="background-color: #007bff;
+            color: white;">
+                    <tr>
+                        <th>#</th>
+                        <th>Registration No</th>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>Date of Birth</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Department ID</th>
+                        <th>Faculty ID</th>
+                        <th>Level ID</th>
+                        <th>Account</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- First Student -->
+                    <tr>
+                        <td>1</td>
+                        <td><a href="#" class="reg-number" data-bs-toggle="modal" data-bs-target="#studentModal"
+                                data-name="UMWERE Chriss"
+                                data-regno="24rp00000"
+                                data-dob="2024-08-22"
+                                data-email="respinho2014@gmail.com"
+                                data-phone="0784389611"
+                                data-dept="1"
+                                data-faculty="3"
+                                data-level="3"
+                                data-account="23"
+                                data-img="http://127.0.0.1:8000/static/student/a099d88dc1684f4cb5a0748c02f4d8bf.jpeg">24rp00000</a></td>
+                        <td>UMWERE</td>
+                        <td>Chriss</td>
+                        <td>2024-08-22</td>
+                        <td>respinho2014@gmail.com</td>
+                        <td>0784389611</td>
+                        <td>1</td>
+                        <td>3</td>
+                        <td>3</td>
+                        <td>23</td>
+                    </tr>
+                    <!-- Second Student -->
+                    <tr>
+                        <td>2</td>
+                        <td><a href="#" class="reg-number" data-bs-toggle="modal" data-bs-target="#studentModal"
+                                data-name="Murenzi Laurent"
+                                data-regno="24rp00001"
+                                data-dob="2012-06-13"
+                                data-email="respinho20yf14@gmail.com"
+                                data-phone="0784389682"
+                                data-dept="1"
+                                data-faculty="4"
+                                data-level="13"
+                                data-account="18"
+                                data-img="http://127.0.0.1:8000/static/student/d5fc223990c741bd8ed86708b386c575.jpg">24rp00001</a></td>
+                        <td>Murenzi</td>
+                        <td>Laurent</td>
+                        <td>2012-06-13</td>
+                        <td>respinho20yf14@gmail.com</td>
+                        <td>0784389682</td>
+                        <td>1</td>
+                        <td>4</td>
+                        <td>13</td>
+                        <td>18</td>
+                    </tr>
+                    <!-- Third Student -->
+                    <tr>
+                        <td>3</td>
+                        <td><a href="#" class="reg-number" data-bs-toggle="modal" data-bs-target="#studentModal"
+                                data-name="Murenzi Laurent"
+                                data-regno="24rp00002"
+                                data-dob="2012-06-13"
+                                data-email="respinho20yf13@gmail.com"
+                                data-phone="0784389689"
+                                data-dept="1"
+                                data-faculty="4"
+                                data-level="13"
+                                data-account="22"
+                                data-img="http://127.0.0.1:8000/static/student/48439986b36e4386afd308fbee9d8bcb.jpg">24rp00002</a></td>
+                        <td>Murenzi</td>
+                        <td>Laurent</td>
+                        <td>2012-06-13</td>
+                        <td>respinho20yf13@gmail.com</td>
+                        <td>0784389689</td>
+                        <td>1</td>
+                        <td>4</td>
+                        <td>13</td>
+                        <td>22</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="studentModal" tabindex="-1" aria-labelledby="studentModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="studentModalLabel">Student Information</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title" id="modal-name">Student Name</h5>
+                            <img id="modal-img" src="" alt="Student Image" class="img-fluid rounded">
+                            <p class="card-text">
+                                <strong>Registration No:</strong> <span id="modal-regno"></span><br>
+                                <strong>Date of Birth:</strong> <span id="modal-dob"></span><br>
+                                <strong>Email:</strong> <span id="modal-email"></span><br>
+                                <strong>Phone:</strong> <span id="modal-phone"></span><br>
+                                <strong>Department ID:</strong> <span id="modal-dept"></span><br>
+                                <strong>Faculty ID:</strong> <span id="modal-faculty"></span><br>
+                                <strong>Level ID:</strong> <span id="modal-level"></span><br>
+                                <strong>Account:</strong> <span id="modal-account"></span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const regNumbers = document.querySelectorAll('.reg-number');
+            regNumbers.forEach(reg => {
+                reg.addEventListener('click', function () {
+                    document.getElementById('modal-img').src = this.dataset.img;
+                    document.getElementById('modal-name').textContent = this.dataset.name;
+                    document.getElementById('modal-regno').textContent = this.dataset.regno;
+                    document.getElementById('modal-dob').textContent = this.dataset.dob;
+                    document.getElementById('modal-email').textContent = this.dataset.email;
+                    document.getElementById('modal-phone').textContent = this.dataset.phone;
+                    document.getElementById('modal-dept').textContent = this.dataset.dept;
+                    document.getElementById('modal-faculty').textContent = this.dataset.faculty;
+                    document.getElementById('modal-level').textContent = this.dataset.level;
+                    document.getElementById('modal-account').textContent = this.dataset.account;
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

@@ -6,7 +6,33 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 
 
+class User(AbstractUser):
+    ROLE_CHOICES = (
+        ('SUPERVISOR', 'Supervisor'),
+        ('STUDENT', 'Student'),
+        ('REGISTER', 'Register'),
+        ('ADMIN', 'Admin'),
+        ('HOD', 'Hod')
+    )
+
+    role = models.CharField(max_length=25, choices=ROLE_CHOICES, default='STUDENT')
+    groups = models.ManyToManyField(
+        "auth.Group",
+        related_name="custom_user_set",  # Custom related_name to avoid conflict
+        blank=True,
+        verbose_name="groups",
+        help_text="The groups this user belongs to.",
+    )
+    
+    user_permissions = models.ManyToManyField(
+        "auth.Permission",
+        related_name="custom_user_set",  # Custom related_name to avoid conflict
+        blank=True,
+        verbose_name="user permissions",
+        help_text="Specific permissions for this user.",
+    )
 # Function to generate a unique profile picture filename
+
 def unique_image_path(instance, filename):
     ext = filename.split('.')[-1]
     unique_filename = f"{uuid.uuid4().hex}.{ext}"
@@ -36,13 +62,14 @@ class Supervisor(models.Model):
     lname = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
     phone = models.CharField(unique=True, max_length=15)
-    profile_pic = models.ImageField(upload_to=unique_image_path, validators=[FileExtensionValidator(['jpg', 'jpeg', 'png'])])
+    profile_pic = models.ImageField(upload_to=unique_image_path, validators=[FileExtensionValidator(['jpg', 'jpeg', 'png'])], blank=True, 
+    null=True)
     specialization = models.CharField(max_length=255)
     dpt_id = models.ForeignKey(Department, on_delete=models.CASCADE)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
     
     # New field to link Supervisor to a user account
-    account = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+    account = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         if not self.reg_num:
@@ -95,44 +122,47 @@ class Student(models.Model):
     profile_pic = models.ImageField(upload_to=unique_image_path, validators=[FileExtensionValidator(['jpg', 'jpeg', 'png'])])
     
     # New field to link Student to a user account
-    account = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+    account = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
     
     def save(self, *args, **kwargs):
         if not self.reg_no:
-            last_student = Student.objects.all().order_by('st_id').last()
-            if last_student:
-                num_part = int(last_student.reg_no[2:7]) + 1
+            last_stu = Student.objects.all().order_by('st_id').last()
+            if last_stu:
+                stud_num = int(last_stu.reg_no[4:]) + 1
             else:
-                num_part = 0
-            self.reg_no = f"24rp{num_part:05d}"
+                stud_num = 0
+            self.reg_no = f"24rp{stud_num:05d}"
         super(Student, self).save(*args, **kwargs)
     
     def __str__(self):
         return f'{self.fname} {self.lname}'
 
+#project model
+class Project(models.Model):
+    project_id = models.AutoField(primary_key=True)
+    student = models.ForeignKey(Student, on_delete=models.SET_NULL, null=True, blank=True)  # Student submitting the project
+    title = models.CharField(max_length=200, unique=True, editable=True)
+    case_study = models.CharField(max_length=200)
+    abstract = models.TextField()
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)  # Automatically set from student or supervisor
+    supervisor = models.ForeignKey(Supervisor, on_delete=models.SET_NULL, null=True, blank=True)  # Supervisor's project won't have a student
+    check_status = models.BooleanField(default=False)  # AI uniqueness test
+    approval_status = models.BooleanField(default=False)  # Approval by supervisor/admin
+    completion_status = models.BooleanField(default=False)
+    collaborators = models.ManyToManyField(Student, related_name='collaborated_projects', blank=True)  # Collaborators can join after approval
 
+    def can_student_submit(self, student):
+        has_approved_project = Project.objects.filter(student=student, approval_status=True).exists()
+        return not has_approved_project
 
-class User(AbstractUser):
-    ROLE_CHOICES = (
-        ('SUPERVISOR', 'Supervisor'),
-        ('STUDENT', 'Student'),
-        ('REGISTER', 'Register'),
-        ('ADMIN', 'Admin'),
-    )
+    def is_unique(self):
+        # AI uniqueness check logic
+        from .utils import check_project_uniqueness
+        return check_project_uniqueness(self.title, self.abstract)
 
-    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='STUDENT')
-    groups = models.ManyToManyField(
-        "auth.Group",
-        related_name="custom_user_set",  # Custom related_name to avoid conflict
-        blank=True,
-        verbose_name="groups",
-        help_text="The groups this user belongs to.",
-    )
-    
-    user_permissions = models.ManyToManyField(
-        "auth.Permission",
-        related_name="custom_user_set",  # Custom related_name to avoid conflict
-        blank=True,
-        verbose_name="user permissions",
-        help_text="Specific permissions for this user.",
-    )
+    def save(self, *args, **kwargs):
+        if self.is_unique():
+            self.check_status = True
+        else:
+            self.check_status = False
+        super().save(*args, **kwargs)

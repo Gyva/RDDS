@@ -1,68 +1,94 @@
-import React from 'react';
-import { useForm } from 'react-hook-form';
+import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Link } from 'react-router-dom';
+import axios from 'axios';
+import { AuthContext } from '../../../contexts/AuthProvider';
+import './Login.css';
 
-const Login = ({ onLogin }) => {
-    const { register, handleSubmit, formState: { errors } } = useForm();
-    const navigate = useNavigate();
+const LOGIN_URL = 'http://127.0.0.1:8000/api/login/';
 
-    const onSubmit = (data) => {
-        // Simulate login process and authentication
-        if (data.email === 'test@example.com' && data.password === 'password') {
-            onLogin(); // Set authentication status to true
-            navigate('/register'); // Redirect to the protected route
-        } else {
-            alert('Invalid credentials');
-        }
-    };
+const Login = () => {
+  const { auth,setAuth } = useContext(AuthContext);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [errMsg, setErrMsg] = useState('');
+  const navigate = useNavigate();
 
-    return (
-        <div className="d-flex align-items-center justify-content-center vh-100">
-            <div className="container">
-                <div className="row justify-content-center">
-                    <div className="col-md-6 col-lg-4">
-                        <h2 className="text-center mb-4">Login</h2>
-                        <form onSubmit={handleSubmit(onSubmit)} className="d-flex flex-column">
-                            <div className="form-group mb-3">
-                                <label htmlFor="email">Email/RegNo:</label>
-                                <input
-                                    type="text"
-                                    id="email"
-                                    className={`form-control ${errors.email ? 'is-invalid' : ''}`}
-                                    {...register('email', {
-                                        required: 'Email address or RegNumber is required',
-                                        pattern: {
-                                            value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                                            message: 'Invalid email address'
-                                        }
-                                    })}
-                                    placeholder="Enter your email/RegNo"
-                                />
-                                {errors.email && <div className="invalid-feedback">{errors.email.message}</div>}
-                            </div>
-                            <div className="form-group mb-3">
-                                <label htmlFor="password">Password:</label>
-                                <input
-                                    type="password"
-                                    id="password"
-                                    className={`form-control ${errors.password ? 'is-invalid' : ''}`}
-                                    {...register('password', { required: 'Password is required' })}
-                                    placeholder="Enter your password"
-                                />
-                                {errors.password && <div className="invalid-feedback">{errors.password.message}</div>}
-                            </div>
-                            <button type="submit" className="btn btn-primary w-100">Login</button>
-                        </form>
-                        <div className='d-flex justify-content-end'>
-                            <Link to={"/claim_password"} className='text-decoration-none text-primary'>Create account</Link>
-                        </div>
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-                    </div>
-                </div>
+    try {
+      const response = await axios.post(LOGIN_URL, 
+        JSON.stringify({ username: email, password }),
+        { headers: { 'Content-Type': 'application/json' } }
+      );
+
+      const result = response?.data;
+      const { username, role, access_token, refresh_token } = result;
+
+      // Save data in localStorage
+      localStorage.setItem('user', username);
+      localStorage.setItem('role', role);
+      localStorage.setItem('token', access_token);
+      localStorage.setItem('refresh_token', refresh_token);
+
+      // Update the auth context
+      setAuth({ user: username, role, accessToken: access_token, isAuthenticated: true });
+
+      navigate('/dashboard'); // Redirect to dashboard on successful login
+
+    } catch (err) {
+      if (!err?.response) {
+        setErrMsg('No Server Response');
+      } else if (err.response?.status === 400) {
+        setErrMsg('Missing Username or Password');
+      } else if (err.response?.status === 401) {
+        setErrMsg('Unauthorized');
+      } else {
+        setErrMsg('Login Failed');
+      }
+    }
+  };
+if(auth.isAuthenticated){
+    navigate("/dashboard");
+}
+
+  return (
+    <div className="login-container">
+      <div className="card p-4">
+        <section>
+          <p className={errMsg ? "alert alert-danger" : "d-none"}>{errMsg}</p>
+          <h1 className="text-center mb-4">Sign In</h1>
+          <form onSubmit={handleSubmit} style={{ width: '300px' }}>
+            <div className="form-group mb-3">
+              <label htmlFor="email">Email/RegNo:</label>
+              <input
+                type="text"
+                id="email"
+                onChange={(e) => setEmail(e.target.value)}
+                value={email}
+                required
+                className="form-control"
+              />
             </div>
-        </div>
-    );
+
+            <div className="form-group mb-4">
+              <label htmlFor="password">Password:</label>
+              <input
+                type="password"
+                id="password"
+                onChange={(e) => setPassword(e.target.value)}
+                value={password}
+                required
+                className="form-control"
+              />
+            </div>
+
+            <button className="btn btn-primary w-100">Sign In</button>
+          </form>
+        </section>
+      </div>
+    </div>
+  );
 };
 
 export default Login;

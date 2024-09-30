@@ -123,9 +123,10 @@ const StudentRegistrationForm = ({ contextValues }) => {
 
     return (
         <div className="container mt-5">
-            <h2 className="mb-4">Student Registration Form</h2>
-            <form onSubmit={handleSubmit(onSubmit)}>
-                <div className="mb-3">
+            <div className='border rounde-top-4 p-3'>
+            <div className='bg-success text-white px-3 py-1 rounded-top-4'><h2 className="text-center">Student Registration Form</h2></div>
+            <form onSubmit={handleSubmit(onSubmit)} className="row g-3">
+                <div className="col-md-6">
                     <label htmlFor="fname" className="form-label">First Name:</label>
                     <input
                         type="text"
@@ -136,7 +137,7 @@ const StudentRegistrationForm = ({ contextValues }) => {
                     {errors.fname && <div className="invalid-feedback">{errors.fname.message}</div>}
                 </div>
 
-                <div className="mb-3">
+                <div className="col-md-6">
                     <label htmlFor="lname" className="form-label">Last Name:</label>
                     <input
                         type="text"
@@ -147,7 +148,7 @@ const StudentRegistrationForm = ({ contextValues }) => {
                     {errors.lname && <div className="invalid-feedback">{errors.lname.message}</div>}
                 </div>
 
-                <div className="mb-3">
+                <div className="col-md-6">
                     <label htmlFor="dob" className="form-label">Date of Birth:</label>
                     <input
                         type="date"
@@ -158,7 +159,7 @@ const StudentRegistrationForm = ({ contextValues }) => {
                     {errors.dob && <div className="invalid-feedback">{errors.dob.message}</div>}
                 </div>
 
-                <div className="mb-3">
+                <div className="col-md-6">
                     <label htmlFor="email" className="form-label">Email:</label>
                     <input
                         type="email"
@@ -175,7 +176,7 @@ const StudentRegistrationForm = ({ contextValues }) => {
                     {errors.email && <div className="invalid-feedback">{errors.email.message}</div>}
                 </div>
 
-                <div className="mb-3">
+                <div className="col-md-6">
                     <label htmlFor="phone" className="form-label">Phone:</label>
                     <input
                         type="tel"
@@ -192,7 +193,7 @@ const StudentRegistrationForm = ({ contextValues }) => {
                     {errors.phone && <div className="invalid-feedback">{errors.phone.message}</div>}
                 </div>
 
-                <div className="mb-3">
+                <div className="col-md-6">
                     <label htmlFor="dpt_id" className="form-label">Department:</label>
                     <select
                         id="dpt_id"
@@ -211,7 +212,7 @@ const StudentRegistrationForm = ({ contextValues }) => {
                     {errors.dpt_id && <div className="invalid-feedback">{errors.dpt_id.message}</div>}
                 </div>
 
-                <div className="mb-3">
+                <div className="col-md-6">
                     <label htmlFor="f_id" className="form-label">Faculty:</label>
                     <select
                         id="f_id"
@@ -230,7 +231,7 @@ const StudentRegistrationForm = ({ contextValues }) => {
                     {errors.f_id && <div className="invalid-feedback">{errors.f_id.message}</div>}
                 </div>
 
-                <div className="mb-3">
+                <div className="col-md-6">
                     <label htmlFor="l_id" className="form-label">Level:</label>
                     <select
                         id="l_id"
@@ -247,10 +248,11 @@ const StudentRegistrationForm = ({ contextValues }) => {
                     {errors.l_id && <div className="invalid-feedback">{errors.l_id.message}</div>}
                 </div>
 
-                <div className="text-center">
-                    <button type="submit" className="btn btn-primary">Submit</button>
+                <div className="col-md-12 text-center mt-4">
+                    <button type="submit" className="btn btn-primary">Register</button>
                 </div>
             </form>
+            </div>
         </div>
     );
 };

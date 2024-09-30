@@ -1,163 +1,120 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import './Sidebar.css'; // Ensure this CSS file exists
+import { AuthContext } from '../../contexts/AuthProvider';
 
 const Sidebar = ({ isVisible, role }) => {
+  const {auth} = useContext(AuthContext)
   const commonMenus = (
-    <>
-      <li className="nav-item">
-        <a href="/home">
-          <i className="nav-icon fas fa-home"></i>
-          Home
-        </a>
-      </li>
-    </>
+    <li className="nav-item">
+      <a href="/home" className="nav-link">
+        <i className="nav-icon fas fa-home me-2"></i> Home
+      </a>
+    </li>
   );
 
-  const hodMenus = (
-    <>
-      <li className="nav-item">
-        <a href="/hod/departments">
-          <i className="nav-icon fas fa-building"></i>
-          Manage Departments
-        </a>
-      </li>
-      <li className="nav-item">
-        <a href="/hod/reports">
-          <i className="nav-icon fas fa-chart-line"></i>
-          View Reports
-        </a>
-      </li>
-    </>
-  );
-
-  const registererMenus = (
-    <>
-      <li className="nav-item">
-        <a href="/registerer/students">
-          <i className="nav-icon fas fa-user"></i>
-          Manage Students
-        </a>
-      </li>
-      <li className="nav-item">
-        <a href="/registerer/payments">
-          <i className="nav-icon fas fa-money-check-alt"></i>
-          Handle Payments
-        </a>
-      </li>
-    </>
-  );
-
-  const supervisorMenus = (
-    <>
-      <li className="nav-item">
-        <a href="/supervisor/projects">
-          <i className="nav-icon fas fa-tasks"></i>
-          Manage Projects
-        </a>
-      </li>
-      <li className="nav-item">
-        <a href="/supervisor/students">
-          <i className="nav-icon fas fa-users"></i>
-          Supervise Students
-        </a>
-      </li>
-    </>
-  );
-
-  const studentMenus = (
-    <>
-      <li className="nav-item">
-        <a href="/student/admission-letter">
-          <i className="nav-icon fas fa-file-alt"></i>
-          Admission Letter
-        </a>
-      </li>
-      <li className="nav-item">
-        <a href="/student/payments">
-          <i className="nav-icon fas fa-money-check-alt"></i>
-          Payments
-        </a>
-        <ul className="nav collapse" id="paymentsMenu">
-          <li className="nav-item">
-            <a href="/student/make-payment">
-              <i className="far fa-circle nav-icon"></i>
-              Make Payment
-            </a>
-          </li>
-          <li className="nav-item">
-            <a href="/student/payment-history">
-              <i className="far fa-circle nav-icon"></i>
-              Payment History
-            </a>
-          </li>
-        </ul>
-      </li>
-      <li className="nav-item">
-        <a href="https://mis.rp.ac.rw/student/marks">
-          <i className="nav-icon fas fa-tasks"></i>
-          Academic Marks
-        </a>
-      </li>
-      <li className="nav-item">
-        <a href="https://mis.rp.ac.rw/student/clearance">
-          <i className="nav-icon fas fa-certificate"></i>
-          Clearance
-        </a>
-      </li>
-    </>
-  );
-
-  const renderMenus = () => {
-    switch (role) {
-      case 'hod':
-        return hodMenus;
-      case 'registerer':
-        return registererMenus;
-      case 'supervisor':
-        return supervisorMenus;
-      case 'student':
-        return studentMenus;
-      default:
-        return null;
-    }
+  const roleMenus = {
+    hod: (
+      <>
+        <li className="nav-item">
+          <a href="/hod/departments" className="nav-link">
+            <i className="nav-icon fas fa-building me-2"></i> Manage Departments
+          </a>
+        </li>
+        <li className="nav-item">
+          <a href="/hod/reports" className="nav-link">
+            <i className="nav-icon fas fa-chart-line me-2"></i> View Reports
+          </a>
+        </li>
+      </>
+    ),
+    registerer: (
+      <>
+        <li className="nav-item">
+          <a href="/registerer/students" className="nav-link">
+            <i className="nav-icon fas fa-user me-2"></i> Manage Students
+          </a>
+        </li>
+        <li className="nav-item">
+          <a href="/registerer/payments" className="nav-link">
+            <i className="nav-icon fas fa-money-check-alt me-2"></i> Handle Payments
+          </a>
+        </li>
+      </>
+    ),
+    supervisor: (
+      <>
+        <li className="nav-item">
+          <a href="/supervisor/projects" className="nav-link">
+            <i className="nav-icon fas fa-tasks me-2"></i> Manage Projects
+          </a>
+        </li>
+        <li className="nav-item">
+          <a href="/supervisor/students" className="nav-link">
+            <i className="nav-icon fas fa-users me-2"></i> Supervise Students
+          </a>
+        </li>
+      </>
+    ),
+    student: (
+      <>
+        <li className="nav-item">
+          <a href="" className="nav-link">
+            <i className="nav-icon fas fa-file-alt me-2"></i> Admission Letter
+          </a>
+        </li>
+        <li className="nav-item">
+          <a href="" className="nav-link">
+            <i className="nav-icon fas fa-money-check-alt me-2"></i> Payments
+          </a>
+        </li>
+        <li className="nav-item">
+          <a href="" className="nav-link">
+            <i className="nav-icon fas fa-tasks me-2"></i> Academic Marks
+          </a>
+        </li>
+        <li className="nav-item">
+          <a href="" className="nav-link">
+            <i className="nav-icon fas fa-certificate me-2"></i> Clearance
+          </a>
+        </li>
+      </>
+    )
   };
 
   return (
     <aside className={`main-sidebar ${isVisible ? '' : 'd-none'}`}>
       {/* Brand Logo */}
       <a href="/" className="brand-link">
-        <img src="" alt="RP" className="brand-image" style={{ opacity: '.8' }} />
-        <span className="brand-text">21RP12272</span>
+        <img src=""  className="brand-image" style={{ opacity: '.8' }} />
+        <span className="brand-text">{auth.user?.toUpperCase()}</span>
       </a>
 
       {/* Sidebar */}
       <div className="sidebar">
         {/* Sidebar user panel */}
-        <div className="user-panel">
+        <div className="user-panel d-flex align-items-center">
           <div className="image">
-            <img src="" alt="User" />
-          </div>
+            <img src="" />
+          </div>&nbsp;&nbsp;
           <div className="info">
-            <a href="/profile">KWIZERA Ferdinand</a>
+            <p className="text-white">KWIZERA Ferdinand</p>
           </div>
         </div>
-
+        <hr className='text-secondary' />
         {/* Sidebar Menu */}
         <nav>
-          <ul className="nav">
+          <ul className="nav flex-column">
             {commonMenus}
-            {renderMenus()}
+            {roleMenus[role] || null}
           </ul>
         </nav>
       </div>
 
       {/* Sidebar footer */}
-      <div className="sidebar-footer">
-        <div className="footer-content">
-          <div className="fs-5">{role}</div>
-        </div>
+      <div className="sidebar-footer text-center p-3">
+        <span className="fs-6 text-white">{role}</span>
       </div>
     </aside>
   );
