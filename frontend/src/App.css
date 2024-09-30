@@ -1,0 +1,61 @@
+/* General layout */ 
+.app-container {
+    display: flex;
+    height: 100vh;
+}
+
+.content-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    transition: margin-left 0.3s ease-in-out;
+    padding-top: 60px; /* To account for the fixed navbar */
+}
+
+.sidebar-visible .content-wrapper {
+    margin-left: 250px; /* Adjust according to sidebar width */
+}
+
+.sidebar-hidden .content-wrapper {
+    margin-left: 0;
+}
+
+/* Adjust Navbar when Sidebar is visible */
+.sidebar-visible .main-header.navbar {
+    width: calc(100% - 250px); /* Adjust width based on sidebar width */
+    transition: width 0.1s ease;
+}
+
+.sidebar-hidden .main-header.navbar {
+    width: 100%;
+    transition: width 0.1s ease;
+}
+.sidebar-hidden .main-content{
+    margin-left: 0px; 
+}
+
+.main-content {
+    margin-left: 250px;
+    padding: 20px;
+    background-color: #f1f1f1;
+    min-height: calc(100vh - 60px); /* Adjust for the fixed navbar */
+}
+
+/* Login form container */
+.login-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh; /* Full viewport height */
+    width: 100vw; /* Full viewport width */
+    background: #f8f9fa;
+}
+
+.login-form {
+    max-width: 400px;
+    width: 100%;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}

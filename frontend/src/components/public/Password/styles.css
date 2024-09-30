@@ -1,0 +1,4 @@
+.block-input {
+    pointer-events: none; /* Prevent clicking */
+    background-color: #e9ecef; /* Bootstrap's disabled background color */
+  }
