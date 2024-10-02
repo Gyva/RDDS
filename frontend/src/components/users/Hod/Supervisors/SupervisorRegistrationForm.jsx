@@ -12,7 +12,7 @@ const SupervisorRegistrationForm = ({ contextValues }) => {
             department_id: contextValues?.department_id || '',
         }
     });
-    const defaultProfilePic = 'C:/Users/@gxtxbanna/Desktop/git-rdds/RDDS/frontend/src/assets/default_profile.png';
+    const defaultProfilePic = '../../../assets/default_profile.png';
 
     useEffect(() => {
         fetch('http://127.0.0.1:8000/api/departments/')

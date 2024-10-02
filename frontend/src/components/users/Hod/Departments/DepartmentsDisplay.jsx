@@ -165,7 +165,7 @@ const DepartmentsDisplay = () => {
                                         }}
                                         className='btn btn-warning'
                                     >
-                                        <i className="fas fa-pencil-alt"></i> Update
+                                        <i className="fas fa-pencil-alt"></i>
                                     </button>
                                 </td>
                                 <td>
@@ -173,7 +173,7 @@ const DepartmentsDisplay = () => {
                                         onClick={() => deleteThisDepartment(dpt.dpt_id)}
                                         className='btn btn-danger'
                                     >
-                                        <i className="fas fa-trash"></i> Delete
+                                        <i className="fas fa-trash"></i>
                                     </button>
                                 </td>
                                 <td>

@@ -156,10 +156,10 @@ const LevelsDisplay = () => {
             cell: (row) => (
                 <div>
                     <button className="btn btn-warning mx-2" onClick={() => openUpdateModal(row)}>
-                        <i className="fas fa-pencil-alt"></i> Update
+                        <i className="fas fa-pencil-alt"></i>
                     </button>
                     <button className="btn btn-danger mx-2" onClick={() => deleteThisLevel(row.l_id)}>
-                        <i className="fas fa-trash"></i> Delete
+                        <i className="fas fa-trash"></i>
                     </button>
                 </div>
             ),
