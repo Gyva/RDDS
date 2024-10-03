@@ -14,6 +14,7 @@ const SupervisorRegistrationForm = ({ contextValues }) => {
     });
     const defaultProfilePic = '../../../assets/default_profile.png';
 
+    // Fetch departments on component mount
     useEffect(() => {
         fetch('http://127.0.0.1:8000/api/departments/')
             .then(response => response.json())
@@ -21,47 +22,41 @@ const SupervisorRegistrationForm = ({ contextValues }) => {
             .catch(error => console.error('Error fetching departments:', error));
     }, []);
 
+    // Handle department change
     const handleDepartmentChange = (e) => {
         const departmentId = e.target.value;
-        console.log(departmentId)
         setSelectedDepartment(departmentId);
         setValue('department_id', departmentId);
     };
 
+    // Custom validation to check if the department is valid
     const validateDepartment = () => {
         const department = getValues('department_id');
-        console.log(department)
         if (department && !departments.find(d => d.dpt_id == department)) {
             return 'Selected department is not valid.';
         }
         return true;
     };
 
+    // Handle form submission
     const onSubmit = async (data) => {
         const validationError = validateDepartment();
-        console.log(defaultProfilePic);
-        if (data.profile_pic === null || data.profile_pic === undefined || data.profile_pic === '') {
-            data.profile_pic = defaultProfilePic
-        }
-        
         if (validationError !== true) {
             alert(validationError);
             return;
         }
 
-        console.log('Form submitted:', data);
+        if (!data.profile_pic) {
+            data.profile_pic = defaultProfilePic;
+        }
 
-        const URL = 'http://127.0.0.1:8000/api/supervisors/'
         try {
-            const response = await axios.post(URL, data, {
-                headers: {
-                    'Content-Type': 'application/json',
-                }
+            const response = await axios.post('http://127.0.0.1:8000/api/supervisors/', data, {
+                headers: { 'Content-Type': 'application/json' }
             });
-            console.log(response);
-
+            console.log('Form submitted successfully:', response.data);
         } catch (error) {
-            console.error("Error occurred ", error)
+            console.error('Error submitting form:', error);
         }
     };
 
@@ -72,8 +67,7 @@ const SupervisorRegistrationForm = ({ contextValues }) => {
                     <h2 className="m-2 text-center">Register a new supervisor to the system</h2>
                 </div>
                 <div className="card-body">
-                    <form onSubmit={handleSubmit(onSubmit)} className='form-group' encType="multipart/form-data">
-
+                    <form onSubmit={handleSubmit(onSubmit)} className="form-group" encType="multipart/form-data">
                         <div className="row mb-3">
                             <div className="col-12 col-md-6">
                                 <label htmlFor="fname" className="form-label">First Name:</label>
@@ -159,8 +153,8 @@ const SupervisorRegistrationForm = ({ contextValues }) => {
                                 <label htmlFor="department_id" className="form-label">Department:</label>
                                 <select
                                     id="department_id"
-                                    className={`form-control ${errors.dpt_id ? 'is-invalid' : ''}`}
-                                    {...register('dpt_id', { required: 'Department is required' })}
+                                    className={`form-control ${errors.department_id ? 'is-invalid' : ''}`}
+                                    {...register('department_id', { required: 'Department is required' })}
                                     value={selectedDepartment}
                                     onChange={handleDepartmentChange}
                                 >
@@ -171,7 +165,7 @@ const SupervisorRegistrationForm = ({ contextValues }) => {
                                         </option>
                                     ))}
                                 </select>
-                                {errors.dpt_id && <div className="invalid-feedback">{errors.dpt_id.message}</div>}
+                                {errors.department_id && <div className="invalid-feedback">{errors.department_id.message}</div>}
                             </div>
                             <div className="col-12 col-md-6">
                                 <label htmlFor="roles" className="form-label">Roles:</label>
@@ -196,6 +190,6 @@ const SupervisorRegistrationForm = ({ contextValues }) => {
             </div>
         </div>
     );
-}
+};
 
 export default SupervisorRegistrationForm;

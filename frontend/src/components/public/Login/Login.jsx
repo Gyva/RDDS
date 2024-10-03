@@ -1,13 +1,13 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { AuthContext } from '../../../contexts/AuthProvider';
+import { AuthContext } from '../../../contexts/AuthProvider'; // Keep the original context import
 import './Login.css';
 
 const LOGIN_URL = 'http://127.0.0.1:8000/api/login/';
 
 const Login = () => {
-  const { auth,setAuth } = useContext(AuthContext);
+  const { auth, setAuth } = useContext(AuthContext); // Keep the original usage of AuthContext
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errMsg, setErrMsg] = useState('');
@@ -17,7 +17,8 @@ const Login = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post(LOGIN_URL, 
+      const response = await axios.post(
+        LOGIN_URL,
         JSON.stringify({ username: email, password }),
         { headers: { 'Content-Type': 'application/json' } }
       );
@@ -48,9 +49,10 @@ const Login = () => {
       }
     }
   };
-if(auth.isAuthenticated){
+
+  if (auth.isAuthenticated) {
     navigate("/dashboard");
-}
+  }
 
   return (
     <div className="login-container">

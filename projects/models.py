@@ -4,7 +4,7 @@ from django.db import models
 from django.core.validators import FileExtensionValidator
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
-
+from django.utils import timezone
 
 class User(AbstractUser):
     ROLE_CHOICES = (
@@ -31,8 +31,8 @@ class User(AbstractUser):
         verbose_name="user permissions",
         help_text="Specific permissions for this user.",
     )
-# Function to generate a unique profile picture filename
 
+# Function to generate a unique profile picture filename
 def unique_image_path(instance, filename):
     ext = filename.split('.')[-1]
     unique_filename = f"{uuid.uuid4().hex}.{ext}"
@@ -62,8 +62,7 @@ class Supervisor(models.Model):
     lname = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
     phone = models.CharField(unique=True, max_length=15)
-    profile_pic = models.ImageField(upload_to=unique_image_path, validators=[FileExtensionValidator(['jpg', 'jpeg', 'png'])], blank=True, 
-    null=True)
+    profile_pic = models.ImageField(upload_to=unique_image_path, validators=[FileExtensionValidator(['jpg', 'jpeg', 'png'])])
     specialization = models.CharField(max_length=255)
     dpt_id = models.ForeignKey(Department, on_delete=models.CASCADE)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
@@ -137,19 +136,26 @@ class Student(models.Model):
     def __str__(self):
         return f'{self.fname} {self.lname}'
 
-#project model
+# Project Model
 class Project(models.Model):
+    APPROVAL_STATUS_CHOICES = [
+        ('Approved', 'Approved'),
+        ('Rejected', 'Rejected'),
+        ('Pending', 'Pending'),
+    ]
     project_id = models.AutoField(primary_key=True)
     student = models.ForeignKey(Student, on_delete=models.SET_NULL, null=True, blank=True)  # Student submitting the project
     title = models.CharField(max_length=200, unique=True, editable=True)
     case_study = models.CharField(max_length=200)
     abstract = models.TextField()
     department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)  # Automatically set from student or supervisor
-    supervisor = models.ForeignKey(Supervisor, on_delete=models.SET_NULL, null=True, blank=True)  # Supervisor's project won't have a student
+    supervisor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)  # Supervisor's project won't have a student
     check_status = models.BooleanField(default=False)  # AI uniqueness test
-    approval_status = models.BooleanField(default=False)  # Approval by supervisor/admin
+    approval_status = models.CharField(max_length=10, choices=APPROVAL_STATUS_CHOICES, default='Pending')  # Approval by supervisor/admin
     completion_status = models.BooleanField(default=False)
     collaborators = models.ManyToManyField(Student, related_name='collaborated_projects', blank=True)  # Collaborators can join after approval
+    improved_project = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='improvements')
+    academic_year = models.CharField(max_length=10, null=False, default=None)
 
     def can_student_submit(self, student):
         has_approved_project = Project.objects.filter(student=student, approval_status=True).exists()
@@ -166,3 +172,37 @@ class Project(models.Model):
         else:
             self.check_status = False
         super().save(*args, **kwargs)
+
+# Feedback Model
+class Feedback(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    feedback_text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Feedback'
+        verbose_name_plural = 'Feedbacks'
+        ordering = ['created_at']
+
+    def __str__(self):
+        return f"Feedback from {self.user} on {self.project.title}"
+
+# Conversation Model   
+class Conversation(models.Model):
+    project = models.ForeignKey('Project', on_delete=models.CASCADE, related_name='conversations')
+    participants = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='conversations')
+    created_at = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return f"Conversation for project: {self.project.title}"
+
+# Message Model
+class Message(models.Model):
+    conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='messages')
+    sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    text = models.TextField()
+    timestamp = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return f"Message from {self.sender.email} at {self.timestamp}"

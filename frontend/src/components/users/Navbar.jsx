@@ -1,10 +1,11 @@
 import React, { useContext } from 'react';
 import './Navbar.css'; // Import the CSS file
-import { AuthContext } from '../../contexts/AuthProvider';
+import { AuthContext } from '../../contexts/AuthProvider'; // Retain the original context import
 
 const Navbar = ({ toggleSidebar, isVisible }) => {
+    // Keeping the logout function commented out as in the original version
     // const {logout} = useContext(AuthContext);
-    
+
     const handleLogout = (e) => {
         e.preventDefault();
         document.getElementById('logout-form').submit();

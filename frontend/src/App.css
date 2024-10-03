@@ -1,4 +1,4 @@
-/* General layout */ 
+/* General layout */
 .app-container {
     display: flex;
     height: 100vh;
@@ -30,7 +30,8 @@
     width: 100%;
     transition: width 0.1s ease;
 }
-.sidebar-hidden .main-content{
+
+.sidebar-hidden .main-content {
     margin-left: 0px; 
 }
 
@@ -57,11 +58,11 @@
     padding: 20px;
     background: #fff;
     border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
+
 @media (max-width: 768px) {
     .main-content {
         width: 100%;
-    } /* Close the block properly */
-    
+    }
 }

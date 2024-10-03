@@ -153,10 +153,8 @@ CORS_ALLOW_METHODS = [
     "GET",
     "POST",
     "PUT",
-    "PATCH",
     "DELETE",
 ]
-CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOW_HEADERS = [
     "Content-Type",

@@ -35,46 +35,36 @@ function App() {
     };
 
     return (
-        <>
-        {/* Use the correct AuthProvider here */}
-             <AuthProvider>
-                <Routes>
+        <AuthProvider>
+            <Routes>
                 <Route path="/login" element={<Login />} />
-                <Route path="/" element={<Login /> } />
-                </Routes>
-            {/* Protected routes */}
-            {/* <ProtectedRoute> */}
-                <div className="app-container">
-                    {/* Sidebar component */}
-                    <Sidebar isVisible={isSidebarVisible} role={'hod'} />
-
-                    {/* Main content wrapper */}
-                    <div className={`content-wrapper ${isSidebarVisible ? 'sidebar-visible' : 'sidebar-hidden'}`}>
-                        <Navbar toggleSidebar={toggleSidebar} isVisible={isSidebarVisible} />
-                        <div className="main-content">
-                            <Routes>
-                            <Route path='/dashboard' element={<Discover />} />
-                                <Route path='/discover' element={<Discover />} />
-                                <Route path='/departments' element={<DepartmentsDisplay />} />
-                                <Route path='/levels' element={<LevelsDisplay />} />
-                                <Route path='/students' element={<StudentsDisplay/>}/>
-                                <Route path='/faculties' element={<FacultiesDisplay />} /> 
-                                <Route path='/reset-password/:uid/:token' element={<PasswordResetForm/>}/>
-                                <Route path='/grab-reset-link' element={<GrabResetLink/>} /> 
-                                <Route path='/create-project' element={<CreateProject/>} /> 
-                                <Route path='/register-supervisor' element={<SupervisorRegistrationForm/>}/>
-                                <Route path='/register-student' element={<StudentRegistrationForm/>}/>
-                                <Route path='/supervisors' element={<SupervisorsDisplay/>}/>
-                                <Route path="/change-password" element={<ChangePasswordForm/>}/>
-                                <Route path='/discover' element={<Discover/>}/>
-                                <Route path="/projects/:id" element={<ProjectBlogPage />} />
-                            </Routes>
-                        </div>
+                <Route path="/" element={<Login />} />
+            </Routes>
+            <div className="app-container">
+                <Sidebar isVisible={isSidebarVisible} role={'hod'} />
+                <div className={`content-wrapper ${isSidebarVisible ? 'sidebar-visible' : 'sidebar-hidden'}`}>
+                    <Navbar toggleSidebar={toggleSidebar} isVisible={isSidebarVisible} />
+                    <div className="main-content">
+                        <Routes>
+                            <Route path="/dashboard" element={<Discover />} />
+                            <Route path="/discover" element={<Discover />} />
+                            <Route path="/departments" element={<DepartmentsDisplay />} />
+                            <Route path="/levels" element={<LevelsDisplay />} />
+                            <Route path="/students" element={<StudentsDisplay />} />
+                            <Route path="/faculties" element={<FacultiesDisplay />} />
+                            <Route path="/reset-password/:uid/:token" element={<PasswordResetForm />} />
+                            <Route path="/grab-reset-link" element={<GrabResetLink />} />
+                            <Route path="/create-project" element={<CreateProject />} />
+                            <Route path="/register-supervisor" element={<SupervisorRegistrationForm />} />
+                            <Route path="/register-student" element={<StudentRegistrationForm />} />
+                            <Route path="/supervisors" element={<SupervisorsDisplay />} />
+                            <Route path="/change-password" element={<ChangePasswordForm />} />
+                            <Route path="/projects/:id" element={<ProjectBlogPage />} />
+                        </Routes>
                     </div>
                 </div>
-            {/* </ProtectedRoute> */}
+            </div>
         </AuthProvider>
-        </>
     );
 }
 

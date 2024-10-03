@@ -1,6 +1,7 @@
 import spacy
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
+from nltk import word_tokenize, sent_tokenize
 from .models import Project
 import torch
 
@@ -93,3 +94,47 @@ def check_project_uniqueness(title, abstract):
             return False  # Too similar, reject the project
 
     return True  # No similar project found
+
+# Algorithm for project improvement
+def check_improvement_similarity(original_project, improved_title, improved_abstract):
+    original_title = original_project.title
+    original_abstract = original_project.abstract
+
+    # Ensure the original title and abstract are not None
+    if original_title is None or original_abstract is None:
+        print("Original project title or abstract is None.")
+        return False
+
+    # Convert titles and abstracts into embeddings
+    improved_title_embedding = get_sentence_embeddings(improved_title)
+    improved_abstract_embedding = get_sentence_embeddings(improved_abstract)
+    original_title_embedding = get_sentence_embeddings(original_title)
+    original_abstract_embedding = get_sentence_embeddings(original_abstract)
+
+    title_similarity = cosine_similarity([improved_title_embedding], [original_title_embedding])[0][0]
+    abstract_similarity = cosine_similarity([improved_abstract_embedding], [original_abstract_embedding])[0][0]
+
+    if title_similarity > 0.85:
+        print(f"Title similarity too high: {title_similarity}")
+        return False
+
+    if abstract_similarity > 0.75:
+        print(f"Abstract similarity too high: {abstract_similarity}")
+        return False
+
+    original_sentences = sent_tokenize(original_abstract)
+    improved_sentences = sent_tokenize(improved_abstract)
+
+    if len(improved_sentences) <= len(original_sentences):
+        print("Improved abstract has no significant structural changes.")
+        return False
+
+    original_word_count = len(word_tokenize(original_abstract))
+    improved_word_count = len(word_tokenize(improved_abstract))
+
+    if improved_word_count <= original_word_count:
+        print("Improved abstract word count is not greater than the original.")
+        return False
+
+    print("Project improvement is significant.")
+    return True

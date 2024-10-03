@@ -1,84 +1,75 @@
 .main-sidebar {
-    width: 250px;
-    min-height: 100vh;
-    background-color: #343a40;
-    color: #fff;
-    display: flex;
-    flex-direction: column;
+  width: 250px;
+  min-height: 100vh;
+  background-color: #343a40;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1040;
+  transition: transform 0.3s ease;
+}
+
+.sidebar-visible .main-sidebar {
+  transform: translateX(0);
+}
+
+.sidebar-hidden .main-sidebar {
+  transform: translateX(-100%);
+}
+
+.brand-link {
+  padding: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #007bff;
+  background-color: white;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.sidebar {
+  flex: 1;
+  overflow-y: auto;
+  padding-top: 20px;
+}
+
+.nav-item a {
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
+  color: #fff;
+  text-decoration: none;
+  transition: background-color 0.3s;
+}
+
+.nav-item a:hover {
+  background-color: #495057;
+}
+
+.sidebar-footer {
+  padding: 15px;
+  background-color: #495057;
+  color: #fff;
+}
+
+/* Responsive Design */
+@media (max-width: 991px) {
+  .main-sidebar {
     position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 1040;
-    transition: transform 0.3s ease;
+    transition: left 0.3s ease-in-out;
   }
-  
+
   .sidebar-visible .main-sidebar {
-    transform: translateX(0);
+    left: 0;
   }
-  
-  .sidebar-hidden .main-sidebar {
-    transform: translateX(-100%);
-  }
-  
-  .brand-link {
-    padding: 15px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #007bff;
-    background-color: white;
-    font-weight: bold;
-    text-decoration: none;
-  }
-  
-  /* .brand-link:hover {
-    background-color: #0056b3;
-    color:#fff;
-  } */
-  
-  .sidebar {
-    flex: 1;
-    overflow-y: auto;
-    padding-top: 20px;
-  }
-  
-  .nav-item a {
-    display: flex;
-    align-items: center;
-    padding: 10px 20px;
-    color: #fff;
-    text-decoration: none;
-    transition: background-color 0.3s;
-  }
-  
-  .nav-item a:hover {
-    background-color: #495057;
-  }
-  
+}
+
+@media (max-width: 768px) {
   .sidebar-footer {
-    padding: 15px;
-    background-color: #495057;
-    color: #fff;
+    display: none;
   }
-  
-  /* Responsive Design */
-  @media (max-width: 991px) {
-    .main-sidebar {
-      position: fixed;
-      /* left: -250px; */
-      transition: left 0.3s ease-in-out;
-    }
-  
-    .sidebar-visible .main-sidebar {
-      left: 0;
-    }
-  }
-  
-  @media (max-width: 768px) {
-    
-  
-    .sidebar-footer {
-      display: none;
-    }
-  }
-  
+}
