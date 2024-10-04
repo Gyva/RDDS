@@ -41,27 +41,26 @@ const GetPasswordForm = () => {
         }
     };
 
-    // Function to mask the email except for the last 3 characters before '@'
     const formatEmail = (email) => {
         const atIndex = email?.indexOf('@');
         if (atIndex > 3) {
-            const maskedPart = '*'.repeat(atIndex - 2); // Replace characters before the last 3 with asterisks
-            const visiblePart = email.slice(atIndex - 2); // Last 3 characters and the domain
+            const maskedPart = '*'.repeat(atIndex - 2);
+            const visiblePart = email.slice(atIndex - 2);
             return `${maskedPart}${visiblePart}`;
         }
-        return email; // Return the email as is if there are fewer than 3 characters before the '@'
+        return email; 
     };
 
     const handleClaimPassword = () => {
         if (searchResult) {
             if (searchResult.student?.account === null) {
-                // Redirect to SetPassword and pass searchResult if student account does not exist
+                
                 navigate('/set-password', { state: { ...searchResult.student, isStudent: 'yes' } });
             } else if (searchResult.supervisor?.account === null) {
-                // Redirect to SetPassword and pass searchResult if supervisor account does not exist
+               
                 navigate('/set-password', { state: { ...searchResult.supervisor, reg_no: searchResult.reg_num, isStudent: 'no' } });
             } else {
-                // If both student and supervisor accounts exist, redirect to homepage
+                
                 navigate('/');
             }
         }

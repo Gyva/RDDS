@@ -5,8 +5,7 @@ import './Sidebar.css'; // Ensure this CSS file exists
 import { AuthContext } from '../../contexts/AuthProvider';
 
 const Sidebar = ({ isVisible, role }) => {
-  const { auth } = useContext(AuthContext);
-  
+  const {auth} = useContext(AuthContext)
   const commonMenus = (
     <li className="nav-item">
       <a href="/home" className="nav-link">
@@ -88,7 +87,7 @@ const Sidebar = ({ isVisible, role }) => {
     <aside className={`main-sidebar ${isVisible ? '' : 'd-none'}`}>
       {/* Brand Logo */}
       <a href="/" className="brand-link">
-        <img src="" className="brand-image" style={{ opacity: '.8' }} alt="brand logo" />
+        <img src=""  className="brand-image" style={{ opacity: '.8' }} />
         <span className="brand-text">{auth.user?.toUpperCase()}</span>
       </a>
 
@@ -97,7 +96,7 @@ const Sidebar = ({ isVisible, role }) => {
         {/* Sidebar user panel */}
         <div className="user-panel d-flex align-items-center">
           <div className="image">
-            <img src="" alt="User" />
+            <img src="" />
           </div>&nbsp;&nbsp;
           <div className="info">
             <p className="text-white">KWIZERA Ferdinand</p>

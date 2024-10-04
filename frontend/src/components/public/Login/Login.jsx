@@ -1,13 +1,13 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { AuthContext } from '../../../contexts/AuthProvider'; // Keep the original context import
+import { AuthContext } from '../../../contexts/AuthProvider';
 import './Login.css';
 
 const LOGIN_URL = 'http://127.0.0.1:8000/api/login/';
 
 const Login = () => {
-  const { auth, setAuth } = useContext(AuthContext); // Keep the original usage of AuthContext
+  const { auth, setAuth } = useContext(AuthContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errMsg, setErrMsg] = useState('');
@@ -17,8 +17,7 @@ const Login = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post(
-        LOGIN_URL,
+      const response = await axios.post(LOGIN_URL,
         JSON.stringify({ username: email, password }),
         { headers: { 'Content-Type': 'application/json' } }
       );
@@ -50,17 +49,13 @@ const Login = () => {
     }
   };
 
-  if (auth.isAuthenticated) {
-    navigate("/dashboard");
-  }
-
   return (
     <div className="login-container">
       <div className="card p-4">
         <section>
           <p className={errMsg ? "alert alert-danger" : "d-none"}>{errMsg}</p>
-          <h1 className="text-center mb-4">Sign In</h1>
-          <form onSubmit={handleSubmit} style={{ width: '300px' }}>
+          <h2 className="text-center mb-4"><b>RP::Project</b>&nbsp;Login In</h2>
+          <form onSubmit={handleSubmit}>
             <div className="form-group mb-3">
               <label htmlFor="email">Email/RegNo:</label>
               <input
@@ -87,6 +82,7 @@ const Login = () => {
 
             <button className="btn btn-primary w-100">Sign In</button>
           </form>
+          <button className="claim-password btn" onClick={() => navigate('/claim-password')}>Claim Password</button>
         </section>
       </div>
     </div>

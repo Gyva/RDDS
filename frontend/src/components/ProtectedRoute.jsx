@@ -10,7 +10,7 @@ const ProtectedRoute = ({ children }) => {
     if (!auth.isAuthenticated) {
         console.log("isAuthenticated State is: ", auth.isAuthenticated)
         
-        return <Navigate to="/login" state={{ from: location }} />;
+        return <Navigate to="/" state={{ from: location }} />;
     }
 
     return children;

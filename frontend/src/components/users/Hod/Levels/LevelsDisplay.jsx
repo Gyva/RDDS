@@ -42,7 +42,7 @@ const LevelsDisplay = () => {
                 setLevels((prev) => [...prev, ...response.data]);
             }
         } catch (error) {
-            setErrorAlerts('Failed to fetch levels');
+            console.error('Error fetching levels:', error);
         }
     };
 
@@ -51,9 +51,13 @@ const LevelsDisplay = () => {
             const response = await axios.get('http://127.0.0.1:8000/api/departments/');
             setDepartments(response.data);
         } catch (error) {
-            setErrorAlerts('Failed to fetch departments');
+            console.error('Error fetching departments:', error);
         }
     };
+
+    useEffect(() => {
+        faculties.forEach((faculty) => fetchLevels(faculty.f_id));
+    }, [faculties]);
 
     const handleUpdateLevel = async () => {
         if (!newDepartmentId) {
@@ -111,7 +115,7 @@ const LevelsDisplay = () => {
 
         const existingLevel = levels.find((level) => level.l_name === newLevelName && level.f_id === newFacultyId);
         if (existingLevel) {
-            setErrorAlerts('The level already exists for this faculty.');
+            alert('The level already exists for this faculty.');
             return;
         }
 

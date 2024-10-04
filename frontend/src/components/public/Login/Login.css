@@ -1,26 +1,96 @@
-/* 
-body, html {
-    height: 100%;
-    margin: 0;
+/* Centering the login container */
+.login-container {
     display: flex;
     justify-content: center;
     align-items: center;
-    background: rgba(0, 0, 0, 0.5); 
-} */
+    height: 100vh;
+    background-color: #f8f9fa;
+}
 
-/* Ensure the login card is centered and styled */
-/* .login-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    height: 100vh; 
-} */
-
-/* .login-card {
-    width: 100%;
-    max-width: 400px; 
+/* Styling the login card */
+.card {
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     background-color: white;
-    border-radius: 10px;
-    padding: 20px;
-} */
+    max-width: 400px;
+    width: 100%;
+}
+
+/* Styling form inputs */
+.form-control {
+    border-radius: 8px;
+    padding: 10px;
+    border: 1px solid #ced4da;
+    transition: border-color 0.3s ease;
+}
+
+/* Adding focus effect */
+.form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+/* Button styling */
+.btn-primary {
+    background-color: #007bff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+}
+
+/* Hover effect for the button */
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+/* Claim password link */
+.claim-password {
+    display: block;
+    margin-top: 10px;
+    text-align: center;
+    color: #007bff;
+    text-decoration: none;
+}
+
+.claim-password:hover {
+    text-decoration: underline;
+}
+
+/* Responsive design */
+@media (max-width: 576px) {
+    .login-container {
+        padding: 20px;
+    }
+
+    .card {
+        padding: 15px;
+        box-shadow: none;
+    }
+
+    .btn-primary {
+        font-size: 16px;
+    }
+
+    .form-control {
+        padding: 8px;
+    }
+}
+
+@media (min-width: 768px) {
+    .login-container {
+        padding: 40px;
+    }
+
+    .card {
+        padding: 30px;
+    }
+
+    .btn-primary {
+        font-size: 18px;
+    }
+
+    .form-control {
+        padding: 12px;
+    }
+}

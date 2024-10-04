@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Login from './components/public/Login/Login';
 import Navbar from './components/users/Navbar';
 import Sidebar from './components/users/Sidebar';
@@ -19,61 +19,40 @@ import SupervisorsDisplay from './components/users/Hod/Supervisors/SupervisorsDi
 import ChangePasswordForm from './components/users/ChangePasswordForm';
 import Discover from './components/users/Discover'; // Import the Discover component
 import ProjectBlogPage from './components/users/ProjectBlogPage'; // Import the ProjectBlogPage component
+import Dashboard from './components/users/Dashboard';
+import GetPasswordForm from './components/public/Password/GetPasswordForm';
+import SetPassword from './components/public/Password/SetPassword';
 
 function App() {
-    const [isSidebarVisible, setIsSidebarVisible] = useState(() => {
-        const savedSidebarState = localStorage.getItem('isSidebarVisible');
-        return savedSidebarState !== null ? JSON.parse(savedSidebarState) : true;
-    });
-
-    useEffect(() => {
-        localStorage.setItem('isSidebarVisible', JSON.stringify(isSidebarVisible));
-    }, [isSidebarVisible]);
-
-    const toggleSidebar = () => {
-        setIsSidebarVisible(prevState => !prevState);
-    };
-
     return (
         <>
-        {/* Use the correct AuthProvider here */}
-             <AuthProvider>
+        <Router>
+            <AuthProvider>
                 <Routes>
-                <Route path="/login" element={<Login />} />
-                <Route path="/" element={<Login /> } />
-                </Routes>
-            {/* Protected routes */}
-            {/* <ProtectedRoute> */}
-                <div className="app-container">
-                    {/* Sidebar component */}
-                    <Sidebar isVisible={isSidebarVisible} role={'hod'} />
+                    {/* Public Route for Login */}
+                    <Route path="/" element={<Login />} />
+                    <Route path="/reset-password/:uid/:token" element={<PasswordResetForm />} />
+                    <Route path="/grab-reset-link" element={<GrabResetLink />} />
+                    <Route path="/claim-password" element={<GetPasswordForm />} />
+                    <Route path="/set-password" element={<SetPassword />} />
 
-                    {/* Main content wrapper */}
-                    <div className={`content-wrapper ${isSidebarVisible ? 'sidebar-visible' : 'sidebar-hidden'}`}>
-                        <Navbar toggleSidebar={toggleSidebar} isVisible={isSidebarVisible} />
-                        <div className="main-content">
-                            <Routes>
-                            <Route path='/dashboard' element={<Discover />} />
-                                <Route path='/discover' element={<Discover />} />
-                                <Route path='/departments' element={<DepartmentsDisplay />} />
-                                <Route path='/levels' element={<LevelsDisplay />} />
-                                <Route path='/students' element={<StudentsDisplay/>}/>
-                                <Route path='/faculties' element={<FacultiesDisplay />} /> 
-                                <Route path='/reset-password/:uid/:token' element={<PasswordResetForm/>}/>
-                                <Route path='/grab-reset-link' element={<GrabResetLink/>} /> 
-                                <Route path='/create-project' element={<CreateProject/>} /> 
-                                <Route path='/register-supervisor' element={<SupervisorRegistrationForm/>}/>
-                                <Route path='/register-student' element={<StudentRegistrationForm/>}/>
-                                <Route path='/supervisors' element={<SupervisorsDisplay/>}/>
-                                <Route path="/change-password" element={<ChangePasswordForm/>}/>
-                                <Route path='/discover' element={<Discover/>}/>
-                                <Route path="/projects/:id" element={<ProjectBlogPage />} />
-                            </Routes>
-                        </div>
-                    </div>
-                </div>
-            {/* </ProtectedRoute> */}
-        </AuthProvider>
+                    {/* Protected Routes */}
+                    <Route path="/dashboard" element={<ProtectedRoute><Dashboard><LevelsDisplay /></Dashboard></ProtectedRoute>} />
+                    <Route path="/discover" element={<ProtectedRoute><Dashboard><Discover /></Dashboard></ProtectedRoute>} />
+                    <Route path="/departments" element={<ProtectedRoute><Dashboard><DepartmentsDisplay /></Dashboard></ProtectedRoute>} />
+                    <Route path="/levels" element={<ProtectedRoute><Dashboard><LevelsDisplay /></Dashboard></ProtectedRoute>} />
+                    <Route path="/students" element={<ProtectedRoute><Dashboard><StudentsDisplay /></Dashboard></ProtectedRoute>} />
+                    <Route path="/faculties" element={<ProtectedRoute><Dashboard><FacultiesDisplay /></Dashboard></ProtectedRoute>} />
+                    <Route path="/create-project" element={<ProtectedRoute><Dashboard><CreateProject /></Dashboard></ProtectedRoute>} />
+                    <Route path="/register-supervisor" element={<ProtectedRoute><Dashboard><SupervisorRegistrationForm /></Dashboard></ProtectedRoute>} />
+                    <Route path="/register-student" element={<ProtectedRoute><Dashboard><StudentRegistrationForm /></Dashboard></ProtectedRoute>} />
+                    <Route path="/supervisors" element={<ProtectedRoute><Dashboard><SupervisorsDisplay /></Dashboard></ProtectedRoute>} />
+                    <Route path="/change-password" element={<ProtectedRoute><Dashboard><ChangePasswordForm /></Dashboard></ProtectedRoute>} />
+                    <Route path="/projects/:id" element={<ProtectedRoute><Dashboard><ProjectBlogPage /></Dashboard></ProtectedRoute>} />
+                    
+                </Routes>
+            </AuthProvider>
+        </Router>
         </>
     );
 }
