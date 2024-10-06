@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import './Navbar.css'; // Import the CSS file
-import { AuthContext } from '../../contexts/AuthProvider';
+import { AuthContext } from '../contexts/AuthProvider';
 
 const Navbar = ({ toggleSidebar, isVisible }) => {
     // const {logout} = useContext(AuthContext);

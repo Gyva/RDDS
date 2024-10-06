@@ -3,7 +3,7 @@ import axios from 'axios';
 import DataTable from 'react-data-table-component';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
-import './Display.css';
+import './FacultiesDisplay.css';
 
 const FacultiesDisplay = () => {
     const [faculties, setFaculties] = useState([]);

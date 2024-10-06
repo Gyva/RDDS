@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { AuthContext } from '../../../contexts/AuthProvider';
+import { AuthContext } from '../contexts/AuthProvider';
 import './Login.css';
 
 const LOGIN_URL = 'http://127.0.0.1:8000/api/login/';
@@ -48,6 +48,9 @@ const Login = () => {
       }
     }
   };
+  if(auth.isAuthenticated){
+    navigate('/dashboard');
+  }
 
   return (
     <div className="login-container">

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import axios from 'axios';
 import '@fortawesome/fontawesome-free/css/all.min.css';
-import './Display.css';
+import './StudentDisplay.css';
 import DataTable from 'react-data-table-component';
 
 const StudentsDisplay = () => {

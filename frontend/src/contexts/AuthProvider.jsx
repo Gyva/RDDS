@@ -76,7 +76,7 @@ const AuthProvider = ({ children }) => {
   }, []);
 
   // Axios instance with interceptor
-  const api = axios.create();
+  const api =  axios.create();
 
   api.interceptors.request.use(
     async (config) => {

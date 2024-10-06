@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import './Sidebar.css'; // Ensure this CSS file exists
-import { AuthContext } from '../../contexts/AuthProvider';
+import { AuthContext } from '../contexts/AuthProvider';
 
 const Sidebar = ({ isVisible, role }) => {
   const {auth} = useContext(AuthContext)

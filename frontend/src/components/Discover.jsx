@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { Link } from 'react-router-dom'; // Import Link for navigation
 import './Discover.css'; 
-import { AuthContext } from '../../contexts/AuthProvider'; 
+import { AuthContext } from '../contexts/AuthProvider'; 
 
 const Discover = () => {
   const [projects, setProjects] = useState([]);

@@ -4,7 +4,7 @@ import DataTable from 'react-data-table-component';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import axios from 'axios';
 import '@fortawesome/fontawesome-free/css/all.min.css';
-import './Display.css';
+import './DepartmentDisplay.css';
 
 const DepartmentsDisplay = () => {
     const [departments, setDepartments] = useState([]);

@@ -21,18 +21,18 @@ const Dashboard = ({ children }) => {
   return (
     <div className="app-container">
       {/* Sidebar remains on the side */}
-      {/* <Sidebar isVisible={isSidebarVisible} role={'hod'} /> */}
+      <Sidebar isVisible={isSidebarVisible} role={'hod'} />
 
       {/* Main content wrapper, including the navbar */}
-      {/* <div className={`content-wrapper ${isSidebarVisible ? 'sidebar-visible' : 'sidebar-hidden'}`}> */}
+      <div className={`content-wrapper ${isSidebarVisible ? 'sidebar-visible' : 'sidebar-hidden'}`}>
         {/* Navbar now follows the same layout as the main content */}
-        {/* <Navbar toggleSidebar={toggleSidebar} isVisible={isSidebarVisible} /> */}
+        <Navbar toggleSidebar={toggleSidebar} isVisible={isSidebarVisible} />
         
         {/* Main content area */}
         <div className="main-content">
           {children}
         </div>
-      {/* </div> */}
+      </div>
     </div>
   );
 };

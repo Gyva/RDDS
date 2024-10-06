@@ -72,4 +72,8 @@
   .sidebar-footer {
     display: none;
   }
+  .brand-link {
+    padding: 23px;
+    
+  }
 }

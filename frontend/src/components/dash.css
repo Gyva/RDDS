@@ -14,7 +14,7 @@
 
 /* Adjust for visible sidebar */
 .sidebar-visible .main-content {
-    margin-left: 250px;
+    margin-left: 240px;
 }
 
 /* Adjust for hidden sidebar */
@@ -48,6 +48,7 @@
 @media (max-width: 768px) {
     .content-wrapper {
         flex-direction: column;
+        margin-left: 0px;
     }
 
     /* Sidebar should be below the navbar on smaller screens */
@@ -56,7 +57,7 @@
     }
 
     .sidebar-hidden .main-content {
-        margin-left: 10px;
+        margin-left: 2px;
     }
 }
 
