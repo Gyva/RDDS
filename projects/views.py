@@ -707,6 +707,16 @@ class ConversationViewSet(viewsets.ModelViewSet):
     serializer_class = ConversationSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        project_id = self.request.query_params.get('project_id', None)
+        
+        # If a project_id is provided, filter conversations by that project
+        if project_id:
+            queryset = queryset.filter(project_id=project_id)
+        
+        return queryset
+
     def create(self, request, *args, **kwargs):
         project_id = request.data.get('project_id')
         project = get_object_or_404(Project, pk=project_id)
