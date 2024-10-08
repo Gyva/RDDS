@@ -1,11 +1,11 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { Link } from 'react-router-dom'; // Import Link for navigation
-import './Discover.css'; 
-import { AuthContext } from '../contexts/AuthProvider'; 
+import './Discover.css';
+import { AuthContext } from '../contexts/AuthProvider';
 
 const Discover = () => {
   const [projects, setProjects] = useState([]);
-  const { auth, api, refreshToken } = useContext(AuthContext); // Destructure refreshToken function
+  const { auth, api, refreshToken,logout } = useContext(AuthContext); // Destructure refreshToken function
 
   const fetchProjects = async () => {
     try {
@@ -31,10 +31,17 @@ const Discover = () => {
     if (auth.accessToken) {
       fetchProjects();
     } else {
-      refreshToken() // Call refreshToken if accessToken is missing initially
-        .then(fetchProjects) // After refreshing, attempt to fetch the projects
-        .catch(error => console.log('Token refresh failed:', error));
+      let tries = 0;
+      while (tries < 2) {
+        refreshToken() // Call refreshToken if accessToken is missing initially
+          .then(fetchProjects) // After refreshing, attempt to fetch the projects
+          .catch(error => console.log('Token refresh failed:', error));
+      }
+      if(projects.length === 0){
+        logout();
+      }
     }
+
   }, [auth.accessToken, api, refreshToken]);
 
   return (

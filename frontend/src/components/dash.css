@@ -8,13 +8,13 @@
 .content-wrapper {
     display: flex;
     flex: 1;
-    transition: margin-left 0.3s ease-in-out;
+    transition: margin-left 0.9s ease-in-out;
     padding-top: 60px; /* To account for the fixed navbar */
 }
 
 /* Adjust for visible sidebar */
 .sidebar-visible .main-content {
-    margin-left: 240px;
+    margin-left: 230px;
 }
 
 /* Adjust for hidden sidebar */

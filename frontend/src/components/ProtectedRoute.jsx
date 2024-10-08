@@ -46,6 +46,9 @@ const ProtectedRoute = ({ children }) => {
         if (location.from === '/manage-project') {
             return <Navigate to="/manage-project" state={{ from: location }} />;
         }
+        if (location.from === '/chat') {
+            return <Navigate to="/chat" state={{ from: location }} />;
+        }
         // Safeguard against undefined from before using startsWith()
         // New logic for matching dynamic routes without startsWith
         if (location.from && /\/projects\/\d+/.test(location.from)) {

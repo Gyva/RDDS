@@ -9,7 +9,7 @@ const SetPassword = () => {
     const password = watch('password', ''); // Get the value of the password field
     const navigate = useNavigate();
     const location = useLocation(); // Get passed data
-    const { reg_no, fname, lname, email, isStudent } = location.state || {}; // Destructure the received data, including role
+    const { reg_no,email } = location.state || {}; // Destructure the received data, including role
 
     const onSubmit = async (data) => {
         try {

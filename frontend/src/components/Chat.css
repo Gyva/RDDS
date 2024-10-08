@@ -1,0 +1,34 @@
+.container {
+    padding: 20px;
+    transition: margin-left 0.3s ease-in-out; /* Smooth transition */
+  }
+  
+  .chat-display-sect {
+    margin-bottom: 80px; /* Leave space for the fixed message section */
+  }
+  
+  .message-send-sect {
+    background-color: silver;
+    padding: 10px;
+  }
+  
+  .header-text {
+    display: flex;
+    justify-content: center;
+    margin-top: 60px;
+    color: steelblue;
+    font-style: italic;
+    font-size: 15px;
+  }
+  
+  @media (max-width: 768px) {
+    .header-text {
+      margin-top: 70px;
+      text-align: center;
+    }
+  
+    .container {
+      margin-left: 10px; /* On small screens, no sidebar margin */
+    }
+  }
+  
