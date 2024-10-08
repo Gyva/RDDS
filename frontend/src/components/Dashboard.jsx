@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
+import { AuthContext } from '../contexts/AuthProvider';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './dash.css';
 
 const Dashboard = ({ children }) => {
+  const {auth} = useContext(AuthContext);
   const [isSidebarVisible, setIsSidebarVisible] = useState(() => {
     const savedSidebarState = localStorage.getItem('isSidebarVisible');
     return savedSidebarState !== null ? JSON.parse(savedSidebarState) : true;
@@ -21,7 +23,7 @@ const Dashboard = ({ children }) => {
   return (
     <div className="app-container">
       {/* Sidebar remains on the side */}
-      <Sidebar isVisible={isSidebarVisible} role={'hod'} />
+      <Sidebar isVisible={isSidebarVisible} role={auth.role?.toLowerCase()} />
 
       {/* Main content wrapper, including the navbar */}
       <div className={`content-wrapper ${isSidebarVisible ? 'sidebar-visible' : 'sidebar-hidden'}`}>

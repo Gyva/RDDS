@@ -1,34 +1,78 @@
-.container {
-    padding: 20px;
-    transition: margin-left 0.3s ease-in-out; /* Smooth transition */
-  }
-  
-  .chat-display-sect {
-    margin-bottom: 80px; /* Leave space for the fixed message section */
-  }
-  
-  .message-send-sect {
-    background-color: silver;
-    padding: 10px;
-  }
-  
-  .header-text {
-    display: flex;
-    justify-content: center;
-    margin-top: 60px;
-    color: steelblue;
-    font-style: italic;
-    font-size: 15px;
-  }
-  
-  @media (max-width: 768px) {
-    .header-text {
-      margin-top: 70px;
-      text-align: center;
-    }
-  
-    .container {
-      margin-left: 10px; /* On small screens, no sidebar margin */
-    }
-  }
-  
+/* Chat header styling */
+.header-text {
+  background-color: #343a40;
+  color: #fff;
+  padding: 15px;
+  font-weight: bold;
+  width: 100%;
+  text-align: center;
+}
+
+/* Messages container */
+.messages-container {
+  margin-top: 80px; /* Adjust for the fixed header */
+  padding: 10px 20px; /* Padding on left and right for consistent margins */
+  overflow-y: auto;
+  height: calc(100vh - 150px); /* Adjust to account for header and input sections */
+  background-color: #f1f1f1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Message styling */
+.message {
+  max-width: 75%;
+  margin-bottom: 15px;
+  padding: 10px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Sent message styling */
+.message.sent {
+  align-self: flex-end;
+  background-color: #007bff;
+  color: white;
+}
+
+/* Received message styling */
+.message.received {
+  align-self: flex-start;
+  background-color: #e2e2e2;
+  color: black;
+}
+
+/* Message text styling */
+.message-text {
+  font-size: 1rem;
+  margin-bottom: 5px;
+}
+
+/* Timestamp styling */
+.message-timestamp {
+  font-size: 0.8rem;
+  color: gray;
+  align-self: flex-end;
+}
+
+/* Message input section */
+.message-send-sect {
+  padding: 10px 20px; /* Same left-right padding as message container */
+  background-color: white;
+  border-top: 1px solid #ccc;
+  position: fixed;
+  bottom: 0; /* Fix it to the bottom */
+  left: 0;
+  right: 0;
+  z-index: 1000;
+}
+
+.message-send-sect.full-width {
+  width: 100%; /* Full width when sidebar is not visible */
+}
+
+.message-send-sect.with-sidebar {
+  width: calc(100% - 250px); /* Adjust this width based on the sidebar size */
+  margin-left: 250px; /* Shift the send message section to the right when sidebar is open */
+}

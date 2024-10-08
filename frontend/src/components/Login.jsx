@@ -23,16 +23,17 @@ const Login = () => {
       );
 
       const result = response?.data;
-      const { username, role, access_token, refresh_token } = result;
+      const { id, username, role, access_token, refresh_token } = result;
 
       // Save data in localStorage
+      localStorage.setItem('id', id);
       localStorage.setItem('user', username);
       localStorage.setItem('role', role);
       localStorage.setItem('token', access_token);
       localStorage.setItem('refresh_token', refresh_token);
 
       // Update the auth context
-      setAuth({ user: username, role, accessToken: access_token, isAuthenticated: true });
+      setAuth({ id: id, username, role, accessToken: access_token, isAuthenticated: true });
 
       navigate('/dashboard'); // Redirect to dashboard on successful login
 

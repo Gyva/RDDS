@@ -1,11 +1,48 @@
 import React, { useContext } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
-import './Sidebar.css'; // Ensure this CSS file exists
+import './Sidebar.css';
 import { AuthContext } from '../contexts/AuthProvider';
+import { useNavigate } from 'react-router-dom'; // To handle navigation
 
 const Sidebar = ({ isVisible, role }) => {
-  const {auth} = useContext(AuthContext)
+  const { auth, api } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  // Function to handle chat menu click
+  const handleChatClick = async () => {
+    try {
+      let studentId, projectId, conversationId;
+
+      // Check user role and fetch the necessary IDs
+      if (auth.role?.toUpperCase() === 'STUDENT') {
+        const studentResponse = await api.get(`http://127.0.0.1:8000/api/students/?reg_num=${auth.user}`);
+        studentId = studentResponse.data[0].st_id;
+
+        const projectsResponse = await api.get(`http://127.0.0.1:8000/api/projects/?student=${studentId}`);
+        projectId = projectsResponse.data[0].project_id;
+
+      } else if (auth.role?.toUpperCase() === 'SUPERVISOR') {
+        const supervisorResponse = await api.get(`http://127.0.0.1:8000/api/supervisors/?reg_num=${auth.user}`);
+        const supervisorId = supervisorResponse.data[0].sup_id;
+
+        const projectsResponse = await api.get(`http://127.0.0.1:8000/api/projects/?supervisor=${supervisorId}`);
+        projectId = projectsResponse.data[0].project_id;
+      }
+
+      // Fetch the conversation ID for the project
+      const conversationResponse = await api.get(`http://127.0.0.1:8000/api/conversations/?project_id=${projectId}`);
+      conversationId = conversationResponse.data[0].id;
+      // console.log(`Student ID: ${studentId} Project ID: ${projectId} Conversation ID: ${conversationId}`)
+
+      // Navigate to the chat component, passing IDs through navigation state
+      navigate('/chat', { state: { studentId, projectId, conversationId } });
+
+    } catch (error) {
+      console.error('Error fetching chat data:', error);
+    }
+  };
+
   const commonMenus = (
     <li className="nav-item">
       <a href="/home" className="nav-link">
@@ -15,6 +52,7 @@ const Sidebar = ({ isVisible, role }) => {
   );
 
   const roleMenus = {
+    // Define different menus for each role
     hod: (
       <>
         <li className="nav-item">
@@ -55,6 +93,12 @@ const Sidebar = ({ isVisible, role }) => {
             <i className="nav-icon fas fa-users me-2"></i> Supervise Students
           </a>
         </li>
+        {/* Chat menu item for supervisor */}
+        <li className="nav-item">
+          <a href="#!" onClick={handleChatClick} className="nav-link">
+            <i className="nav-icon fas fa-comments me-2"></i> Chat
+          </a>
+        </li>
       </>
     ),
     student: (
@@ -79,31 +123,29 @@ const Sidebar = ({ isVisible, role }) => {
             <i className="nav-icon fas fa-certificate me-2"></i> Clearance
           </a>
         </li>
+        {/* Chat menu item for student */}
+        <li className="nav-item">
+          <a href="#!" onClick={handleChatClick} className="nav-link">
+            <i className="nav-icon fas fa-comments me-2"></i> Chat
+          </a>
+        </li>
       </>
     )
   };
 
   return (
     <aside className={`main-sidebar ${isVisible ? '' : 'd-none'}`}>
-      {/* Brand Logo */}
       <a href="/" className="brand-link">
-        <img src=""  className="brand-image" style={{ opacity: '.8' }} />
         <span className="brand-text">{auth.user?.toUpperCase()}</span>
       </a>
 
-      {/* Sidebar */}
       <div className="sidebar">
-        {/* Sidebar user panel */}
         <div className="user-panel d-flex align-items-center">
-          <div className="image">
-            <img src="" />
-          </div>&nbsp;&nbsp;
           <div className="info">
             <p className="text-white">KWIZERA Ferdinand</p>
           </div>
         </div>
         <hr className='text-secondary' />
-        {/* Sidebar Menu */}
         <nav>
           <ul className="nav flex-column">
             {commonMenus}
@@ -112,7 +154,6 @@ const Sidebar = ({ isVisible, role }) => {
         </nav>
       </div>
 
-      {/* Sidebar footer */}
       <div className="sidebar-footer text-center p-3">
         <span className="fs-6 text-white">{role}</span>
       </div>

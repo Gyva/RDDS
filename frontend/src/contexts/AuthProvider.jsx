@@ -5,6 +5,7 @@ export const AuthContext = createContext({});
 
 const AuthProvider = ({ children }) => {
   const [auth, setAuth] = useState({
+    id:null,
     isAuthenticated: JSON.parse(localStorage.getItem("isAuthenticated")) || false,
     user: null,
     role: null,
@@ -57,13 +58,15 @@ const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const checkAuthStatus = () => {
+      const savedId = localStorage.getItem('id')
       const savedUser = localStorage.getItem('user');
       const savedRole = localStorage.getItem('role');
       const savedAccessToken = localStorage.getItem('token');
       const refreshToken = localStorage.getItem('refresh_token');
 
-      if (savedUser && savedAccessToken && refreshToken) {
+      if (savedId && savedUser && savedAccessToken && refreshToken) {
         setAuth({
+          id : savedId,
           isAuthenticated: true,
           user: savedUser,
           role: savedRole,
