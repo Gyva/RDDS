@@ -177,7 +177,7 @@ class Project(models.Model):
 
 #Feedback model
 class Feedback(models.Model):
-    project = models.ForeignKey(Project, on_delete=models.SET_NULL)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     feedback_text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -192,7 +192,7 @@ class Feedback(models.Model):
 
 #Conversation model   
 class Conversation(models.Model):
-    project = models.ForeignKey('Project', on_delete=models.SET_NULL, related_name='conversations')
+    project = models.ForeignKey('Project', on_delete=models.CASCADE, related_name='conversations')
     participants = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='conversations')
     created_at = models.DateTimeField(default=timezone.now)
 
@@ -201,8 +201,8 @@ class Conversation(models.Model):
 
 #Message model
 class Message(models.Model):
-    conversation = models.ForeignKey(Conversation, on_delete=models.SET_NULL, related_name='messages')
-    sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL)
+    conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='messages')
+    sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     text = models.TextField()
     timestamp = models.DateTimeField(default=timezone.now)
 
@@ -233,12 +233,12 @@ def project_file_upload_path(instance, filename):
     # Return the full path to store the file, e.g., "projects/documents/24rp00001_24rp00002_final-report.pdf"
     return f"projects/documents/{new_filename}"  
 class ProjectFile(models.Model):
-    project = models.ForeignKey(Project, on_delete=models.SET_NULL)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
     file = models.FileField(upload_to=project_file_upload_path, validators=[FileExtensionValidator(['pdf'])])
     uploaded_at = models.DateTimeField(auto_now_add=True)
     
     # Track the uploader
-    uploader = models.ForeignKey(Student, on_delete=models.SET_NULL)
+    uploader = models.ForeignKey(Student, on_delete=models.CASCADE)
 
     def __str__(self):
         return f"File for Project: {self.project.title} uploaded by {self.uploader.reg_no}"
