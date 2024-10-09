@@ -38,7 +38,7 @@ const Chat = () => {
       const response = await api.post('http://127.0.0.1:8000/api/messages/', {
         text: messageText,
         conversation: conversationId,
-        sender:auth.id
+        sender: auth.id
       });
       setMessages([...messages, response.data]); // Append new message to list
       setMessageText(''); // Clear input field
@@ -51,28 +51,37 @@ const Chat = () => {
     <div className='container'>
       {/* Chat header */}
       <div className='chat-display-sect'>
-        <p className='border p-1 d-flex align-items-center fixed-top header-text'>
+        <p className='border p-1 d-flex align-items-center fixed-top header-text' style={{marginTop:'53px'}}>
           Chat with Supervisor
+          <p>
+            {conversationId}
+          </p>
         </p>
 
         {/* Messages display section */}
         <div className='messages-container'>
-          {messages.map((msg, index) => (
+          {messages.map((msg) => (
             <div
               key={msg.id}
-              className={`message ${
-                msg.sender === studentId ? 'sent' : 'received'
-              }`} // Apply different styles for sent and received messages
+              className={`message d-flex ${msg.sender === auth.id ? 'sent justify-content-end' : 'received justify-content-start'}`}
+              aria-label={`Message from ${msg.sender === auth.id ? 'you' : 'other user'}`}
             >
               <div className='message-info'>
                 <p className='message-text'>{msg.text}</p>
                 <small className='message-timestamp'>
-                  {new Date(msg.timestamp).toLocaleString()} {/* Format timestamp */}
+                  {new Date(msg.timestamp).toLocaleString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })} {/* Format timestamp with more control */}
                 </small>
               </div>
             </div>
           ))}
         </div>
+
       </div>
 
       {/* Message input section */}

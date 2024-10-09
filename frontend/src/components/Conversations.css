@@ -1,0 +1,16 @@
+.conversation-list {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .conversation-card {
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+  }
+  
+  .conversation-card h3 {
+    margin-bottom: 10px;
+    color: #007bff;
+  }
+  

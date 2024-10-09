@@ -22,6 +22,7 @@ import GetPasswordForm from './components/GetPasswordForm';
 import SetPassword from './components/SetPassword';
 import ManageSubmittedProjects from './components/ManageSubmittedProjects';
 import Chat from './components/Chat';
+import ConversationsList from './components/ConversationsList';
 
 function App() {
     return (
@@ -52,6 +53,7 @@ function App() {
                     <Route path="/projects/:id" element={<ProtectedRoute><Dashboard><ProjectBlogPage /></Dashboard></ProtectedRoute>} />
                     <Route path="/manage-projects" element={<ProtectedRoute><Dashboard><ManageSubmittedProjects /></Dashboard></ProtectedRoute>} />
                     <Route path="/chat" element={<ProtectedRoute><Dashboard><Chat /></Dashboard></ProtectedRoute>} />
+                    <Route path="/conversations" element={<ProtectedRoute><Dashboard><ConversationsList /></Dashboard></ProtectedRoute>} />
 
                     
                 </Routes>

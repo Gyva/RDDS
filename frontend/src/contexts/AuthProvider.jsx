@@ -1,9 +1,11 @@
 import React, { createContext, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 export const AuthContext = createContext({});
 
 const AuthProvider = ({ children }) => {
+  const navigate = useNavigate();
   const [auth, setAuth] = useState({
     id:null,
     isAuthenticated: JSON.parse(localStorage.getItem("isAuthenticated")) || false,
@@ -54,6 +56,7 @@ const AuthProvider = ({ children }) => {
       accessToken: null,
     });
     localStorage.clear(); // Clear user data
+    navigate('/');
   };
 
   useEffect(() => {

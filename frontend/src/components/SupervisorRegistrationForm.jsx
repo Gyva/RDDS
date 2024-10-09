@@ -12,7 +12,6 @@ const SupervisorRegistrationForm = ({ contextValues }) => {
             department_id: contextValues?.department_id || '',
         }
     });
-    const defaultProfilePic = '../../../assets/default_profile.png';
 
     useEffect(() => {
         fetch('http://127.0.0.1:8000/api/departments/')
@@ -23,37 +22,22 @@ const SupervisorRegistrationForm = ({ contextValues }) => {
 
     const handleDepartmentChange = (e) => {
         const departmentId = e.target.value;
-        console.log(departmentId)
         setSelectedDepartment(departmentId);
         setValue('department_id', departmentId);
     };
 
-    const validateDepartment = () => {
-        const department = getValues('department_id');
-        console.log(department)
-        if (department && !departments.find(d => d.dpt_id == department)) {
-            return 'Selected department is not valid.';
-        }
-        return true;
-    };
+    
 
     const onSubmit = async (data) => {
-        const validationError = validateDepartment();
-        console.log(defaultProfilePic);
-        if (data.profile_pic === null || data.profile_pic === undefined || data.profile_pic === '') {
-            data.profile_pic = defaultProfilePic
-        }
-        
-        if (validationError !== true) {
-            alert(validationError);
-            return;
-        }
 
         console.log('Form submitted:', data);
 
+        // Remove the profile_pic from data before submission
+        const { profile_pic, ...filteredData } = data;
+
         const URL = 'http://127.0.0.1:8000/api/supervisors/'
         try {
-            const response = await axios.post(URL, data, {
+            const response = await axios.post(URL, filteredData, {
                 headers: {
                     'Content-Type': 'application/json',
                 }
@@ -134,15 +118,6 @@ const SupervisorRegistrationForm = ({ contextValues }) => {
 
                         <div className="row mb-3">
                             <div className="col-12 col-md-6">
-                                <label htmlFor="profile_pic" className="form-label">Profile Picture URL:</label>
-                                <input
-                                    type="file"
-                                    id="profile_pic"
-                                    className="form-control"
-                                    {...register('profile_pic')}
-                                />
-                            </div>
-                            <div className="col-12 col-md-6">
                                 <label htmlFor="specialization" className="form-label">Specialization:</label>
                                 <input
                                     type="text"
@@ -152,9 +127,7 @@ const SupervisorRegistrationForm = ({ contextValues }) => {
                                 />
                                 {errors.specialization && <div className="invalid-feedback">{errors.specialization.message}</div>}
                             </div>
-                        </div>
 
-                        <div className="row mb-3">
                             <div className="col-12 col-md-6">
                                 <label htmlFor="department_id" className="form-label">Department:</label>
                                 <select
@@ -173,6 +146,9 @@ const SupervisorRegistrationForm = ({ contextValues }) => {
                                 </select>
                                 {errors.dpt_id && <div className="invalid-feedback">{errors.dpt_id.message}</div>}
                             </div>
+                        </div>
+
+                        <div className="row mb-3">
                             <div className="col-12 col-md-6">
                                 <label htmlFor="roles" className="form-label">Roles:</label>
                                 <select
