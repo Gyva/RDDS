@@ -63,7 +63,7 @@ class Supervisor(models.Model):
     lname = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
     phone = models.CharField(unique=True, max_length=15)
-    profile_pic = models.ImageField(upload_to=unique_image_path, validators=[FileExtensionValidator(['jpg', 'jpeg', 'png'])])
+    profile_pic = models.ImageField(upload_to=unique_image_path, validators=[FileExtensionValidator(['jpg', 'jpeg', 'png'])], default='static/supervisor/ef7f1db6dc4f4b148121cbfdad0d32be.jpg')
     specialization = models.CharField(max_length=255)
     dpt_id = models.ForeignKey(Department, on_delete=models.CASCADE)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
@@ -119,7 +119,7 @@ class Student(models.Model):
     dpt_id = models.ForeignKey(Department, on_delete=models.CASCADE)
     f_id = models.ForeignKey(Faculty, on_delete=models.CASCADE)
     l_id = models.ForeignKey(Level, on_delete=models.CASCADE)
-    profile_pic = models.ImageField(upload_to=unique_image_path, validators=[FileExtensionValidator(['jpg', 'jpeg', 'png'])])
+    profile_pic = models.ImageField(upload_to=unique_image_path, validators=[FileExtensionValidator(['jpg', 'jpeg', 'png'])], default='static/supervisor/ef7f1db6dc4f4b148121cbfdad0d32be.jpg')
     
     # New field to link Student to a user account
     account = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
@@ -231,7 +231,7 @@ def project_file_upload_path(instance, filename):
     new_filename = f"{reg_no_part}_{filename_slug}{extension}"
     
     # Return the full path to store the file, e.g., "projects/documents/24rp00001_24rp00002_final-report.pdf"
-    return f"projects/documents/{new_filename}"  
+    return f"static/documents/{new_filename}"  
 class ProjectFile(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     file = models.FileField(upload_to=project_file_upload_path, validators=[FileExtensionValidator(['pdf'])])
