@@ -1,6 +1,6 @@
 from rest_framework import viewsets, serializers, permissions, filters
-from .models import Department, Supervisor, Faculty, Level, Student, User, Project, Feedback, Conversation, Message
-from .serializers import DepartmentSerializer, SupervisorSerializer, FacultySerializer, LevelSerializer, StudentSerializer, LoginSerializer, PasswordResetSerializer, PasswordResetConfirmSerializer, ChangePasswordSerializer, ProjectSerializer, FeedbackSerializer, ConversationSerializer, MessageSerializer
+from .models import Department, Supervisor, Faculty, Level, Student, User, Project, Feedback, Conversation, Message, ProjectFile
+from .serializers import DepartmentSerializer, SupervisorSerializer, FacultySerializer, LevelSerializer, StudentSerializer, LoginSerializer, PasswordResetSerializer, PasswordResetConfirmSerializer, ChangePasswordSerializer, ProjectSerializer, FeedbackSerializer, ConversationSerializer, MessageSerializer, ProjectFileSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.core.mail import send_mail
@@ -18,6 +18,7 @@ from django.shortcuts import get_object_or_404
 from .utils import check_improvement_similarity
 from django.db import transaction
 from django.conf import settings
+from rest_framework.exceptions import PermissionDenied
 
 # Login view
 @api_view(['POST'])
@@ -571,7 +572,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
         # Send notification email
         send_mail(
             'Project Marked as Completed',
-            'Your project has been marked as completed.',
+            'Your project has been marked as completed, now you can upload your research study.',
             settings.DEFAULT_FROM_EMAIL,
             [project.student.account.email],
             fail_silently=False,
@@ -702,6 +703,7 @@ class ProvideFeedbackView(APIView):
         return Response({'error': 'Feedback text is required.'}, status=status.HTTP_400_BAD_REQUEST)
     
 
+# Conversation viewset
 class ConversationViewSet(viewsets.ModelViewSet):
     queryset = Conversation.objects.all()
     serializer_class = ConversationSerializer
@@ -749,6 +751,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
         message_serializer = MessageSerializer(message)
         return Response(message_serializer.data)
 
+# Message viewset
 class MessageViewSet(viewsets.ModelViewSet):
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
@@ -765,3 +768,22 @@ class MessageViewSet(viewsets.ModelViewSet):
         
         return queryset.order_by('timestamp')  # Order by newest first
 
+class ProjectFileViewSet(viewsets.ModelViewSet):
+    queryset = ProjectFile.objects.all()
+    serializer_class = ProjectFileSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        # Retrieve the user who is uploading the file
+        user = self.request.user
+        
+        # Ensure the user is a Student and associated with the project
+        student = user.student  # Assuming 'student' is linked to the user
+        project = serializer.validated_data['project']
+        
+        # Check if the student is the main project student or a collaborator
+        if project.student == student or project.collaborators.filter(st_id=student.st_id).exists():
+            # Save the file, with the uploader being the current student
+            serializer.save(uploader=student)
+        else:
+            raise PermissionDenied("You are not authorized to upload files for this project.")
