@@ -10,13 +10,16 @@
 
 /* Messages container */
 .messages-container {
-  margin-top: 80px; /* Adjust for the fixed header */
+  margin-top: 0px; /* Adjust for the fixed header */
   padding: 10px 20px; /* Padding on left and right for consistent margins */
   overflow-y: auto;
   height: calc(100vh - 150px); /* Adjust to account for header and input sections */
   background-color: #f1f1f1;
   display: flex;
   flex-direction: column;
+  margin-bottom: 60px;
+  max-height: '400px';
+  overflow-y: 'scroll',
 }
 
 /* Message styling */

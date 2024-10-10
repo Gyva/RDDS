@@ -6,6 +6,7 @@ import axios from 'axios';
 const SupervisorRegistrationForm = ({ contextValues }) => {
     const [departments, setDepartments] = useState([]);
     const [selectedDepartment, setSelectedDepartment] = useState(contextValues?.department_id || '');
+    const [afterSubmitMessage, setAfterSubmitMessage] = useState(null)
 
     const { register, handleSubmit, formState: { errors }, setValue, getValues } = useForm({
         defaultValues: {
@@ -42,7 +43,10 @@ const SupervisorRegistrationForm = ({ contextValues }) => {
                     'Content-Type': 'application/json',
                 }
             });
-            console.log(response);
+            console.log(response.data);
+            alert(response.data.message)
+            setAfterSubmitMessage(response.data.message)
+            data = {};
 
         } catch (error) {
             console.error("Error occurred ", error)
@@ -51,7 +55,9 @@ const SupervisorRegistrationForm = ({ contextValues }) => {
 
     return (
         <div className="container-fluid vh-100 d-flex align-items-center justify-content-center">
+            
             <div className="card w-100 rounded-top-4 rounded-bottom-4" style={{ maxWidth: '800px', height: '70vh', overflowY: 'auto' }}>
+            <span className='text-primary  ml-5'>{afterSubmitMessage}</span>
                 <div className="card-header bg-success text-white rounded-top-4">
                     <h2 className="m-2 text-center">Register a new supervisor to the system</h2>
                 </div>

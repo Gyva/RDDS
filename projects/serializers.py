@@ -9,7 +9,6 @@ from django.conf import settings
 from django.contrib.auth.password_validation import validate_password
 from django.utils.http import urlsafe_base64_decode
 
-# Login Serializer
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField(required=True)  # Handle both email and registration number
     password = serializers.CharField(required=True, write_only=True)
@@ -39,6 +38,7 @@ class DepartmentSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class SupervisorSerializer(serializers.ModelSerializer):
+
     phone = serializers.CharField(max_length=10)
 
     class Meta:
@@ -93,7 +93,7 @@ class StudentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Student
-        fields = ['st_id', 'reg_no', 'fname', 'lname', 'dob', 'email', 'phone', 'dpt_id', 'f_id', 'l_id', 'profile_pic', 'account']
+        fields =['st_id', 'reg_no', 'fname', 'lname', 'dob', 'email', 'phone', 'dpt_id', 'f_id', 'l_id', 'profile_pic','account']
 
     def __init__(self, *args, **kwargs):
         super(StudentSerializer, self).__init__(*args, **kwargs)
@@ -140,8 +140,8 @@ class StudentSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Selected level does not belong to the selected faculty.")
 
         return data
-
-# Reset password serializer
+    
+#Reset password serializer
 class PasswordResetSerializer(serializers.Serializer):
     email = serializers.EmailField()
     username = serializers.CharField()
@@ -248,17 +248,43 @@ class ChangePasswordSerializer(serializers.Serializer):
 
         return user
 
+# Project serializer
 class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
-        fields = '__all__'
+        fields = ['project_id','title', 'case_study', 'abstract', 'collaborators','check_status','approval_status', 'completion_status', 'department_id', 'student_id', 'supervisor_id', 'improved_project_id', 'accademic_year']
 
+    def create(self, validated_data):
+        request = self.context.get('request', None)
+        user = request.user
+        validated_data['department'] = user.profile.department
+
+        if user.is_student:
+            validated_data['student'] = user.student_profile
+        elif user.is_supervisor:
+            validated_data['supervisor'] = user.supervisor_profile
+
+        return super().create(validated_data)
+    
+#Feedback serializer
 class FeedbackSerializer(serializers.ModelSerializer):
     class Meta:
         model = Feedback
-        fields = '__all__'
+        fields = ['id', 'project', 'user', 'feedback_text', 'created_at']
+        read_only_fields = ['id', 'user', 'created_at']
 
+#Message serializer
+class MessageSerializer(serializers.ModelSerializer):
+    sender = serializers.StringRelatedField(read_only=True)
+
+    class Meta:
+        model = Message
+        fields = ['id', 'conversation', 'sender', 'text', 'timestamp']
+
+#Conversation serializaers
 class ConversationSerializer(serializers.ModelSerializer):
+    messages = MessageSerializer(many=True, read_only=True)
+
     class Meta:
         model = Conversation
         fields = ['id', 'project', 'participants', 'messages', 'created_at']

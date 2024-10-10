@@ -4,8 +4,10 @@ import './Navbar.css'; // Import the CSS file
 import { AuthContext } from '../contexts/AuthProvider';
 import { assets } from '../assets/assets.js';
 
+
 const Navbar = ({ toggleSidebar, isVisible }) => {
     // const {logout} = useContext(AuthContext);
+    const {auth, logout} = useContext(AuthContext);
     const navigate = useNavigate();
 
     const handleLogout = (e) => {
@@ -36,12 +38,10 @@ const Navbar = ({ toggleSidebar, isVisible }) => {
                         <p className="nav-link mb-0 year-text" onClick={() => navigateToPage('#')}>
                             2023 - 2024
                         </p>
-                        <p className="nav-link mb-0 logout-text" onClick={handleLogout}>
+                        <p className="nav-link mb-0 logout-text" onClick={logout}>
                             Logout <i className="fas fa-sign-out-alt"></i>
                         </p>
-                        <form id="logout-form" action="https://mis.rp.ac.rw/logout" method="POST" className="d-none">
-                            <input type="hidden" name="_token" value="3To1bq5UNUZH7mvt5ZAws2Lgp3zsarRjWfwl2bld" autoComplete="off" />
-                        </form>
+                        
                     </div>
                 </div>
 

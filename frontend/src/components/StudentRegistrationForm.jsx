@@ -8,6 +8,7 @@ const StudentRegistrationForm = ({ contextValues }) => {
     const [levels, setLevels] = useState([]);
     const [selectedDepartment, setSelectedDepartment] = useState(contextValues?.dpt_id || '');
     const [selectedFaculty, setSelectedFaculty] = useState(contextValues?.f_id || '');
+    const [afterSubmitMessage, setAfterSubmitMessage] = useState(null)
 
     const { register, handleSubmit, formState: { errors }, setValue, getValues } = useForm({
         defaultValues: {
@@ -74,28 +75,8 @@ const StudentRegistrationForm = ({ contextValues }) => {
         setValue('l_id', '');
     };
 
-    const validateDepartmentAndFaculty = () => {
-        const department = getValues('dpt_id');
-        const faculty = getValues('f_id');
-        const level = getValues('l_id');
-
-        if (faculty && !faculties.find(f => f.f_id === faculty && f.dpt_id === department)) {
-            return 'Selected faculty does not belong to the selected department.';
-        }
-
-        if (level && !levels.find(l => l.l_id === level && l.dpt_id === department && l.f_id === faculty)) {
-            return 'Selected level does not belong to the selected department and faculty.';
-        }
-
-        return true;
-    };
-
     const onSubmit = (data) => {
-        const validationError = validateDepartmentAndFaculty();
-        if (validationError !== true) {
-            alert(validationError);
-            return;
-        }
+        
 
         console.log('Form submitted:', data);
 
@@ -115,6 +96,9 @@ const StudentRegistrationForm = ({ contextValues }) => {
             })
             .then(data => {
                 console.log('Success:', data);
+                alert(data.message)
+                setAfterSubmitMessage(data.message)
+                data = {};
             })
             .catch(error => {
                 console.error('Error:', error);
@@ -123,6 +107,7 @@ const StudentRegistrationForm = ({ contextValues }) => {
 
     return (
         <div className="container mt-5">
+            <span className='text text-primary'>{afterSubmitMessage}</span>
             <div className='border rounde-top-4 p-3'>
             <div className='bg-success text-white px-3 py-1 rounded-top-4'><h2 className="text-center">Student Registration Form</h2></div>
             <form onSubmit={handleSubmit(onSubmit)} className="row g-3">

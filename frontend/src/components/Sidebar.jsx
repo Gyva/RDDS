@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import './Sidebar.css';
@@ -6,33 +6,47 @@ import { AuthContext } from '../contexts/AuthProvider';
 import { useNavigate } from 'react-router-dom'; // To handle navigation
 
 const Sidebar = ({ isVisible, role }) => {
+  const [students,setStudents] = useState()
+    const [supervisors, setSupervisors] = useState() 
   const { auth, api } = useContext(AuthContext);
   const navigate = useNavigate();
 
   // Function to handle chat menu click
   const handleChatClick = async () => {
     try {
-      let studentId, projectId, conversationId;
+      let studentId,supervisorId, projectId, conversationId;
 
       // Check user role and fetch the necessary IDs
       if (auth.role?.toUpperCase() === 'STUDENT') {
-        const studentResponse = await api.get(`http://127.0.0.1:8000/api/students/?reg_num=${auth.user}`);
-        studentId = studentResponse.data[0].st_id;
+        const studentResponse = await api.get(`http://127.0.0.1:8000/api/students/`);
+        console.log(studentResponse.data)
+        studentId = studentResponse.data?.find((student) => student.reg_num === auth.user)
+        studentId = studentId.st_id
+        
+        console.log("Student ID: "+students)
 
         const projectsResponse = await api.get(`http://127.0.0.1:8000/api/projects/?student=${studentId}`);
         projectId = projectsResponse.data[0].project_id;
+        console.log("Project ID: "+projectId)
 
-      } else if (auth.role?.toUpperCase() === 'SUPERVISOR') {
-        const supervisorResponse = await api.get(`http://127.0.0.1:8000/api/supervisors/?reg_num=${auth.user}`);
-        const supervisorId = supervisorResponse.data[0].sup_id;
-
+      } else if (auth.role?.toUpperCase() === 'SUPERVISOR' || auth.role?.toUpperCase() === 'HOD' ) {
+        console.log("The logged User role is: "+auth.role)
+        const supervisorResponse = await api.get(`http://127.0.0.1:8000/api/supervisors/`);
+        setSupervisors(supervisorResponse.data);
+        console.log(supervisorResponse.data)
+        supervisorId = supervisorResponse.data?.find((supervisor) => supervisor.reg_num === auth.user)
+        supervisorId = supervisorId.sup_id
+        
         const projectsResponse = await api.get(`http://127.0.0.1:8000/api/projects/?supervisor=${supervisorId}`);
         projectId = projectsResponse.data[0].project_id;
+        console.log("Project ID: "+projectId)
       }
-
+      console.log("Supervisor ID: "+ supervisorId)
       // Fetch the conversation ID for the project
       const conversationResponse = await api.get(`http://127.0.0.1:8000/api/conversations/?project_id=${projectId}`);
       conversationId = conversationResponse.data[0].id;
+
+      console.log("Conversation ID: "+conversationId)
       // console.log(`Student ID: ${studentId} Project ID: ${projectId} Conversation ID: ${conversationId}`)
 
       // Navigate to the chat component, passing IDs through navigation state
@@ -63,6 +77,12 @@ const Sidebar = ({ isVisible, role }) => {
         <li className="nav-item">
           <a href="/hod/reports" className="nav-link">
             <i className="nav-icon fas fa-chart-line me-2"></i> View Reports
+          </a>
+        </li>
+        {/* Chat menu item for supervisor */}
+        <li className="nav-item">
+          <a href="#!" onClick={() => navigate('/conversations')} className="nav-link">
+            <i className="nav-icon fas fa-comments me-2"></i> Chats
           </a>
         </li>
       </>

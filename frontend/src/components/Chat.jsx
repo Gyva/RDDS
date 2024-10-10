@@ -1,5 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react';
-import axios from 'axios';
+import React, { useEffect, useState, useContext, useRef } from 'react';
 import './Chat.css';
 import { AuthContext } from '../contexts/AuthProvider';
 import { useLocation } from 'react-router-dom'; // To access state from navigation
@@ -7,11 +6,13 @@ import { useLocation } from 'react-router-dom'; // To access state from navigati
 const Chat = () => {
   const [messages, setMessages] = useState([]); // List of messages in the conversation
   const [messageText, setMessageText] = useState(''); // Message input field
-  const { auth, api, refreshToken } = useContext(AuthContext); // Auth context values
+  const { auth, api } = useContext(AuthContext); // Auth context values
   const location = useLocation(); // Get state from the navigation
 
   // Destructure the state from the location object
   const { studentId, projectId, conversationId } = location.state || {};
+
+  const messageContainerRef = useRef(null); // Reference for the messages container
 
   // Function to fetch messages for a conversation
   const getMessages = async (conversationId) => {
@@ -23,6 +24,13 @@ const Chat = () => {
       console.error("Failed to get messages: ", error);
     }
   };
+  
+  // Scroll to bottom function
+  const scrollToBottom = () => {
+    if (messageContainerRef.current) {
+      messageContainerRef.current.scrollTop = messageContainerRef.current.scrollHeight;
+    }
+  };
 
   // Fetch messages when conversationId is available
   useEffect(() => {
@@ -31,14 +39,17 @@ const Chat = () => {
     }
   }, [conversationId]);
 
+  // Scroll to bottom whenever messages are updated
+  useEffect(() => {
+    scrollToBottom(); // This will scroll to the bottom when the messages change
+  }, [messages]);
+
   // Handle message sending
   const handleSendMessage = async (e) => {
     e.preventDefault();
     try {
-      const response = await api.post('http://127.0.0.1:8000/api/messages/', {
+      const response = await api.post(`http://127.0.0.1:8000/api/conversations/${conversationId}/send-message/`, {
         text: messageText,
-        conversation: conversationId,
-        sender: auth.id
       });
       setMessages([...messages, response.data]); // Append new message to list
       setMessageText(''); // Clear input field
@@ -53,19 +64,23 @@ const Chat = () => {
       <div className='chat-display-sect'>
         <p className='border p-1 d-flex align-items-center fixed-top header-text' style={{marginTop:'53px'}}>
           Chat with Supervisor
-          <p>
-            {conversationId}
-          </p>
+          <p>{conversationId}</p>
         </p>
 
         {/* Messages display section */}
-        <div className='messages-container'>
+        <div
+          className='messages-container'
+          ref={messageContainerRef} // Attach the ref to the message container
+          style={{ maxHeight: '550px', overflowY: 'scroll' }} // Ensure scroll works for overflowing content
+        >
           {messages.map((msg) => (
             <div
               key={msg.id}
-              className={`message d-flex ${msg.sender === auth.id ? 'sent justify-content-end' : 'received justify-content-start'}`}
-              aria-label={`Message from ${msg.sender === auth.id ? 'you' : 'other user'}`}
+              className={`message d-flex ${msg.sender === auth.user ? 'sent justify-content-end' : 'received justify-content-start'}`}
+              aria-label={`Message from ${msg.sender === auth.user ? 'you' : 'other user'}`}
             >
+              <p style={{fontSize:'10px', marginBottom:'-16px'}}><i>{msg.sender}</i></p>
+              <hr/>
               <div className='message-info'>
                 <p className='message-text'>{msg.text}</p>
                 <small className='message-timestamp'>
@@ -75,13 +90,12 @@ const Chat = () => {
                     day: 'numeric',
                     hour: '2-digit',
                     minute: '2-digit',
-                  })} {/* Format timestamp with more control */}
+                  })}
                 </small>
               </div>
             </div>
           ))}
         </div>
-
       </div>
 
       {/* Message input section */}

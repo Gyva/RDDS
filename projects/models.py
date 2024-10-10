@@ -32,8 +32,8 @@ class User(AbstractUser):
         verbose_name="user permissions",
         help_text="Specific permissions for this user.",
     )
-
 # Function to generate a unique profile picture filename
+
 def unique_image_path(instance, filename):
     ext = filename.split('.')[-1]
     unique_filename = f"{uuid.uuid4().hex}.{ext}"
@@ -137,7 +137,7 @@ class Student(models.Model):
     def __str__(self):
         return f'{self.fname} {self.lname}'
 
-# Project Model
+#project model
 class Project(models.Model):
     APPROVAL_STATUS_CHOICES = [
         ('Approved', 'Approved'),
@@ -156,7 +156,7 @@ class Project(models.Model):
     completion_status = models.BooleanField(default=False)
     collaborators = models.ManyToManyField(Student, related_name='collaborated_projects', blank=True)  # Collaborators can join after approval
     improved_project = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='improvements')
-    academic_year = models.CharField(max_length=10, null=False, default=None)
+    accademic_year = models.CharField(max_length=10, null=False, default= None)
 
     def can_student_submit(self, student):
         has_approved_project = Project.objects.filter(student=student, approval_status=True).exists()
@@ -166,6 +166,7 @@ class Project(models.Model):
         # AI uniqueness check logic
         from .utils import check_project_uniqueness
         return check_project_uniqueness(self.title, self.abstract)
+    
 
     def save(self, *args, **kwargs):
         if self.is_unique():
@@ -189,7 +190,7 @@ class Feedback(models.Model):
     def __str__(self):
         return f"Feedback from {self.user} on {self.project.title}"
 
-# Conversation Model   
+#Conversation model   
 class Conversation(models.Model):
     project = models.ForeignKey('Project', on_delete=models.CASCADE, related_name='conversations')
     participants = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='conversations')
@@ -198,7 +199,7 @@ class Conversation(models.Model):
     def __str__(self):
         return f"Conversation for project: {self.project.title}"
 
-# Message Model
+#Message model
 class Message(models.Model):
     conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='messages')
     sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
