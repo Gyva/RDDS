@@ -1,6 +1,6 @@
 from rest_framework import viewsets, serializers, permissions, filters
 from .models import Department, Supervisor, Faculty, Level, Student, User, Project, Feedback, Conversation, Message, ProjectFile
-from .serializers import DepartmentSerializer, SupervisorSerializer, FacultySerializer, LevelSerializer, StudentSerializer, LoginSerializer, PasswordResetSerializer, PasswordResetConfirmSerializer, ChangePasswordSerializer, ProjectSerializer, FeedbackSerializer, ConversationSerializer, MessageSerializer, ProjectFileSerializer
+from .serializers import DepartmentSerializer, SupervisorSerializer, FacultySerializer, LevelSerializer, StudentSerializer, LoginSerializer, PasswordResetSerializer, PasswordResetConfirmSerializer, ChangePasswordSerializer, ProjectSerializer, FeedbackSerializer, ConversationSerializer, MessageSerializer, ProjectFileSerializer, UserSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.core.mail import send_mail
@@ -20,6 +20,13 @@ from django.db import transaction
 from django.conf import settings
 from rest_framework.exceptions import PermissionDenied
 
+User = get_user_model()
+
+#Users Viewset
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    
 # Login view
 @api_view(['POST'])
 def login_view(request):
@@ -87,8 +94,6 @@ class PasswordResetConfirmView(APIView):
 class DepartmentViewSet(viewsets.ModelViewSet):
     queryset = Department.objects.all()
     serializer_class = DepartmentSerializer
-
-User = get_user_model()
 
 # Supervisor view
 class SupervisorViewSet(viewsets.ModelViewSet):
