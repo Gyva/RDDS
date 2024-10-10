@@ -5,6 +5,7 @@ from django.core.validators import FileExtensionValidator
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
+from django.utils.text import slugify
 
 class User(AbstractUser):
     ROLE_CHOICES = (
@@ -62,7 +63,7 @@ class Supervisor(models.Model):
     lname = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
     phone = models.CharField(unique=True, max_length=15)
-    profile_pic = models.ImageField(upload_to=unique_image_path, validators=[FileExtensionValidator(['jpg', 'jpeg', 'png'])])
+    profile_pic = models.ImageField(upload_to=unique_image_path, validators=[FileExtensionValidator(['jpg', 'jpeg', 'png'])], default='static/supervisor/ef7f1db6dc4f4b148121cbfdad0d32be.jpg')
     specialization = models.CharField(max_length=255)
     dpt_id = models.ForeignKey(Department, on_delete=models.CASCADE)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
@@ -118,7 +119,7 @@ class Student(models.Model):
     dpt_id = models.ForeignKey(Department, on_delete=models.CASCADE)
     f_id = models.ForeignKey(Faculty, on_delete=models.CASCADE)
     l_id = models.ForeignKey(Level, on_delete=models.CASCADE)
-    profile_pic = models.ImageField(upload_to=unique_image_path, validators=[FileExtensionValidator(['jpg', 'jpeg', 'png'])])
+    profile_pic = models.ImageField(upload_to=unique_image_path, validators=[FileExtensionValidator(['jpg', 'jpeg', 'png'])], default='static/supervisor/ef7f1db6dc4f4b148121cbfdad0d32be.jpg')
     
     # New field to link Student to a user account
     account = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
@@ -173,7 +174,7 @@ class Project(models.Model):
             self.check_status = False
         super().save(*args, **kwargs)
 
-# Feedback Model
+#Feedback model
 class Feedback(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
@@ -206,3 +207,37 @@ class Message(models.Model):
 
     def __str__(self):
         return f"Message from {self.sender.email} at {self.timestamp}"
+
+# ProjectFile model  
+def project_file_upload_path(instance, filename):
+    main_student_reg_no = instance.project.student.reg_no if instance.project.student else ''
+    # Get the registration numbers of all collaborators
+    collaborator_reg_nos = instance.project.collaborators.values_list('reg_no', flat=True)
+    
+    # Combine the main student's reg_no with all collaborator reg_nos
+    all_reg_nos = [main_student_reg_no] + list(collaborator_reg_nos)
+    
+    # Join all reg_nos with underscores
+    reg_no_part = '_'.join(all_reg_nos)
+    
+    # Slugify the filename to avoid issues with special characters
+    filename_slug = slugify(os.path.splitext(filename)[0])
+    
+    # Get the file extension (e.g., '.pdf', '.docx')
+    extension = os.path.splitext(filename)[1]
+    
+    # Construct the new filename using all students' reg_no and slugified filename
+    new_filename = f"{reg_no_part}_{filename_slug}{extension}"
+    
+    # Return the full path to store the file, e.g., "projects/documents/24rp00001_24rp00002_final-report.pdf"
+    return f"static/documents/{new_filename}"  
+class ProjectFile(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    file = models.FileField(upload_to=project_file_upload_path, validators=[FileExtensionValidator(['pdf'])])
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    
+    # Track the uploader
+    uploader = models.ForeignKey(Student, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"File for Project: {self.project.title} uploaded by {self.uploader.reg_no}"

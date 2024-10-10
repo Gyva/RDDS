@@ -1,6 +1,6 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
-from .views import DepartmentViewSet, SupervisorViewSet, FacultyViewSet, LevelViewSet, StudentViewSet, login_view, PasswordResetView, PasswordResetConfirmView, ChangePasswordView, LogoutView, ProjectViewSet, ProvideFeedbackView, ConversationViewSet, MessageViewSet
+from .views import DepartmentViewSet, SupervisorViewSet, FacultyViewSet, LevelViewSet, StudentViewSet, login_view, PasswordResetView, PasswordResetConfirmView, ChangePasswordView, LogoutView, ProjectViewSet, ProvideFeedbackView, ConversationViewSet, MessageViewSet, ProjectFileViewSet
 from rest_framework_simplejwt.views import TokenRefreshView
 
 router = DefaultRouter()
@@ -12,6 +12,7 @@ router.register(r'students', StudentViewSet)
 router.register(r'projects', ProjectViewSet, basename='projects')
 router.register(r'conversations', ConversationViewSet, basename='conversation')
 router.register(r'messages', MessageViewSet, basename='message')
+router.register(r'project-files', ProjectFileViewSet, basename='projectfile')
 
 urlpatterns = [
     path('', include(router.urls)),

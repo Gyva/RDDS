@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Department, Supervisor, Faculty, Level, Student, User, Project, Feedback, Conversation, Message
+from .models import Department, Supervisor, Faculty, Level, Student, User, Project, Feedback, Conversation, Message, ProjectFile
 from django.contrib.auth import authenticate
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.http import urlsafe_base64_encode
@@ -261,9 +261,11 @@ class FeedbackSerializer(serializers.ModelSerializer):
 class ConversationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Conversation
-        fields = '__all__'
+        fields = ['id', 'project', 'participants', 'messages', 'created_at']
 
-class MessageSerializer(serializers.ModelSerializer):
+# ProjectFile serializer
+class ProjectFileSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Message
-        fields = '__all__'
+        model = ProjectFile
+        fields = ['id', 'project', 'file', 'uploader', 'uploaded_at']
+        read_only_fields = ['uploaded_at']
