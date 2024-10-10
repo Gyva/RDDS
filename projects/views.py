@@ -26,7 +26,19 @@ User = get_user_model()
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    
+
+    @action(detail=False, methods=['get'], url_path='get-by-username')
+    def get_by_username(self, request):
+        username = request.query_params.get('username', None)
+        if username is not None:
+            try:
+                user = User.objects.get(username=username)
+                serializer = self.get_serializer(user)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            except User.DoesNotExist:
+                return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'error': 'Username parameter is required'}, status=status.HTTP_400_BAD_REQUEST)
+
 # Login view
 @api_view(['POST'])
 def login_view(request):
