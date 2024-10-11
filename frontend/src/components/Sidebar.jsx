@@ -25,9 +25,9 @@ const Sidebar = ({ isVisible, role }) => {
         
         console.log("Student ID: "+students)
 
-        const projectsResponse = await api.get(`http://127.0.0.1:8000/api/projects/?student=${studentId}`);
-        projectId = projectsResponse.data[0].project_id;
-        console.log("Project ID: "+projectId)
+        const projectsResponse = await api.get(`http://127.0.0.1:8000/api/projects/`);
+        projectId = projectsResponse.data?.find((project) => project.student_id === studentId);
+        projectId = projectId.project_id
 
       } else if (auth.role?.toUpperCase() === 'SUPERVISOR' || auth.role?.toUpperCase() === 'HOD' ) {
         console.log("The logged User role is: "+auth.role)
@@ -37,9 +37,9 @@ const Sidebar = ({ isVisible, role }) => {
         supervisorId = supervisorResponse.data?.find((supervisor) => supervisor.reg_num === auth.user)
         supervisorId = supervisorId.sup_id
         
-        const projectsResponse = await api.get(`http://127.0.0.1:8000/api/projects/?supervisor=${supervisorId}`);
-        projectId = projectsResponse.data[0].project_id;
-        console.log("Project ID: "+projectId)
+        const projectsResponse = await api.get(`http://127.0.0.1:8000/api/projects/`);
+        projectId = projectsResponse.data?.find((project) => project.supervisor_id === supervisorId);
+        projectId = projectId.project_id
       }
       console.log("Supervisor ID: "+ supervisorId)
       // Fetch the conversation ID for the project

@@ -42,7 +42,7 @@ const ConversationsList = () => {
         const supervisorResponse = await api.get(`http://127.0.0.1:8000/api/supervisors/`);
         setSupervisors(supervisorResponse.data);
         console.log(supervisorResponse.data)
-        supervisorId = supervisorResponse.data?.find((supervisor) => supervisor.reg_num === auth.user)
+        supervisorId = supervisorResponse.data?.find((supervisor) => supervisor.reg_num  === auth.user)
         supervisorId = supervisorId.sup_id
         
         const projectsResponse = await api.get(`http://127.0.0.1:8000/api/projects/?supervisor=${supervisorId}`);

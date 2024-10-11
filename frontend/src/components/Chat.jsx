@@ -6,12 +6,10 @@ import { useLocation } from 'react-router-dom'; // To access state from navigati
 const Chat = () => {
   const [messages, setMessages] = useState([]); // List of messages in the conversation
   const [messageText, setMessageText] = useState(''); // Message input field
+  const [userNames, setUserNames] = useState({}); // Store usernames here
   const { auth, api } = useContext(AuthContext); // Auth context values
   const location = useLocation(); // Get state from the navigation
-
-  // Destructure the state from the location object
   const { studentId, projectId, conversationId } = location.state || {};
-
   const messageContainerRef = useRef(null); // Reference for the messages container
 
   // Function to fetch messages for a conversation
@@ -20,11 +18,20 @@ const Chat = () => {
       const url = `http://127.0.0.1:8000/api/messages/?conversation_id=${conversationId}`;
       const response = await api.get(url);
       setMessages(response.data); // Set messages
+
+      // Fetch and store the sender's full names and role
+      const users = {};
+      for (const msg of response.data) {
+        if (!users[msg.sender]) {
+          users[msg.sender] = await getUserFullNamesAndRole(msg.sender);
+        }
+      }
+      setUserNames(users); // Store the user names in state
     } catch (error) {
       console.error("Failed to get messages: ", error);
     }
   };
-  
+
   // Scroll to bottom function
   const scrollToBottom = () => {
     if (messageContainerRef.current) {
@@ -41,7 +48,7 @@ const Chat = () => {
 
   // Scroll to bottom whenever messages are updated
   useEffect(() => {
-    scrollToBottom(); // This will scroll to the bottom when the messages change
+    scrollToBottom();
   }, [messages]);
 
   // Handle message sending
@@ -58,13 +65,24 @@ const Chat = () => {
     }
   };
 
+  // Function to fetch user's full names and role
+  const getUserFullNamesAndRole = async (username) => {
+    const url = `http://127.0.0.1:8000/api/users/get-by-username/?username=${username}`;
+    try {
+      const response = await api.get(url);
+      return `${response.data.first_name} ${response.data.last_name} | ${response.data.role}`;
+    } catch (error) {
+      console.error("Error " + error);
+      return 'Unknown User';
+    }
+  };
+
   return (
     <div className='container'>
       {/* Chat header */}
       <div className='chat-display-sect'>
-        <p className='border p-1 d-flex align-items-center fixed-top header-text' style={{marginTop:'53px'}}>
+        <p className='border p-1 d-flex align-items-center fixed-top header-text' style={{ marginTop: '53px' }}>
           Chat with Supervisor
-          <p>{conversationId}</p>
         </p>
 
         {/* Messages display section */}
@@ -79,8 +97,10 @@ const Chat = () => {
               className={`message d-flex ${msg.sender === auth.user ? 'sent justify-content-end' : 'received justify-content-start'}`}
               aria-label={`Message from ${msg.sender === auth.user ? 'you' : 'other user'}`}
             >
-              <p style={{fontSize:'10px', marginBottom:'-16px'}}><i>{msg.sender}</i></p>
-              <hr/>
+              <p style={{ fontSize: '10px', marginBottom: '-16px' }}>
+                <i>{userNames[msg.sender] || 'Loading...'}</i> {/* Display username or loading state */}
+              </p>
+              <hr />
               <div className='message-info'>
                 <p className='message-text'>{msg.text}</p>
                 <small className='message-timestamp'>

@@ -35,3 +35,22 @@ body {
   background-color: #0056b3;
   border-color: #0056b3;
 }
+.project-info {
+  flex: 1;
+}
+
+.button-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.abstract-container {
+  margin-top: 10px;
+}
+
+.abstract {
+  padding: 10px;
+  border: 1px solid #ddd; /* Optional: add border */
+  border-radius: 5px; /* Optional: add border radius */
+}
