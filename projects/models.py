@@ -230,7 +230,7 @@ def project_file_upload_path(instance, filename):
     # Construct the new filename using all students' reg_no and slugified filename
     new_filename = f"{reg_no_part}_{filename_slug}{extension}"
     
-    # Return the full path to store the file, e.g., "projects/documents/24rp00001_24rp00002_final-report.pdf"
+    # Return the full path to store the file, e.g., "static/documents/24rp00001_24rp00002_final-report.pdf"
     return f"static/documents/{new_filename}"  
 class ProjectFile(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
