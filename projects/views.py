@@ -416,7 +416,8 @@ class ProjectViewSet(viewsets.ModelViewSet):
         project = Project(
             title=serializer.validated_data.get('title'),
             case_study=serializer.validated_data.get('case_study'),
-            abstract=serializer.validated_data.get('abstract')
+            abstract=serializer.validated_data.get('abstract'),
+            accademic_year=serializer.validated_data.get('accademic_year')
         )
         
          # Set department and assign user based on role
@@ -635,6 +636,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
             abstract = request.data.get('abstract')
             case_study = request.data.get('case_study', original_project.case_study)
             collaborators = request.data.get('collaborators', [])
+            accademic_year = request.data.get('accademic_year')
 
             # Ensure abstract is provided
             if not abstract:
@@ -678,7 +680,8 @@ class ProjectViewSet(viewsets.ModelViewSet):
                     department=original_project.department,  # Same department
                     check_status=False,  # New project must go through the approval process
                     approval_status='Pending',  # HoD must approve it
-                    completion_status=False
+                    completion_status=False,
+                    accademic_year = accademic_year
                 )
 
                 # Add valid collaborators
