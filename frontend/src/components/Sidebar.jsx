@@ -20,7 +20,8 @@ const Sidebar = ({ isVisible, role }) => {
       if (auth.role?.toUpperCase() === 'STUDENT') {
         const studentResponse = await api.get(`http://127.0.0.1:8000/api/students/`);
         console.log(studentResponse.data)
-        studentId = studentResponse.data?.find((student) => student.reg_num === auth.user)
+        studentId = studentResponse.data?.find((student) => student.reg_no === auth.user)
+        console.log(studentId)
         studentId = studentId.st_id
         
         console.log("Student ID: "+students)

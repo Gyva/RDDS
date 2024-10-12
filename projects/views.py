@@ -699,8 +699,8 @@ class ProjectViewSet(viewsets.ModelViewSet):
         project = self.get_object()  # Get the project instance by ID
 
         # Check if the user is the project owner (student or supervisor) or has permission to edit
-        if not (project.student and project.student.account == user) and not (project.supervisor and project.supervisor.account == user):
-            return Response({"detail": "You do not have permission to edit this project."}, status=status.HTTP_403_FORBIDDEN)
+        # if not (project.student and project.student.account == user) and not (project.supervisor and project.supervisor.account == user):
+        #     return Response({"detail": "You do not have permission to edit this project."}, status=status.HTTP_403_FORBIDDEN)
 
         # Load and validate the updated data
         partial = kwargs.pop('partial', False)

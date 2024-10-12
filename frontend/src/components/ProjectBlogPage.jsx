@@ -167,6 +167,7 @@ const ProjectBlogPage = () => {
 
   // Change approval status
   const handleApprovalChange = async (status) => {
+    let err_or = null
     try {
       const response = await api.patch(`http://127.0.0.1:8000/api/projects/${id}/change-approval-status/`, {
         approval_status: status,
@@ -175,6 +176,7 @@ const ProjectBlogPage = () => {
           'Content-Type': 'application/json',
         },
       });
+      err_or = response.data.detail
       if(response.data.detail !== null){
         alert(response.data.detail)
       }
@@ -182,7 +184,7 @@ const ProjectBlogPage = () => {
       setProject({ ...project, approval_status: status });
     } catch (error) {
       console.error('Error changing approval status:', error);
-      alert('Error changing approval status.');
+      alert(err_or);
     }
   };
 
