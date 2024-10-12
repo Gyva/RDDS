@@ -138,3 +138,93 @@ def check_improvement_similarity(original_project, improved_title, improved_abst
 
     print("Project improvement is significant.")
     return True
+
+#Update existing project
+def backup_project_data(project):
+    """
+    Create a backup of the current project data before deleting it temporarily.
+    Returns a dictionary containing the original project data.
+    """
+    backup_data = {
+        'project_id': project.project_id,
+        'student': project.student,
+        'title': project.title,
+        'case_study': project.case_study,
+        'abstract': project.abstract,
+        'department': project.department,  # Department of the project
+        'supervisor': project.supervisor,  # Supervisor of the project
+        'check_status': project.check_status,
+        'approval_status': project.approval_status,
+        'completion_status': project.completion_status,
+        'collaborators': list(project.collaborators.all()),  # Collaborators if any
+        'improved_project': project.improved_project,
+        'accademic_year': project.accademic_year,
+    }
+    return backup_data
+
+def restore_project_data(backup_data):
+    """
+    Restore the backed-up project data if the update fails.
+    """
+    project = Project.objects.create(
+        project_id=backup_data['project_id'],
+        student=backup_data['student'],
+        title=backup_data['title'],
+        case_study=backup_data['case_study'],
+        abstract=backup_data['abstract'],
+        department=backup_data['department'],  # Restore department
+        supervisor=backup_data['supervisor'],  # Restore supervisor
+        check_status=backup_data['check_status'],
+        approval_status=backup_data['approval_status'],
+        completion_status=backup_data['completion_status'],
+        improved_project=backup_data['improved_project'],
+        accademic_year=backup_data['accademic_year'],
+    )
+    # Restore many-to-many relationships
+    project.collaborators.set(backup_data['collaborators'])
+
+    project.save()
+    return project
+
+def update_project(project, new_title, case_study, new_abstract):
+    """
+    Temporarily delete the project, perform AI checks on the updated project,
+    and restore the original if the updated one fails the AI test.
+    """
+    # Step 1: Backup current project data
+    backup_data = backup_project_data(project)
+
+    # Step 2: Delete the current project to avoid self-comparison
+    project.delete()
+
+    # Step 3: Perform AI uniqueness check on the new version of the project
+    if not check_project_uniqueness(new_title, new_abstract):
+        print("Project failed AI uniqueness check (similar to other projects).")
+        
+        # Step 4: Restore the original project if the new version fails the AI test
+        restore_project_data(backup_data)
+        return False  # Indicate failure in saving the new version
+
+    # Step 5: Save the updated project (same ID as the original)
+    project = Project.objects.create(
+        project_id=backup_data['project_id'],  # Keep the same project ID
+        student=backup_data['student'],
+        title=new_title or backup_data['title'],
+        case_study=case_study or backup_data['case_study'],
+        abstract=new_abstract or backup_data['abstract'],
+        department=backup_data['department'],  # Keep department
+        supervisor=backup_data['supervisor'],  # Keep supervisor
+        # check_status=True,  # Passed AI check
+        approval_status=backup_data['approval_status'],  # Mark as approved
+        completion_status=backup_data['completion_status'],  # Mark as approved
+        improved_project=backup_data['improved_project'],  # Mark as approved
+        accademic_year=backup_data['accademic_year'],  # Mark as approved
+        
+    )
+    # Restore many-to-many relationships (collaborators)
+    project.collaborators.set(backup_data['collaborators'])
+
+    project.save()
+
+    print("Project successfully updated and passed AI uniqueness check.")
+    return True  # Indicate success in saving the new version

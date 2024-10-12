@@ -19,6 +19,7 @@ from .utils import check_improvement_similarity
 from django.db import transaction
 from django.conf import settings
 from rest_framework.exceptions import PermissionDenied
+from .utils import update_project
 
 User = get_user_model()
 
@@ -694,43 +695,49 @@ class ProjectViewSet(viewsets.ModelViewSet):
             return Response({"error": "Project not found."}, status=status.HTTP_404_NOT_FOUND)
     
     # Update an existing project
-    def update(self, request, *args, **kwargs):
+    def has_update_permission(self, request, project):
+        """
+        Checks if the current user has permission to update the project.
+        Only the student or collaborator, the supervisor, or the HoD of the department can update.
+        """
         user = request.user
-        project = self.get_object()  # Get the project instance by ID
+        
+        # Check if the user is the student linked to the project or a collaborator
+        if project.students.filter(account=user).exists() or project.collaborators.filter(account=user).exists():
+            return True
+        
+        # Check if the user is the assigned supervisor
+        if project.supervisor.account == user:
+            return True
+        
+        # Check if the user is the HoD of the department
+        if user.role == 'HOD' and project.department.hod == user:
+            return True
 
-        # Check if the user is the project owner (student or supervisor) or has permission to edit
-        if not (project.student and project.student.account == user) and not (project.supervisor and project.supervisor.account == user):
-            return Response({"detail": "You do not have permission to edit this project."}, status=status.HTTP_403_FORBIDDEN)
+        # If none of the above, the user cannot update the project
+        return False
+    
+    @action(detail=True, methods=['put'], permission_classes=[IsAuthenticated])
+    def update_project(self, request, pk=None):
+        """
+        Update the project if the user has permission.
+        """
+        project = self.get_object()  # Fetch the project to update
+        
+        if not self.has_update_permission(request, project):
+            return Response({'error': 'You do not have permission to update this project.'}, status=403)
 
-        # Load and validate the updated data
-        partial = kwargs.pop('partial', False)
-        serializer = self.get_serializer(project, data=request.data, partial=partial)
-        serializer.is_valid(raise_exception=True)
+        new_title = request.data.get('title')
+        new_case_study = request.data.get('case_study')
+        new_abstract = request.data.get('abstract')
 
-        # Check if critical fields (title, abstract) have been updated
-        updated_title = serializer.validated_data.get('title', project.title)
-        updated_abstract = serializer.validated_data.get('abstract', project.abstract)
+        # Call the update_project function to handle the logic
+        success = update_project(project, new_title, new_case_study, new_abstract)
 
-        # If title or abstract is changed, run uniqueness check
-        if updated_title != project.title or updated_abstract != project.abstract:
-            # Create a temporary project for uniqueness check
-            temp_project = Project(title=updated_title, abstract=updated_abstract)
-
-            if not temp_project.is_unique():
-                return Response(
-                    {"detail": "Project update failed. The new title or abstract is too similar to an existing project."},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-
-        # If uniqueness check passes, save the updated project
-        self.perform_update(serializer)
-
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    # Override the perform_update method to handle project-specific logic
-    def perform_update(self, serializer):
-        # Optionally, add custom save logic here if needed
-        serializer.save()
+        if success:
+            return Response({'message': 'Project updated successfully.'})
+        else:
+            return Response({'message': 'Project update failed due to similarity with another project.'}, status=400)
 
 
 #Feedback viewset
