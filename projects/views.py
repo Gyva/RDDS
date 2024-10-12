@@ -693,6 +693,46 @@ class ProjectViewSet(viewsets.ModelViewSet):
         except Project.DoesNotExist:
             return Response({"error": "Project not found."}, status=status.HTTP_404_NOT_FOUND)
     
+    # Update an existing project
+    def update(self, request, *args, **kwargs):
+        user = request.user
+        project = self.get_object()  # Get the project instance by ID
+
+        # Check if the user is the project owner (student or supervisor) or has permission to edit
+        if not (project.student and project.student.account == user) and not (project.supervisor and project.supervisor.account == user):
+            return Response({"detail": "You do not have permission to edit this project."}, status=status.HTTP_403_FORBIDDEN)
+
+        # Load and validate the updated data
+        partial = kwargs.pop('partial', False)
+        serializer = self.get_serializer(project, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+
+        # Check if critical fields (title, abstract) have been updated
+        updated_title = serializer.validated_data.get('title', project.title)
+        updated_abstract = serializer.validated_data.get('abstract', project.abstract)
+
+        # If title or abstract is changed, run uniqueness check
+        if updated_title != project.title or updated_abstract != project.abstract:
+            # Create a temporary project for uniqueness check
+            temp_project = Project(title=updated_title, abstract=updated_abstract)
+
+            if not temp_project.is_unique():
+                return Response(
+                    {"detail": "Project update failed. The new title or abstract is too similar to an existing project."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+        # If uniqueness check passes, save the updated project
+        self.perform_update(serializer)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    # Override the perform_update method to handle project-specific logic
+    def perform_update(self, serializer):
+        # Optionally, add custom save logic here if needed
+        serializer.save()
+
+
 #Feedback viewset
 class ProvideFeedbackView(APIView):
     permission_classes = [IsAuthenticated]

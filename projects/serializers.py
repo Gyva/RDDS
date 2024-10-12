@@ -264,6 +264,20 @@ class ProjectSerializer(serializers.ModelSerializer):
         model = Project
         fields = ['project_id','title', 'case_study', 'abstract', 'collaborators','check_status','approval_status', 'completion_status', 'department_id', 'student_id', 'supervisor_id', 'improved_project_id', 'accademic_year']
 
+    def validate(self, data):
+        title = data.get('title', None)
+        abstract = data.get('abstract', None)
+
+        # Perform uniqueness check if title or abstract is provided
+        if title and abstract:
+            temp_project = Project(title=title, abstract=abstract)
+            if not temp_project.is_unique():
+                raise serializers.ValidationError(
+                    "The project title or abstract is too similar to an existing project."
+                )
+
+        return data
+        
     def create(self, validated_data):
         request = self.context.get('request', None)
         user = request.user
