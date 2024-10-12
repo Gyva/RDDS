@@ -20,7 +20,7 @@ const CreateProject = () => {
             title: title,
             case_study: caseStudy,
             abstract: abstract,
-            academic_year: getAcademicYear(),
+            accademic_year: getAcademicYear(),
         };
 
         try {
@@ -38,7 +38,20 @@ const CreateProject = () => {
 
     return (
         <div className="container-fluid vh-100 d-flex align-items-center justify-content-center">
-            <div className="card w-100 rounded-top-4 rounded-bottom-4" style={{ maxWidth: '1000px', height: '100vh' }}>
+            <div className="card w-100 rounded-top-4 rounded-bottom-4" 
+                style={{ maxWidth: '1000px', height: '100vh' }}>
+
+                {/* Media query for small screens to double the height */}
+                <style>
+                    {`
+                    @media (max-width: 576px) {
+                        .card {
+                            height: 200vh;
+                        }
+                    }
+                    `}
+                </style>
+
                 <div className="card-header bg-primary text-white rounded-top-4">
                     <h2 className="m-2 text-center">Submit a Project</h2>
                 </div>
@@ -75,6 +88,7 @@ const CreateProject = () => {
                                 theme="snow"
                                 value={abstract}
                                 onChange={setAbstract}
+                                className="mb-5"  
                                 style={{ height: '250px' }}
                                 required
                             />
