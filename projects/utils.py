@@ -5,6 +5,7 @@ from nltk import word_tokenize, sent_tokenize
 from .models import Project
 import torch
 
+
 # Load an NLP model for Named Entity Recognition (NER)
 nlp = spacy.load('en_core_web_lg')
 
@@ -214,7 +215,7 @@ def update_project(project, new_title, case_study, new_abstract):
         abstract=new_abstract or backup_data['abstract'],
         department=backup_data['department'],  # Keep department
         supervisor=backup_data['supervisor'],  # Keep supervisor
-        # check_status=True,  # Passed AI check
+        check_status=True,  # Passed AI check
         approval_status=backup_data['approval_status'],  # Mark as approved
         completion_status=backup_data['completion_status'],  # Mark as approved
         improved_project=backup_data['improved_project'],  # Mark as approved

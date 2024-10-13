@@ -257,7 +257,7 @@ const ProjectBlogPage = () => {
   const handleUpdateProject = async (e) => {
     e.preventDefault();
     try {
-      const response = await api.patch(`http://127.0.0.1:8000/api/projects/${id}/`, {
+      const response = await api.put(`http://127.0.0.1:8000/api/projects/${id}/update_project/`, {
         title: updatedTitle,
         case_study: updatedCaseStudy,
         abstract: updatedAbstract,
@@ -270,8 +270,8 @@ const ProjectBlogPage = () => {
       setProject(response.data);
       window.$('#updateModal').modal('hide');
     } catch (error) {
-      console.error('Error updating project:', error);
-      alert('Error updating project.');
+      console.error('Error updating project:', error.message);
+      alert('Error updating project.',error.message);
     }
   };
 
@@ -296,7 +296,7 @@ const ProjectBlogPage = () => {
                 <span><strong>Case Study:</strong> {project.case_study}</span>
                 <span><strong>Student:</strong> {assignedStudent ? `${assignedStudent.fname} ${assignedStudent.lname}` : 'Not assigned'}</span>
                 <span><strong>Department:</strong> {departmentName}</span>
-                <span><strong>AI Check:</strong> {project.check_status.toString()}</span>
+                <span><strong>AI Check:</strong> {project.check_status?.toString()}</span>
                 <span><strong>Supervisor:</strong> {assignedSupervisor ? `${assignedSupervisor.fname} ${assignedSupervisor.lname}` : 'Not assigned'}</span>
                 <span><strong>Approval Status:</strong> {project.approval_status}</span>
               </div>

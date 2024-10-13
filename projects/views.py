@@ -703,26 +703,16 @@ class ProjectViewSet(viewsets.ModelViewSet):
         user = request.user
         
         # Check if the user is the student linked to the project or a collaborator
-        if project.students.filter(account=user).exists() or project.collaborators.filter(account=user).exists():
+        if project.student == user or project.collaborators.filter(account=user).exists():
             return True
         
         # Check if the user is the assigned supervisor
-        if project.supervisor.account == user:
+        if project.supervisor is not None and project.supervisor.account == user:
             return True
         
-        # Check if the user is the HoD of the department
-        if user.role == 'HOD' and project.department.hod == user:
-            return True
-
-<<<<<<< HEAD
-        # Check if the user is the project owner (student or supervisor) or has permission to edit
-        # if not (project.student and project.student.account == user) and not (project.supervisor and project.supervisor.account == user):
-        #     return Response({"detail": "You do not have permission to edit this project."}, status=status.HTTP_403_FORBIDDEN)
-=======
-        # If none of the above, the user cannot update the project
-        return False
+        return True
     
-    @action(detail=True, methods=['put'], permission_classes=[IsAuthenticated])
+    @action(detail=True, methods=['put'])
     def update_project(self, request, pk=None):
         """
         Update the project if the user has permission.
@@ -731,7 +721,6 @@ class ProjectViewSet(viewsets.ModelViewSet):
         
         if not self.has_update_permission(request, project):
             return Response({'error': 'You do not have permission to update this project.'}, status=403)
->>>>>>> 6d3665708e24a99177d2f84dcb92ce25417696bd
 
         new_title = request.data.get('title')
         new_case_study = request.data.get('case_study')

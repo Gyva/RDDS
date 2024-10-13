@@ -171,8 +171,6 @@ class Project(models.Model):
     def save(self, *args, **kwargs):
         if self.is_unique():
             self.check_status = True
-        else:
-            self.check_status = False
         super().save(*args, **kwargs)
 
 #Feedback model
