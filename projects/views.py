@@ -20,6 +20,8 @@ from django.db import transaction
 from django.conf import settings
 from rest_framework.exceptions import PermissionDenied
 from .utils import update_project
+from django.utils.crypto import get_random_string
+from django.db.models import Max
 
 User = get_user_model()
 
@@ -39,6 +41,57 @@ class UserViewSet(viewsets.ModelViewSet):
             except User.DoesNotExist:
                 return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
         return Response({'error': 'Username parameter is required'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    # Endpoint to create a REGISTER user with username pattern regXXXXX
+    @action(detail=False, methods=['post'], url_path='create-register-user')
+    def create_register_user(self, request):
+        # Ensure the user performing the action is ADMIN
+        if request.user.role != 'ADMIN':
+            return Response({"detail": "Only admins can create REGISTER users."}, status=status.HTTP_403_FORBIDDEN)
+
+        # Retrieve the highest current registration username (regXXXXX)
+        max_reg_user = User.objects.filter(username__startswith='reg').aggregate(Max('username'))
+        last_username = max_reg_user['username__max']
+
+        # Determine the next registration number
+        if last_username:
+            next_num = int(last_username[3:]) + 1
+        else:
+            next_num = 1
+
+        new_username = f'reg{next_num:05d}'  # Format as reg00001, reg00002, etc.
+
+        # Set a default password (this should be changed by the user later)
+        default_password = get_random_string(length=8)  # Generate a random 8-character password
+
+        # Collect required fields from request
+        email = request.data.get('email')
+        first_name = request.data.get('first_name')
+        last_name = request.data.get('last_name')
+
+        if not email or not first_name or not last_name:
+            return Response({"error": "First name, last name, and email are required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Create the REGISTER user
+        user = User.objects.create_user(
+            username=new_username,
+            password=default_password,
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            role='REGISTER'  # Assign the REGISTER role
+        )
+
+        # Notify the user via email with their username and default password
+        send_mail(
+            'Your Registration Information',
+            f'Dear {first_name},\n\nYou have been registered with the following credentials:\n\nUsername: {new_username}\nEmail: {email}\nPassword: {default_password}\n\nPlease change your password after logging in.',
+            settings.DEFAULT_FROM_EMAIL,
+            [email],
+            fail_silently=False,
+        )
+
+        return Response({"message": "REGISTER user created successfully and notification email sent."}, status=status.HTTP_201_CREATED)
 
 # Login view
 @api_view(['POST'])
@@ -540,6 +593,55 @@ class ProjectViewSet(viewsets.ModelViewSet):
         return Response({'message': f'Collaborator {collaborator.fname} {collaborator.lname} added to project.'}, 
                         status=status.HTTP_200_OK)
     
+    #Assign supervisor on a project
+    @action(detail=True, methods=['post'], url_path='assign-supervisor', url_name='assign_supervisor')
+    def assign_supervisor(self, request, pk=None):
+        project = self.get_object()
+
+        # Ensure the user is HoD
+        if request.user.role != 'HOD':
+            return Response({"detail": "Only HoDs can assign supervisors."}, status=status.HTTP_403_FORBIDDEN)
+
+        # Ensure the project doesn't already have a supervisor
+        if project.supervisor:
+            return Response({"error": "This project already has a supervisor."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Get the supervisor ID from request data or assign the HoD
+        supervisor_id = request.data.get('supervisor_id')
+        if supervisor_id:
+            supervisor = get_object_or_404(Supervisor, pk=supervisor_id)
+            # Ensure supervisor is from the same department
+            if supervisor.dpt_id != project.department:
+                return Response({"error": "The supervisor must belong to the same department as the project."}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            supervisor = Supervisor.objects.get(account=request.user)
+
+        # Assign the supervisor to the project
+        project.supervisor = supervisor
+        project.save()
+
+        # Send email to the supervisor
+        send_mail(
+            'You have been assigned as a supervisor',
+            f'Dear {supervisor.name},\n\nYou have been assigned as the supervisor for the project titled "{project.title}".',
+            settings.DEFAULT_FROM_EMAIL,
+            [supervisor.account.email],
+            fail_silently=False,
+        )
+
+        # Notify the main student and all collaborators
+        all_students = [project.student] + list(project.collaborators.all())
+        for student in all_students:
+            send_mail(
+                'A supervisor has been assigned to your project',
+                f'Dear {student.name},\n\nYour project titled "{project.title}" has been assigned a supervisor: {supervisor.name}.',
+                settings.DEFAULT_FROM_EMAIL,
+                [student.account.email],
+                fail_silently=False,
+            )
+
+        return Response({"message": f"Supervisor {supervisor.name} has been successfully assigned to the project, and all students have been notified."}, status=status.HTTP_200_OK)
+    
     # Change Approval Status
     @action(detail=True, methods=['patch'], url_path='change-approval-status', url_name='change_approval_status')
     def change_approval_status(self, request, pk=None):
@@ -575,6 +677,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
         )
 
         return Response({"message": f"Approval status updated to {approval_status}."}, status=status.HTTP_200_OK)
+    
     
     # Mark Project as Completed
     @action(detail=True, methods=['patch'], url_path='mark-completed', url_name='mark_completed')
