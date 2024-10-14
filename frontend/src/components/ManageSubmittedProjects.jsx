@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useContext } from 'react';
 import DataTable from 'react-data-table-component';
 import { AuthContext } from '../contexts/AuthProvider';
+import { utils, writeFile } from 'xlsx'; // Import necessary functions from xlsx
 import './ManageSubmittedProjects.css';
 
 const ManageSubmittedProjects = () => {
@@ -15,8 +16,7 @@ const ManageSubmittedProjects = () => {
     try {
       const response = await api.get('http://127.0.0.1:8000/api/projects/', {
         headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${auth.accessToken}` // Include access token in request
+          'Content-Type': 'application/json',// Include access token in request
         },
       });
       setProjects(response.data);
@@ -124,6 +124,25 @@ const ManageSubmittedProjects = () => {
     }
   }, [auth.accessToken, projects.length, refreshToken, logout]);
 
+  // Function to generate the report
+  const generateReport = () => {
+    const reportData = filteredProjects.map(project => ({
+      'Student': project.student_name, // Adjust according to your API structure
+      'Supervisor': project.supervisor_name, // Adjust according to your API structure
+      'Collaborator': project.collaborator_name, // Adjust according to your API structure
+      'Project Title': project.title,
+      'Approval Status': project.approval_status
+    }));
+
+    // Create a new workbook and add the report data to it
+    const worksheet = utils.json_to_sheet(reportData);
+    const workbook = utils.book_new();
+    utils.book_append_sheet(workbook, worksheet, 'Project Report');
+
+    // Export the Excel file
+    writeFile(workbook, 'Project_Report.xlsx');
+  };
+
   return (
     <div className="container">
       <h2>Manage Submitted Projects</h2>
@@ -142,6 +161,9 @@ const ManageSubmittedProjects = () => {
 
       <div className="project-section">
         <h3>{selectedStatus} Projects</h3>
+        <button className="btn btn-success mb-3" onClick={generateReport}>
+          Generate Report
+        </button>
         <DataTable
           columns={columns}
           data={filteredProjects}

@@ -23,6 +23,9 @@ import SetPassword from './components/SetPassword';
 import ManageSubmittedProjects from './components/ManageSubmittedProjects';
 import Chat from './components/Chat';
 import ConversationsList from './components/ConversationsList';
+import RegistrarRegistrationForm from './components/RegistrarRegistrationForm';
+import PDFViewer from './components/PDFViewer';
+import ManageRegistrar from './components/ManageRegistrar';
 
 function App() {
     return (
@@ -54,6 +57,9 @@ function App() {
                     <Route path="/manage-projects" element={<ProtectedRoute><Dashboard><ManageSubmittedProjects /></Dashboard></ProtectedRoute>} />
                     <Route path="/chat" element={<ProtectedRoute><Dashboard><Chat /></Dashboard></ProtectedRoute>} />
                     <Route path="/conversations" element={<ProtectedRoute><Dashboard><ConversationsList /></Dashboard></ProtectedRoute>} />
+                    <Route path="/create-regstrar" element={<ProtectedRoute><Dashboard><RegistrarRegistrationForm /></Dashboard></ProtectedRoute>} />
+                    <Route path="/view-pdf" element={<ProtectedRoute><Dashboard><PDFViewer /></Dashboard></ProtectedRoute>} />
+                    <Route path="/manage-registrar" element={<ProtectedRoute><Dashboard><ManageRegistrar /></Dashboard></ProtectedRoute>} />
 
                     
                 </Routes>

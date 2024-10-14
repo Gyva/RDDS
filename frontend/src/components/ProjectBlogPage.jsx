@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams,useNavigate } from 'react-router-dom';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { AuthContext } from '../contexts/AuthProvider';
 import './ProjectBlogPage.css';
 import axios from 'axios';
+import { getAcademicYear } from '../utils/getAcademicYear';
 
 const ProjectBlogPage = () => {
   const { id } = useParams();
@@ -25,6 +26,13 @@ const ProjectBlogPage = () => {
   const [selectedCollaborator, setSelectedCollaborator] = useState(null);
   const [projectStudentInfo, setProjectStudentInfo] = useState(null)
   const [projectSupervisorInfo, setProjectSupervisorInfo] = useState(null)
+  const [dissertationFile, setDissertationFile] = useState(null)
+  const navigate = useNavigate();
+
+  //for upload modal
+  const [file, setFile] = useState(null); // State to store the uploaded file
+  const [uploadMessage, setUploadMessage] = useState(''); // To store any response message from the API
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     const fetchProject = async () => {
@@ -74,7 +82,23 @@ const ProjectBlogPage = () => {
           console.log("supervisor on this project: " + supervisor.data)
         }
 
-        
+        if (response.data.completion_status === true) {
+          const projectsFiles = await api.get("http://127.0.0.1:8000/api/project-files/");
+          console.log("this => ", projectsFiles.data);
+
+          // Check if id and projectFile.project are integers and compare
+          console.log("id:", id, typeof id);
+          const fileData = projectsFiles.data.find((projectFile) => {
+            console.log("projectFile.project:", projectFile.project, typeof projectFile.project);
+            return projectFile.project === parseInt(id); // Ensure both are integers
+          });
+
+          setDissertationFile(fileData?.file);
+          console.log("fileData:", fileData);
+
+        }
+
+
       } catch (error) {
         console.error('Error fetching project:', error);
       }
@@ -83,10 +107,14 @@ const ProjectBlogPage = () => {
     fetchProject();
   }, [api, id]);
 
-  const handleUpdateContent =async () => {
-        setUpdatedTitle(project.title) 
-        setUpdatedCaseStudy(project.case_study) 
-        setUpdatedAbstract(project.abstract) 
+  const handleUpdateContent = async () => {
+    setUpdatedTitle(project.title)
+    setUpdatedCaseStudy(project.case_study)
+    setUpdatedAbstract(project.abstract)
+  }
+  const handleImproveContent = async () => {
+    setUpdatedTitle(project.title)
+    setUpdatedCaseStudy(project.case_study)
   }
 
 
@@ -106,7 +134,7 @@ const ProjectBlogPage = () => {
       // Assign missing supervisor
       if (!project.supervisor_id && selectedSupervisor) {
         requestBody.supervisor_id = selectedSupervisor;
-       const response =  await api.patch(`http://127.0.0.1:8000/api/projects/${id}/`, requestBody, {
+        const response = await api.patch(`http://127.0.0.1:8000/api/projects/${id}/`, requestBody, {
           headers: { 'Content-Type': 'application/json' },
         });
 
@@ -136,7 +164,7 @@ const ProjectBlogPage = () => {
         },
       });
 
-      
+
       alert(response.data.message);
       window.$('#addCollaboratorModal').modal('hide');
     } catch (error) {
@@ -177,7 +205,7 @@ const ProjectBlogPage = () => {
         },
       });
       err_or = response.data.detail
-      if(response.data.detail !== null){
+      if (response.data.detail !== null) {
         alert(response.data.detail)
       }
       alert(response.data.message);
@@ -186,6 +214,8 @@ const ProjectBlogPage = () => {
       console.error('Error changing approval status:', error);
       alert(err_or);
     }
+
+
   };
 
   // Assign supervisor or student
@@ -271,13 +301,87 @@ const ProjectBlogPage = () => {
       window.$('#updateModal').modal('hide');
     } catch (error) {
       console.error('Error updating project:', error.message);
-      alert('Error updating project.',error.message);
+      alert('Error updating project.', error.message);
+    }
+  };
+
+  // Handle request for project improvement
+  const handleImproveProject = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await api.post(`http://127.0.0.1:8000/api/projects/${id}/improve-project/`, {
+        title: updatedTitle,
+        case_study: updatedCaseStudy,
+        abstract: updatedAbstract,
+        accademic_year: getAcademicYear(),
+        collaborators: []
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      alert('Project updated successfully.');
+      setProject(response.data);
+      window.$('#improveModal').modal('hide');
+    } catch (error) {
+      console.error('Error improving project:', error);
+      alert('Error submit the form data. Try again?', error);
     }
   };
 
   const canModifyProject = project?.approval_status === 'Pending' && (
     project.student_id === auth.id || project.supervisor_id === auth.id
   );
+
+
+
+  //for upload
+
+
+
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]); // Set the selected file to state
+  };
+
+  const handleUpload = async () => {
+    if (!file) {
+      alert("Please select a file first!");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file); // Add the file to the form data
+
+    try {
+      const response = await axios.post('http://127.0.0.1:8000/api/project-files/', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      setUploadMessage('File uploaded successfully!');
+      setFile(null); // Clear the file input
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      setUploadMessage('Failed to upload file. Please try again.');
+    }
+  };
+
+  const handleClose = () => {
+    setShowModal(false);
+    setUploadMessage(''); // Reset message on modal close
+  };
+
+  const loadDissertationContent = () => { 
+    console.log("dissertation is: ", dissertationFile);
+    if (dissertationFile !== null) {
+      // Redirect to PDF viewer route
+      navigate(`/view-pdf?fileUrl=${encodeURIComponent(dissertationFile)}`);
+    } else {
+      alert('No file available to view.');
+    }
+  }
+
 
 
   if (!project) return <div>Loading...</div>;
@@ -311,30 +415,52 @@ const ProjectBlogPage = () => {
           </div>
         </div>
         <div className="action-buttons">
-          {project.approval_status === 'Pending' && (project.student_id || project.supervisor_id) && (auth.role.toUpperCase() === 'HOD' || auth.role.toUpperCase() === 'SUPERVISOR') && (
+          {project.approval_status === 'Pending' && project.completion_status !== true && (project.student_id || project.supervisor_id) && (auth.role.toUpperCase() === 'HOD') && (
             <button className="btn btn-success ml-2" data-toggle="modal" data-target="#approveModal">
               Approve
             </button>
           )}
-          {project.approval_status === 'Pending' && (project.student_id || project.supervisor_id) && (auth.role.toUpperCase() === 'HOD' || auth.role.toUpperCase() === 'SUPERVISOR') && (
+          {project.approval_status === 'Pending' && project.completion_status !== true && (project.student_id || project.supervisor_id) && (auth.role.toUpperCase() === 'HOD') && (
             <button className="btn btn-danger ml-2" onClick={() => handleApprovalChange('Reject')}>
               Delete
             </button>
           )}
-          
-          {project.approval_status === 'Pending' && (project.student_id || project.supervisor_id) && (auth.role.toUpperCase() === 'HOD') && (
+
+          {project.approval_status === 'Pending' && project.completion_status !== true && (project.student_id || project.supervisor_id) && (auth.role.toUpperCase() === 'HOD') && (
             <button className="btn btn-info ml-2" data-toggle="modal" data-target="#feedbackModal">
               Give Feedback
             </button>
           )}
-          {project.approval_status === 'Pending' && (project.student_id || project.supervisor_id) && (auth.role.toUpperCase() === 'HOD') && (
+          {project.approval_status === 'Pending' && project.completion_status !== true && (project.student_id || project.supervisor_id) && (auth.role.toUpperCase() === 'HOD') && (
             <button className="btn btn-info ml-2" data-toggle="modal" data-target="#addCollaboratorModal">
               Add Collaborator
             </button>
           )}
-          {project.approval_status === 'Pending' && (project.student_id || project.supervisor_id) && (projectStudentInfo?.reg_no.toUpperCase() === auth.user.toUpperCase() || projectSupervisorInfo?.reg_num.toUpperCase() === auth.user.toUpperCase()) && (
+          {project.approval_status === 'Pending' && project.completion_status !== true && (project.student_id || project.supervisor_id) && (projectStudentInfo?.reg_no.toUpperCase() === auth.user.toUpperCase() || projectSupervisorInfo?.reg_num.toUpperCase() === auth.user.toUpperCase()) && (
             <button className="btn btn-info ml-2" onClick={handleUpdateContent} data-toggle="modal" data-target="#updateModal">
               Update This Project
+            </button>
+          )}
+          {canModifyProject && project.completion_status !== true && (
+            <div className="text-center mt-4">
+              <button className="btn btn-danger" onClick={handleDeleteProject}>
+                Delete Project
+              </button>
+            </div>
+          )}
+          {project.completion_status === true && (project.student_id || project.supervisor_id) && (auth.role.toUpperCase() === 'STUDENT' || auth.role.toUpperCase() === 'SUPERVISOR' || auth.role.toUpperCase() === 'HOD') && (
+            <button className="btn btn-info ml-2" onClick={handleImproveContent} data-toggle="modal" data-target="#improveModal">
+              Request Improvement On This Project
+            </button>
+          )}
+          {dissertationFile === null && project.completion_status === true && (projectStudentInfo?.reg_no.toUpperCase() === auth.user.toUpperCase()) && (
+            <button className="btn btn-info ml-2" onClick={handleUpdateContent} data-toggle="modal" data-target="#upldModal">
+              Upload project dissertation
+            </button>
+          )}
+          {project.completion_status === true && dissertationFile !== null && (projectStudentInfo?.reg_no.toUpperCase() === auth.user.toUpperCase()) && (
+            <button className="btn btn-info ml-2" onClick={loadDissertationContent}>
+              View Project Dissertation
             </button>
           )}
         </div>
@@ -531,6 +657,53 @@ const ProjectBlogPage = () => {
           </div>
         </div>
       </div>
+      {/* improve project Modal */}
+      <div className="modal fade" id="improveModal" tabIndex="-1" role="dialog" aria-labelledby="improveModalLabel" aria-hidden="true">
+        <div className="modal-dialog" role="document">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title" id="improveModalLabel">Request Project Improvements</h5>
+              <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div className="modal-body">
+              <form onSubmit={handleImproveProject}>
+                <div className="form-group">
+                  <label htmlFor="updatedTitle">Title</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="updatedTitle"
+                    value={updatedTitle}
+                    onChange={(e) => setUpdatedTitle(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="updatedCaseStudy">Case Study</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="updatedCaseStudy"
+                    value={updatedCaseStudy}
+                    onChange={(e) => setUpdatedCaseStudy(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="updatedAbstract"> Your Abstract</label>
+                  <ReactQuill
+                    theme="snow"
+                    onChange={setUpdatedAbstract}
+                  />
+                </div>
+                <button type="submit" className="btn btn-primary">Submit</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
       {/* Add Collaborator Modal */}
       <div className="modal fade" id="addCollaboratorModal" tabIndex="-1" role="dialog" aria-labelledby="addCollaboratorModalLabel" aria-hidden="true">
         <div className="modal-dialog" role="document">
@@ -569,15 +742,57 @@ const ProjectBlogPage = () => {
         </div>
       </div>
 
-
-      {/* Delete Project Button */}
-      {canModifyProject && (
-        <div className="text-center mt-4">
-          <button className="btn btn-danger" onClick={handleDeleteProject}>
-            Delete Project
-          </button>
+      {/* upload modal */}
+      <div
+        className={`modal fade`}
+        id="upldModal"
+        tabIndex="-1"
+        role="dialog"
+        aria-labelledby="uploadModalLabel"
+        aria-hidden="true"
+      >
+        <div className="modal-dialog" role="document">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title" id="uploadModalLabel">Upload File for Project</h5>
+              <button
+                type="button"
+                className="close"
+                data-dismiss="modal"
+                aria-label="Close"
+                onClick={handleClose}
+              >
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div className="modal-body">
+              <form onSubmit={(e) => { e.preventDefault(); handleUpload(); }}>
+                <div className="form-group">
+                  <label htmlFor="fileInput">Choose file</label>
+                  <input
+                    type="file"
+                    className="form-control"
+                    id="fileInput"
+                    onChange={handleFileChange}
+                    accept=".pdf,.doc,.docx,.txt"
+                    required
+                  />
+                </div>
+                {uploadMessage && <p className="text-success">{uploadMessage}</p>}
+                <div className="modal-footer">
+                  <button type="submit" className="btn btn-primary">
+                    Upload
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
         </div>
-      )}
+      </div>
+
+
+
+
     </div>
   );
 };
