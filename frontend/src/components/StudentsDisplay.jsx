@@ -48,6 +48,7 @@ const StudentsDisplay = () => {
                     return { ...student, departmentName, facultyName, levelName };
                 })
             );
+            console.log(response.data)
             setStudents(studentsWithDetails);
         } catch (error) {
             console.error('Error fetching students:', error);

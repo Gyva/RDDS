@@ -49,6 +49,7 @@ const SupervisorsDisplay = () => {
     const fetchSupervisors = async () => {
         try {
             const response = await axios.get('http://127.0.0.1:8000/api/supervisors/');
+            console.log(response.data)
             setSupervisors(response.data);
             setFilteredSupervisors(response.data);
             setErrorAlerts('');

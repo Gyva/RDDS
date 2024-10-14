@@ -87,7 +87,7 @@ const ProjectBlogPage = () => {
           console.log("this => ", projectsFiles.data);
 
           // Check if id and projectFile.project are integers and compare
-          console.log("id:", id, typeof id);
+          console.log("id:", id);
           const fileData = projectsFiles.data.find((projectFile) => {
             console.log("projectFile.project:", projectFile.project, typeof projectFile.project);
             return projectFile.project === parseInt(id); // Ensure both are integers
