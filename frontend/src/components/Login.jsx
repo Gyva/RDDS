@@ -86,8 +86,9 @@ const Login = () => {
 
           <button type="submit" className="btn btn-primary w-100">Sign In</button>
         </form>
-        <div className="text-center mt-3">
-          <button className="btn btn-link" onClick={() => navigate('/claim-password')}>Claim Password</button>
+        <div className="text-center mt-3 d-flex justify-content-between">
+        <button className="btn btn-link" onClick={() => navigate('/claim-password')}>Claim Password</button>
+        <button className="btn btn-link" onClick={() => navigate('/grap-reset-link')}>Reset Password</button>
         </div>
       </div>
     </div>

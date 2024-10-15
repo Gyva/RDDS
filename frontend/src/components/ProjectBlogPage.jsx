@@ -405,7 +405,7 @@ const ProjectBlogPage = () => {
     console.log("dissertation is: ", dissertationFile);
     if (dissertationFile !== null) {
       // Redirect to PDF viewer route
-      navigate(`/view-pdf?fileUrl=${encodeURIComponent(dissertationFile)}`);
+      navigate(`/view-pdf`, {state:{fileUrl:`${encodeURIComponent(dissertationFile)}`}});
     } else {
       alert('No file available to view.');
     }
