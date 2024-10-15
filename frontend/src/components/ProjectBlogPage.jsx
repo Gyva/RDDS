@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { useParams,useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { AuthContext } from '../contexts/AuthProvider';
@@ -42,6 +42,8 @@ const ProjectBlogPage = () => {
             'Content-Type': 'application/json',
           },
         });
+
+
         setProject(response.data);
 
         // Fetch department supervisors and students
@@ -92,6 +94,20 @@ const ProjectBlogPage = () => {
             console.log("projectFile.project:", projectFile.project, typeof projectFile.project);
             return projectFile.project === parseInt(id); // Ensure both are integers
           });
+          // for collaborators retrieve
+
+          const collaboratorsDetails = await Promise.all(
+            response.data.collaborators.map((collaborator) =>  getUserDetails(collaborator, 'students'))
+          );
+          console.log("Coolb details ", collaboratorsDetails)
+
+          setProject((prevProject) => ({
+            ...prevProject,
+            collaborators: collaboratorsDetails.map(collaborator => ({
+              name: collaborator.name,
+              regNo: collaborator.regNo,
+            })),
+          }));
 
           setDissertationFile(fileData?.file);
           console.log("fileData:", fileData);
@@ -106,6 +122,19 @@ const ProjectBlogPage = () => {
 
     fetchProject();
   }, [api, id]);
+
+  const getUserDetails = async (id, userType) => {
+    try {
+      const response = await api.get(`http://127.0.0.1:8000/api/${userType}/${id}/`);
+      return {
+        name: `${response.data.fname} ${response.data.lname}`,
+        regNo: response.data.reg_no || response.data.reg_num,
+      };
+    } catch (error) {
+      console.error(`Error fetching ${userType} details:`, error);
+      return { name: 'N/A', regNo: 'N/A' };
+    }
+  };
 
   const handleUpdateContent = async () => {
     setUpdatedTitle(project.title)
@@ -372,7 +401,7 @@ const ProjectBlogPage = () => {
     setUploadMessage(''); // Reset message on modal close
   };
 
-  const loadDissertationContent = () => { 
+  const loadDissertationContent = () => {
     console.log("dissertation is: ", dissertationFile);
     if (dissertationFile !== null) {
       // Redirect to PDF viewer route
@@ -398,10 +427,22 @@ const ProjectBlogPage = () => {
               <div className="info-box d-flex flex-column p-4">
                 <h5 className="mb-3">{project.title}</h5>
                 <span><strong>Case Study:</strong> {project.case_study}</span>
-                <span><strong>Student:</strong> {assignedStudent ? `${assignedStudent.fname} ${assignedStudent.lname}` : 'Not assigned'}</span>
+                <span><strong>Student(s):</strong> {assignedStudent ? `${assignedStudent.fname} ${assignedStudent.lname} ( Reg No: ${assignedStudent.reg_no})`
+                
+                
+                : 'Not assigned'} {project.collaborators && project.collaborators.length > 0 && (
+                  project.collaborators.map((collab, index) => (
+                   <span key={index}>
+                     {console.log("bbbb ",collab.name)}
+                     {", "+collab.name} (Reg No: {collab.regNo}){index < project.collaborators.length - 1 && ', '}
+                   </span>
+                 ))
+               )}</span>
+                {console.log("Collab ",project.collaborators)}
+                
                 <span><strong>Department:</strong> {departmentName}</span>
                 <span><strong>AI Check:</strong> {project.check_status?.toString()}</span>
-                <span><strong>Supervisor:</strong> {assignedSupervisor ? `${assignedSupervisor.fname} ${assignedSupervisor.lname}` : 'Not assigned'}</span>
+                <span><strong>Supervisor:</strong> {assignedSupervisor ? `${assignedSupervisor.fname} ${assignedSupervisor.lname} ( Reg No: ${assignedSupervisor.reg_num})` : 'Not assigned'}</span>
                 <span><strong>Approval Status:</strong> {project.approval_status}</span>
               </div>
 

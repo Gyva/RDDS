@@ -114,7 +114,11 @@ const ManageSubmittedProjects = () => {
 
   // Function to generate the report
   const generateReport = (status) => {
-    const reportData = filteredProjects(status).map(project => ({
+    // Define the report title
+    const reportTitle = `${status} Projects Report`;
+
+    // Create the report data
+    const reportData = filteredProjects(status).map((project) => ({
       'Student': project.student_name,
       'Student Reg No': project.student_reg,
       'Supervisor': project.supervisor_name,
@@ -123,10 +127,14 @@ const ManageSubmittedProjects = () => {
       'Approval Status': project.approval_status,
     }));
 
-    // Create a new workbook and add the report data to it
-    const worksheet = utils.json_to_sheet(reportData);
+    // Create a new workbook and add the title row
+    const worksheet = utils.json_to_sheet([{ Title: reportTitle }, {}, ...reportData]);
+
+    // Create a new workbook
     const workbook = utils.book_new();
-    utils.book_append_sheet(workbook, worksheet, `${status} Projects Report`);
+
+    // Append the worksheet to the workbook
+    utils.book_append_sheet(workbook, worksheet, reportTitle);
 
     // Export the Excel file
     writeFile(workbook, `${status}_Projects_Report.xlsx`);

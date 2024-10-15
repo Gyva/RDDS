@@ -1,52 +1,80 @@
 .discover-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    justify-content: center;
-  }
-  
-  .project-card {
-    width: 100%;
-    max-width: 300px;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-    transition: transform 0.2s ease-in-out;
-  }
-  
-  .project-card:hover {
-    transform: scale(1.05);
-  }
-  
-  .project-card-image img {
-    width: 100%;
-    height: 150px;
-    object-fit: cover;
-  }
-  
-  .project-card-content {
-    padding: 15px;
-  }
-  
-  .project-card h3 {
-    margin: 0;
-    font-size: 1.2rem;
-  }
-  
-  .project-card p {
-    font-size: 0.9rem;
-    color: #555;
-  }
-  
-  @media (max-width: 768px) {
-    .discover-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  padding: 20px;
+  background-color: #f9f9f9; /* Light background for contrast */
+}
+
+.project-card {
+  width: 100%;
+  padding: 10px;
+  max-width: 350px; /* Slightly larger card width */
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0; /* Light border for definition */
+  border-radius: 12px; /* More rounded corners */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  display: flex;
+  flex-direction: column; /* Flexbox for better alignment */
+}
+
+.project-card:hover {
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2); /* Enhanced shadow on hover */
+  transform: translateY(-3px); /* Slight lift effect */
+}
+
+.project-card-image {
+  height: 200px; /* Height for image area */
+  background-color: #e0e0e0; /* Placeholder background */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem; /* Placeholder text size */
+  color: #777;
+}
+
+.project-card-content {
+  padding: 20px; /* Increased padding */
+  flex-grow: 1; /* Allow content to take available space */
+}
+
+.project-card h3 {
+  margin: 0 0 10px; /* Margin adjustment */
+  font-size: 1.4rem; /* Increased font size for title */
+  color: #333; /* Darker title color */
+}
+
+.project-card p {
+  font-size: 1rem; /* Standard font size for text */
+  color: #666; /* Medium grey for text */
+  margin: 5px 0; /* Margin adjustment */
+}
+
+.project-card .btn {
+  margin-top: 10px; /* Spacing above button */
+  background-color: #007bff; /* Primary button color */
+  color: white; /* White text */
+  border: none; /* No border */
+  border-radius: 5px; /* Slightly rounded button */
+  padding: 10px; /* Padding for button */
+  text-align: center; /* Center text */
+  transition: background-color 0.3s ease; /* Smooth transition for hover */
+}
+
+.project-card .btn:hover {
+  background-color: #0056b3; /* Darker shade on hover */
+}
+
+@media (max-width: 768px) {
+  .discover-container {
       flex-direction: column;
       align-items: center;
-    }
-  
-    .project-card {
-      max-width: 100%;
-    }
   }
-  
+
+  .project-card {
+      max-width: 100%;
+  }
+}
