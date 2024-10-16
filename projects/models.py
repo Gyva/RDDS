@@ -150,7 +150,7 @@ class Project(models.Model):
     case_study = models.CharField(max_length=200)
     abstract = models.TextField()
     department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)  # Automatically set from student or supervisor
-    supervisor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)  # Supervisor's project won't have a student
+    supervisor = models.ForeignKey(Supervisor, on_delete=models.SET_NULL, null=True, blank=True)  # Supervisor's project won't have a student
     check_status = models.BooleanField(default=False)  # AI uniqueness test
     approval_status = models.CharField(max_length=10, choices=APPROVAL_STATUS_CHOICES, default='Pending')  # Approval by supervisor/admin
     completion_status = models.BooleanField(default=False)
