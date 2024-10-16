@@ -26,6 +26,8 @@ import ConversationsList from './components/ConversationsList';
 import RegistrarRegistrationForm from './components/RegistrarRegistrationForm';
 import PDFViewer from './components/PDFViewer';
 import ManageRegistrar from './components/ManageRegistrar';
+import DepartmentReport from './components/DepartmentReport';
+import StudentAssignedProject from './components/StudentAssignedProject';
 
 function App() {
     return (
@@ -43,23 +45,27 @@ function App() {
 
                     {/* Protected Routes */}
                     <Route path="/dashboard" element={<ProtectedRoute><Dashboard><LevelsDisplay /></Dashboard></ProtectedRoute>} />
-                    <Route path="/discover" element={<ProtectedRoute><Dashboard><Discover /></Dashboard></ProtectedRoute>} />
-                    <Route path="/departments" element={<ProtectedRoute><Dashboard><DepartmentsDisplay /></Dashboard></ProtectedRoute>} />
-                    <Route path="/levels" element={<ProtectedRoute><Dashboard><LevelsDisplay /></Dashboard></ProtectedRoute>} />
-                    <Route path="/students" element={<ProtectedRoute><Dashboard><StudentsDisplay /></Dashboard></ProtectedRoute>} />
-                    <Route path="/faculties" element={<ProtectedRoute><Dashboard><FacultiesDisplay /></Dashboard></ProtectedRoute>} />
-                    <Route path="/create-project" element={<ProtectedRoute><Dashboard><CreateProject /></Dashboard></ProtectedRoute>} />
-                    <Route path="/register-supervisor" element={<ProtectedRoute><Dashboard><SupervisorRegistrationForm /></Dashboard></ProtectedRoute>} />
-                    <Route path="/register-student" element={<ProtectedRoute><Dashboard><StudentRegistrationForm /></Dashboard></ProtectedRoute>} />
-                    <Route path="/supervisors" element={<ProtectedRoute><Dashboard><SupervisorsDisplay /></Dashboard></ProtectedRoute>} />
-                    <Route path="/change-password" element={<ProtectedRoute><Dashboard><ChangePasswordForm /></Dashboard></ProtectedRoute>} />
-                    <Route path="/projects/:id" element={<ProtectedRoute><Dashboard><ProjectBlogPage /></Dashboard></ProtectedRoute>} />
-                    <Route path="/manage-projects" element={<ProtectedRoute><Dashboard><ManageSubmittedProjects /></Dashboard></ProtectedRoute>} />
-                    <Route path="/chat" element={<ProtectedRoute><Dashboard><Chat /></Dashboard></ProtectedRoute>} />
-                    <Route path="/conversations" element={<ProtectedRoute><Dashboard><ConversationsList /></Dashboard></ProtectedRoute>} />
-                    <Route path="/create-regstrar" element={<ProtectedRoute><Dashboard><RegistrarRegistrationForm /></Dashboard></ProtectedRoute>} />
-                    <Route path="/view-pdf" element={<ProtectedRoute><Dashboard><PDFViewer /></Dashboard></ProtectedRoute>} />
-                    <Route path="/manage-registrar" element={<ProtectedRoute><Dashboard><ManageRegistrar /></Dashboard></ProtectedRoute>} />
+                    <Route path="/home" element={<ProtectedRoute><Dashboard><Discover /></Dashboard></ProtectedRoute>} />
+                    <Route path="/discover" element={<ProtectedRoute><Dashboard><Discover /></Dashboard></ProtectedRoute>} /> {/*for hod/supervisor/student/admin/registrar */}
+                    <Route path="/departments" element={<ProtectedRoute><Dashboard><DepartmentsDisplay /></Dashboard></ProtectedRoute>} />{/*for registar  and admin */}
+                    <Route path="/levels" element={<ProtectedRoute><Dashboard><LevelsDisplay /></Dashboard></ProtectedRoute>} />{/*for registar  and admin */}
+                    <Route path="/students" element={<ProtectedRoute><Dashboard><StudentsDisplay /></Dashboard></ProtectedRoute>} />{/*for registar  and admin */}
+                    <Route path="/faculties" element={<ProtectedRoute><Dashboard><FacultiesDisplay /></Dashboard></ProtectedRoute>} />{/*for registar  and admin */}
+                    <Route path="/create-project" element={<ProtectedRoute><Dashboard><CreateProject /></Dashboard></ProtectedRoute>} />{/*for supervisor/HOD/student */}
+                    <Route path="/register-supervisor" element={<ProtectedRoute><Dashboard><SupervisorRegistrationForm /></Dashboard></ProtectedRoute>} />{/*for registar  and admin */}
+                    <Route path="/register-student" element={<ProtectedRoute><Dashboard><StudentRegistrationForm /></Dashboard></ProtectedRoute>} />{/*for registar  and admin */}
+                    <Route path="/supervisors" element={<ProtectedRoute><Dashboard><SupervisorsDisplay /></Dashboard></ProtectedRoute>} />{/*for registar  and admin */}
+                    <Route path="/change-password" element={<ProtectedRoute><Dashboard><ChangePasswordForm /></Dashboard></ProtectedRoute>} /> {/* for all */}
+                    <Route path="/projects/:id" element={<ProtectedRoute><Dashboard><ProjectBlogPage /></Dashboard></ProtectedRoute>} />{/*for registar  and admin */}
+                    <Route path="/manage-projects" element={<ProtectedRoute><Dashboard><ManageSubmittedProjects /></Dashboard></ProtectedRoute>} />{/*for HOD  and admin */}
+                    <Route path="/chat" element={<ProtectedRoute><Dashboard><Chat /></Dashboard></ProtectedRoute>} />{/*for student/ */}
+                    <Route path="/conversations" element={<ProtectedRoute><Dashboard><ConversationsList /></Dashboard></ProtectedRoute>} />{/*for hod/supervisor*/}
+                    <Route path="/create-regstrar" element={<ProtectedRoute><Dashboard><RegistrarRegistrationForm /></Dashboard></ProtectedRoute>} />{/*for admin */}
+                    <Route path="/view-pdf" element={<ProtectedRoute><Dashboard><PDFViewer /></Dashboard></ProtectedRoute>} />{/*for supervisor/HOD/student */}
+                    <Route path="/manage-registrar" element={<ProtectedRoute><Dashboard><ManageRegistrar /></Dashboard></ProtectedRoute>} />{/*for admin */}
+                    <Route path="/my-department" element={<ProtectedRoute><Dashboard><DepartmentReport /></Dashboard></ProtectedRoute>} />{/*for admin */}
+                    <Route path="/my-projects" element={<ProtectedRoute><Dashboard><StudentAssignedProject /></Dashboard></ProtectedRoute>} />{/*for admin */}
+                    
 
                     
                 </Routes>

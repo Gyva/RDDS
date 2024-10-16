@@ -8,8 +8,8 @@ import './ManageSubmittedProjects.css';
 const ManageSubmittedProjects = () => {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState(''); 
-  const [activeSection, setActiveSection] = useState('Approved'); 
+  const [searchTerm, setSearchTerm] = useState('');
+  const [activeSection, setActiveSection] = useState('All Submitted'); // Default to 'All Submitted'
   const { auth, api, logout, refreshToken } = useContext(AuthContext);
 
   const fetchProjectsWithNames = async () => {
@@ -107,6 +107,7 @@ const ManageSubmittedProjects = () => {
     },
   ];
 
+  // Filter projects by submission status (excluding unsubmitted)
   const filteredProjects = (status) => {
     return projects.filter((project) => {
       return (
@@ -117,6 +118,11 @@ const ManageSubmittedProjects = () => {
       );
     });
   };
+
+  // Filter all submitted projects, excluding unsubmitted ones
+  const allSubmittedProjects = projects.filter(
+    (project) => ['Approved', 'Pending', 'Rejected', 'Completed'].includes(project.approval_status)
+  );
 
   const completedProjects = projects.filter((project) => project.completion_status === true);
 
@@ -170,7 +176,7 @@ const ManageSubmittedProjects = () => {
       </div>
 
       <div className="section-buttons mb-3">
-        {['Approved', 'Pending', 'Rejected', 'Completed'].map((status) => (
+        {['All Submitted', 'Approved', 'Pending', 'Rejected', 'Completed'].map((status) => (
           <button
             key={status}
             className={`btn ${activeSection === status ? 'btn-primary' : 'btn-secondary'} me-2`}
@@ -188,7 +194,13 @@ const ManageSubmittedProjects = () => {
         </button>
         <DataTable
           columns={columns}
-          data={activeSection === 'Completed' ? completedProjects : filteredProjects(activeSection)}
+          data={
+            activeSection === 'Completed'
+              ? completedProjects
+              : activeSection === 'All Submitted'
+              ? allSubmittedProjects
+              : filteredProjects(activeSection)
+          }
           progressPending={loading}
           pagination
           responsive

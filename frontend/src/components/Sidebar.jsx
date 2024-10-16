@@ -91,13 +91,13 @@ const Sidebar = ({ isVisible, role }) => {
     registerer: (
       <>
         <li className="nav-item">
-          <a href="/registerer/students" className="nav-link">
+          <a href="/students" className="nav-link">
             <i className="nav-icon fas fa-user me-2"></i> Manage Students
           </a>
         </li>
         <li className="nav-item">
           <a href="/registerer/payments" className="nav-link">
-            <i className="nav-icon fas fa-money-check-alt me-2"></i> Handle Payments
+            <i className="nav-icon fas fa-money-check-alt me-2"></i> Manage Supervisor
           </a>
         </li>
       </>
@@ -106,7 +106,7 @@ const Sidebar = ({ isVisible, role }) => {
       <>
         <li className="nav-item">
           <a href="/supervisor/projects" className="nav-link">
-            <i className="nav-icon fas fa-tasks me-2"></i> Manage Projects
+            <i className="nav-icon fas fa-tasks me-2"></i> Assigned Projects
           </a>
         </li>
         <li className="nav-item">
@@ -125,25 +125,16 @@ const Sidebar = ({ isVisible, role }) => {
     student: (
       <>
         <li className="nav-item">
-          <a href="" className="nav-link">
-            <i className="nav-icon fas fa-file-alt me-2"></i> Admission Letter
+          <a href="/create-project" className="nav-link">
+            <i className="nav-icon fas fa-money-check-alt me-2"></i> Register a project
           </a>
         </li>
         <li className="nav-item">
-          <a href="" className="nav-link">
-            <i className="nav-icon fas fa-money-check-alt me-2"></i> Payments
+          <a href="/my-projects" className="nav-link">
+            <i className="nav-icon fas fa-tasks me-2"></i> My project(s)
           </a>
         </li>
-        <li className="nav-item">
-          <a href="" className="nav-link">
-            <i className="nav-icon fas fa-tasks me-2"></i> Academic Marks
-          </a>
-        </li>
-        <li className="nav-item">
-          <a href="" className="nav-link">
-            <i className="nav-icon fas fa-certificate me-2"></i> Clearance
-          </a>
-        </li>
+        
         {/* Chat menu item for student */}
         <li className="nav-item">
           <a href="#!" onClick={handleChatClick} className="nav-link">

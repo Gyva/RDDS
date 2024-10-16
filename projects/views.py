@@ -840,6 +840,8 @@ class ProjectViewSet(viewsets.ModelViewSet):
 
 #Feedback viewset
 class ProvideFeedbackView(APIView):
+    queryset = Feedback.objects.all()
+    serializer_class = FeedbackSerializer
     permission_classes = [IsAuthenticated]
 
     def post(self, request, project_id):

@@ -254,7 +254,7 @@ const ProjectBlogPage = () => {
       const requestBody = {};
       if (selectedSupervisor) {
         requestBody.supervisor_id = selectedSupervisor;
-        const response = await api.patch(`http://127.0.0.1:8000/api/project/${id}/assign_supervisor/`, requestBody, {
+        const response = await api.post(`http://127.0.0.1:8000/api/project/${id}/assign_supervisor/`, requestBody, {
           headers: {
             'Content-Type': 'application/json',
           },

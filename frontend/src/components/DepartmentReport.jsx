@@ -1,24 +1,59 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React, { useEffect, useState, useContext } from 'react';
 import * as XLSX from 'xlsx';
+import { AuthContext } from '../contexts/AuthProvider'; // Assuming you have an AuthContext for user role and details
+import 'bootstrap/dist/css/bootstrap.min.css'; // Ensure Bootstrap is imported
 
 const DepartmentReport = () => {
     const [data, setData] = useState({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [viewMode, setViewMode] = useState('both'); // State for view mode
+    const [userDepartment, setUserDepartment] = useState(null); // Store user's department
+    const { auth, api } = useContext(AuthContext); // Access auth for role and reg_no
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const responseStudents = await axios.get('http://127.0.0.1:8000/api/students/');
-                const responseSupervisors = await axios.get('http://127.0.0.1:8000/api/supervisors/');
+                let departmentId = null;
 
-                const students = responseStudents.data;
+                // Fetch all supervisors
+                const responseSupervisors = await api.get('http://127.0.0.1:8000/api/supervisors/');
                 const supervisors = responseSupervisors.data;
 
+                // Fetch all projects
+                const responseProjects = await api.get('http://127.0.0.1:8000/api/projects/');
+                const projects = responseProjects.data;
+
+                // If the user is HOD, find the supervisor whose reg_no matches auth.user.reg_no
+                if (auth.role === 'HOD') {
+                    const supervisor = supervisors.find(sup => sup.reg_num === auth.user);
+                    if (supervisor) {
+                        departmentId = supervisor.department;
+                        setUserDepartment(departmentId);
+                    } else {
+                        setError('No supervisor found for this HOD.');
+                        return;
+                    }
+                }
+
+                // Fetch all students
+                const responseStudents = await api.get('http://127.0.0.1:8000/api/students/');
+                const students = responseStudents.data;
+
+                // Filter data based on role and department
+                const filteredStudents = auth.role === 'HOD' ? students.filter(student => student.department === departmentId) : students;
+                const filteredSupervisors = auth.role === 'HOD' ? supervisors.filter(supervisor => supervisor.department === departmentId) : supervisors;
+
+                // For each supervisor, count the number of assigned students based on projects
+                const supervisorsWithStudentCount = filteredSupervisors.map(supervisor => {
+                    const studentsAssigned = projects.filter(project =>
+                        project.supervisor_id === supervisor.sup_id && project.student_id !== null
+                    ).length;
+                    return { ...supervisor, studentsCount: studentsAssigned };
+                });
+
                 // Group students and supervisors by department
-                const groupedData = groupByDepartment(students, supervisors);
+                const groupedData = groupByDepartment(filteredStudents, supervisorsWithStudentCount);
                 setData(groupedData);
             } catch (error) {
                 console.error('Error fetching data:', error);
@@ -29,7 +64,7 @@ const DepartmentReport = () => {
         };
 
         fetchData();
-    }, []);
+    }, [auth]);
 
     const groupByDepartment = (students, supervisors) => {
         const grouped = {};
@@ -64,8 +99,8 @@ const DepartmentReport = () => {
         // Add supervisors data
         supervisors.forEach(supervisor => {
             reportData.push({
-                Name: supervisor.name,
-                RegNo: supervisor.regNo,
+                Name: supervisor.fname + ' ' + supervisor.lname,
+                RegNo: supervisor.reg_num,
                 Department: department,
                 Type: 'Supervisor',
                 StudentsAssigned: supervisor.studentsCount || 0, // Ensure students count is available
@@ -75,8 +110,8 @@ const DepartmentReport = () => {
         // Add students data
         students.forEach(student => {
             reportData.push({
-                Name: student.name,
-                RegNo: student.regNo,
+                Name: student.fname,
+                RegNo: student.reg_no,
                 Department: department,
                 Type: 'Student',
                 StudentsAssigned: '', // No students assigned for students
@@ -97,62 +132,76 @@ const DepartmentReport = () => {
         XLSX.writeFile(workbook, fileName);
     };
 
-    if (loading) return <p>Loading...</p>;
-    if (error) return <p>{error}</p>;
+    if (loading) return <p className="text-center">Loading...</p>;
+    if (error) return <p className="text-center text-danger">{error}</p>;
 
     return (
-        <div>
+        <div className="container mt-4">
             {/* View Mode Selection */}
-            <div>
-                <label>
+            <div className="text-center mb-3">
+                <label className="mx-2">
                     <input 
                         type="radio" 
                         name="viewMode" 
                         value="both" 
                         checked={viewMode === 'both'} 
                         onChange={() => setViewMode('both')} 
+                        className="me-1"
                     />
                     Both
                 </label>
-                <label>
+                <label className="mx-2">
                     <input 
                         type="radio" 
                         name="viewMode" 
                         value="supervisors" 
                         checked={viewMode === 'supervisors'} 
                         onChange={() => setViewMode('supervisors')} 
+                        className="me-1"
                     />
                     Supervisors Only
                 </label>
-                <label>
+                <label className="mx-2">
                     <input 
                         type="radio" 
                         name="viewMode" 
                         value="students" 
                         checked={viewMode === 'students'} 
                         onChange={() => setViewMode('students')} 
+                        className="me-1"
                     />
                     Students Only
                 </label>
             </div>
 
             {Object.entries(data).map(([department, { supervisors, students }]) => (
-                <div key={department} style={{ margin: '20px 0', border: '1px solid gray', padding: '10px' }}>
+                <div key={department} className="mb-4">
                     <h3>{department}</h3>
-                    <button onClick={() => handleGenerateReport(department)}>Generate Report</button>
+                    <button className="btn btn-primary mb-2" onClick={() => handleGenerateReport(department)}>Generate Report</button>
 
                     {/* Render based on view mode */}
                     {viewMode !== 'students' && (
                         <>
                             <h4>Supervisors:</h4>
                             {supervisors.length > 0 ? (
-                                <ul>
-                                    {supervisors.map((supervisor) => (
-                                        <li key={supervisor.id}>
-                                            {supervisor.name} (Reg No: {supervisor.regNo}, Students Assigned: {supervisor.studentsCount || 0})
-                                        </li>
-                                    ))}
-                                </ul>
+                                <table className="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Reg No</th>
+                                            <th>Students Assigned</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {supervisors.map((supervisor) => (
+                                            <tr key={supervisor.id}>
+                                                <td>{supervisor.fname} {supervisor.lname}</td>
+                                                <td>{supervisor.reg_num}</td>
+                                                <td>{supervisor.studentsCount || 0}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
                             ) : (
                                 <p>No supervisors available</p>
                             )}
@@ -163,13 +212,22 @@ const DepartmentReport = () => {
                         <>
                             <h4>Students:</h4>
                             {students.length > 0 ? (
-                                <ul>
-                                    {students.map((student) => (
-                                        <li key={student.id}>
-                                            {student.name} (Reg No: {student.regNo})
-                                        </li>
-                                    ))}
-                                </ul>
+                                <table className="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Reg No</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {students.map((student) => (
+                                            <tr key={student.id}>
+                                                <td>{student.fname} {student.lname}</td>
+                                                <td>{student.reg_no}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
                             ) : (
                                 <p>No students available</p>
                             )}
