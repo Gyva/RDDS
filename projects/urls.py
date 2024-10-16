@@ -13,6 +13,7 @@ router.register(r'projects', ProjectViewSet, basename='projects')
 router.register(r'conversations', ConversationViewSet, basename='conversation')
 router.register(r'messages', MessageViewSet, basename='message')
 router.register(r'project-files', ProjectFileViewSet, basename='projectfile')
+# router.register(r'feedbacks', ProvideFeedbackView, basename='feedback')
 router.register(r'users', UserViewSet, basename='user')
 
 urlpatterns = [

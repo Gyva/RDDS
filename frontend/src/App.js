@@ -44,7 +44,7 @@ function App() {
                     <Route path="/set-password" element={<SetPassword />} />
 
                     {/* Protected Routes */}
-                    <Route path="/dashboard" element={<ProtectedRoute><Dashboard><LevelsDisplay /></Dashboard></ProtectedRoute>} />
+                    <Route path="/dashboard" element={<ProtectedRoute><Dashboard><Discover/></Dashboard></ProtectedRoute>} />
                     <Route path="/home" element={<ProtectedRoute><Dashboard><Discover /></Dashboard></ProtectedRoute>} />
                     <Route path="/discover" element={<ProtectedRoute><Dashboard><Discover /></Dashboard></ProtectedRoute>} /> {/*for hod/supervisor/student/admin/registrar */}
                     <Route path="/departments" element={<ProtectedRoute><Dashboard><DepartmentsDisplay /></Dashboard></ProtectedRoute>} />{/*for registar  and admin */}
@@ -60,11 +60,11 @@ function App() {
                     <Route path="/manage-projects" element={<ProtectedRoute><Dashboard><ManageSubmittedProjects /></Dashboard></ProtectedRoute>} />{/*for HOD  and admin */}
                     <Route path="/chat" element={<ProtectedRoute><Dashboard><Chat /></Dashboard></ProtectedRoute>} />{/*for student/ */}
                     <Route path="/conversations" element={<ProtectedRoute><Dashboard><ConversationsList /></Dashboard></ProtectedRoute>} />{/*for hod/supervisor*/}
-                    <Route path="/create-regstrar" element={<ProtectedRoute><Dashboard><RegistrarRegistrationForm /></Dashboard></ProtectedRoute>} />{/*for admin */}
+                    <Route path="/create-registrar" element={<ProtectedRoute><Dashboard><RegistrarRegistrationForm /></Dashboard></ProtectedRoute>} />{/*for admin */}
                     <Route path="/view-pdf" element={<ProtectedRoute><Dashboard><PDFViewer /></Dashboard></ProtectedRoute>} />{/*for supervisor/HOD/student */}
                     <Route path="/manage-registrar" element={<ProtectedRoute><Dashboard><ManageRegistrar /></Dashboard></ProtectedRoute>} />{/*for admin */}
                     <Route path="/my-department" element={<ProtectedRoute><Dashboard><DepartmentReport /></Dashboard></ProtectedRoute>} />{/*for admin */}
-                    <Route path="/my-projects" element={<ProtectedRoute><Dashboard><StudentAssignedProject /></Dashboard></ProtectedRoute>} />{/*for admin */}
+                    <Route path="/my-projects/:regno" element={<ProtectedRoute><Dashboard><StudentAssignedProject /></Dashboard></ProtectedRoute>} />{/*for admin */}
                     
 
                     

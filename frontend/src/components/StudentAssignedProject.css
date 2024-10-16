@@ -1,0 +1,57 @@
+.student-projects {
+    padding: 20px;
+  }
+  
+  .projects-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px; /* Space between cards */
+  }
+  
+  /* General styling for project cards */
+  .project-card {
+    background-color: #f9f9f9; /* Light background for cards */
+    border: 1px solid #ddd; /* Light border */
+    border-radius: 8px; /* Rounded corners */
+    padding: 15px; /* Inner padding */
+    width: calc(33.333% - 20px); /* Three cards per row with gap */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    transition: transform 0.2s; /* Smooth hover effect */
+  }
+  
+  .project-card:hover {
+    transform: scale(1.02); /* Slight zoom on hover */
+  }
+  
+  /* Margin for title */
+  .project-card h5 {
+    margin: 0 0 10px;
+  }
+  
+  .btn {
+    margin-top: 10px; /* Space above button */
+  }
+  
+  /* Responsive adjustments for smaller screens */
+  
+  /* For large screens (desktops), three cards per row */
+  @media (min-width: 992px) {
+    .project-card {
+      width: calc(33.333% - 20px);
+    }
+  }
+  
+  /* For medium screens (tablets), two cards per row */
+  @media (min-width: 768px) {
+    .project-card {
+      width: calc(50% - 20px);
+    }
+  }
+  
+  /* For small screens (mobile phones), one card per row */
+  @media (max-width: 767px) {
+    .project-card {
+      width: 100%; /* Full width */
+    }
+  }
+  

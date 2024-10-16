@@ -51,6 +51,7 @@ const AuthProvider = ({ children }) => {
   const logout = () => {
     setAuth({
       isAuthenticated: false,
+      id:null,
       user: null,
       role: null,
       accessToken: null,

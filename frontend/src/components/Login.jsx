@@ -42,6 +42,7 @@ const Login = () => {
         setErrMsg('No Server Response');
       } else if (err.response?.status === 400) {
         setErrMsg('Missing Username or Password');
+        console.log(err)
       } else if (err.response?.status === 401) {
         setErrMsg('Unauthorized');
       } else {
@@ -88,7 +89,7 @@ const Login = () => {
         </form>
         <div className="text-center mt-3 d-flex justify-content-between">
         <button className="btn btn-link" onClick={() => navigate('/claim-password')}>Claim Password</button>
-        <button className="btn btn-link" onClick={() => navigate('/grap-reset-link')}>Reset Password</button>
+        <button className="btn btn-link" onClick={() => navigate('/grab-reset-link')}>Reset Password</button>
         </div>
       </div>
     </div>

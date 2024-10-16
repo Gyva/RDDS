@@ -39,7 +39,13 @@ const LevelsDisplay = () => {
         try {
             const response = await axios.get(`http://127.0.0.1:8000/api/levels/?f_id=${f_id}`);
             if (response && response.data) {
-                setLevels((prev) => [...prev, ...response.data]);
+                setLevels((prev) => {
+                    // Avoid duplicates
+                    const newLevels = response.data.filter(
+                        (level) => !prev.some((existing) => existing.l_id === level.l_id)
+                    );
+                    return [...prev, ...newLevels];
+                });
             }
         } catch (error) {
             console.error('Error fetching levels:', error);
@@ -73,7 +79,7 @@ const LevelsDisplay = () => {
             });
             setSuccessAlerts('Level updated successfully');
             setShowUpdateModal(false);
-            fetchFaculties();
+            fetchFaculties(); // Consider calling fetchLevels here instead
         } catch (error) {
             setErrorAlerts('Failed to update the level');
         }
@@ -85,7 +91,7 @@ const LevelsDisplay = () => {
             try {
                 await axios.delete(`http://127.0.0.1:8000/api/levels/${id}/`);
                 setSuccessAlerts('Level deleted successfully');
-                fetchFaculties();
+                fetchFaculties(); // Consider calling fetchLevels here instead
             } catch (error) {
                 setErrorAlerts('Failed to delete level');
             }
@@ -127,7 +133,7 @@ const LevelsDisplay = () => {
             });
             setSuccessAlerts('Level added successfully');
             setShowAddModal(false);
-            fetchFaculties();
+            fetchFaculties(); // Consider calling fetchLevels here instead
         } catch (error) {
             setErrorAlerts('Failed to add level');
         }
@@ -240,16 +246,16 @@ const LevelsDisplay = () => {
                                     onChange={(e) => setNewDepartmentId(e.target.value)}
                                 >
                                     <option value="">Select Department</option>
-                                    {departments.map((dept) => (
-                                        <option key={dept.dpt_id} value={dept.dpt_id}>
-                                            {dept.dpt_name}
+                                    {departments.map((department) => (
+                                        <option key={department.dpt_id} value={department.dpt_id}>
+                                            {department.dpt_name}
                                         </option>
                                     ))}
                                 </select>
                             </div>
                             <div className="modal-footer">
                                 <button className="btn btn-secondary" onClick={() => setShowAddModal(false)}>
-                                    Cancel
+                                    Close
                                 </button>
                                 <button className="btn btn-primary" onClick={handleAddLevel}>
                                     Add Level
@@ -261,7 +267,7 @@ const LevelsDisplay = () => {
             )}
 
             {/* Update Modal */}
-            {showUpdateModal && selectedLevel && (
+            {showUpdateModal && (
                 <div className="modal show d-block custom-modal-position">
                     <div className="modal-dialog">
                         <div className="modal-content">
@@ -297,16 +303,16 @@ const LevelsDisplay = () => {
                                     onChange={(e) => setNewDepartmentId(e.target.value)}
                                 >
                                     <option value="">Select Department</option>
-                                    {departments.map((dept) => (
-                                        <option key={dept.dpt_id} value={dept.dpt_id}>
-                                            {dept.dpt_name}
+                                    {departments.map((department) => (
+                                        <option key={department.dpt_id} value={department.dpt_id}>
+                                            {department.dpt_name}
                                         </option>
                                     ))}
                                 </select>
                             </div>
                             <div className="modal-footer">
                                 <button className="btn btn-secondary" onClick={() => setShowUpdateModal(false)}>
-                                    Cancel
+                                    Close
                                 </button>
                                 <button className="btn btn-primary" onClick={handleUpdateLevel}>
                                     Update Level

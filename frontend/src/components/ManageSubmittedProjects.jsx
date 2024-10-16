@@ -90,7 +90,16 @@ const ManageSubmittedProjects = () => {
       ),
     },
     { name: 'Case Study', selector: (row) => row.case_study, sortable: true, width: '250px' },
-    { name: 'Abstract', selector: (row) => row.abstract, sortable: true, width: '300px' },
+    {
+      name: 'Abstract',
+      cell: (row) => (
+        <div className="abstract-cell" title={row.abstract}>
+          <p dangerouslySetInnerHTML={{ __html: row.abstract }} />
+        </div>
+      ),
+      sortable: true,
+      width: '300px'
+    },
     { name: 'Check Status', selector: (row) => row.check_status, sortable: true, width: '150px' },
     { name: 'Completion Status', selector: (row) => row.completion_status, sortable: true, width: '150px' },
     { name: 'Academic Year', selector: (row) => row.academic_year, sortable: true, width: '150px' },

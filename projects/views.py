@@ -617,13 +617,13 @@ class ProjectViewSet(viewsets.ModelViewSet):
             supervisor = Supervisor.objects.get(account=request.user)
 
         # Assign the supervisor to the project
-        project.supervisor = supervisor
+        project.supervisor = supervisor.account
         project.save()
 
         # Send email to the supervisor
         send_mail(
             'You have been assigned as a supervisor',
-            f'Dear {supervisor.name},\n\nYou have been assigned as the supervisor for the project titled "{project.title}".',
+            f'Dear {supervisor.fname},\n\nYou have been assigned as the supervisor for the project titled "{project.title}".',
             settings.DEFAULT_FROM_EMAIL,
             [supervisor.account.email],
             fail_silently=False,
@@ -634,13 +634,13 @@ class ProjectViewSet(viewsets.ModelViewSet):
         for student in all_students:
             send_mail(
                 'A supervisor has been assigned to your project',
-                f'Dear {student.name},\n\nYour project titled "{project.title}" has been assigned a supervisor: {supervisor.name}.',
+                f'Dear {student.fname},\n\nYour project titled "{project.title}" has been assigned a supervisor: {supervisor.fname}.',
                 settings.DEFAULT_FROM_EMAIL,
                 [student.account.email],
                 fail_silently=False,
             )
 
-        return Response({"message": f"Supervisor {supervisor.name} has been successfully assigned to the project, and all students have been notified."}, status=status.HTTP_200_OK)
+        return Response({"message": f"Supervisor {supervisor.fname} has been successfully assigned to the project, and all students have been notified."}, status=status.HTTP_200_OK)
     
     # Change Approval Status
     @action(detail=True, methods=['patch'], url_path='change-approval-status', url_name='change_approval_status')
@@ -843,6 +843,20 @@ class ProvideFeedbackView(APIView):
     queryset = Feedback.objects.all()
     serializer_class = FeedbackSerializer
     permission_classes = [IsAuthenticated]
+
+    def get(self, request, project_id):
+        """
+        Handle retrieving feedback for a project.
+        """
+        try:
+            project = Project.objects.get(project_id=project_id)
+        except Project.DoesNotExist:
+            return Response({'error': 'Project not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Get feedback related to this project
+        feedbacks = Feedback.objects.filter(project=project)
+        serializer = FeedbackSerializer(feedbacks, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request, project_id):
         """

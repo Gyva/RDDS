@@ -97,7 +97,7 @@ const ProjectBlogPage = () => {
           // for collaborators retrieve
 
           const collaboratorsDetails = await Promise.all(
-            response.data.collaborators.map((collaborator) =>  getUserDetails(collaborator, 'students'))
+            response.data.collaborators.map((collaborator) => getUserDetails(collaborator, 'students'))
           );
           console.log("Coolb details ", collaboratorsDetails)
 
@@ -162,13 +162,17 @@ const ProjectBlogPage = () => {
 
       // Assign missing supervisor
       if (!project.supervisor_id && selectedSupervisor) {
-        requestBody.supervisor_id = selectedSupervisor;
-        const response = await api.patch(`http://127.0.0.1:8000/api/projects/${id}/`, requestBody, {
+        requestBody.supervisor_id = parseInt(selectedSupervisor);
+        const response = await api.post(`http://127.0.0.1:8000/api/projects/${id}/assign-supervisor/`, requestBody, {
           headers: { 'Content-Type': 'application/json' },
         });
+        if(response.ok){
+          alert("Supervisor added.")
+        }
 
 
       }
+      
 
       // Now approve the project
       await handleApprovalChange('Approved');
@@ -253,6 +257,7 @@ const ProjectBlogPage = () => {
     try {
       const requestBody = {};
       if (selectedSupervisor) {
+        console.log("supervisor :", selectedSupervisor)
         requestBody.supervisor_id = selectedSupervisor;
         const response = await api.post(`http://127.0.0.1:8000/api/project/${id}/assign_supervisor/`, requestBody, {
           headers: {
@@ -292,6 +297,7 @@ const ProjectBlogPage = () => {
 
     } catch (error) {
       console.error('Error assigning users:', error);
+      console.log(error)
       alert('Error assigning supervisor/student.');
     }
   };
@@ -405,7 +411,7 @@ const ProjectBlogPage = () => {
     console.log("dissertation is: ", dissertationFile);
     if (dissertationFile !== null) {
       // Redirect to PDF viewer route
-      navigate(`/view-pdf`, {state:{fileUrl:`${encodeURIComponent(dissertationFile)}`}});
+      navigate(`/view-pdf`, { state: { fileUrl: `${encodeURIComponent(dissertationFile)}` } });
     } else {
       alert('No file available to view.');
     }
@@ -428,18 +434,18 @@ const ProjectBlogPage = () => {
                 <h5 className="mb-3">{project.title}</h5>
                 <span><strong>Case Study:</strong> {project.case_study}</span>
                 <span><strong>Student(s):</strong> {assignedStudent ? `${assignedStudent.fname} ${assignedStudent.lname} ( Reg No: ${assignedStudent.reg_no})`
-                
-                
-                : 'Not assigned'} {project.collaborators && project.collaborators.length > 0 && (
-                  project.collaborators.map((collab, index) => (
-                   <span key={index}>
-                     {console.log("bbbb ",collab.name)}
-                     {", "+collab.name} (Reg No: {collab.regNo}){index < project.collaborators.length - 1 && ', '}
-                   </span>
-                 ))
-               )}</span>
-                {console.log("Collab ",project.collaborators)}
-                
+
+
+                  : 'Not assigned'} {project.collaborators && project.collaborators.length > 0 && (
+                    project.collaborators.map((collab, index) => (
+                      <span key={index}>
+                        {console.log("bbbb ", collab.name)}
+                        {", " + collab.name} (Reg No: {collab.regNo}){index < project.collaborators.length - 1 && ', '}
+                      </span>
+                    ))
+                  )}</span>
+                {console.log("Collab ", project.collaborators)}
+
                 <span><strong>Department:</strong> {departmentName}</span>
                 <span><strong>AI Check:</strong> {project.check_status?.toString()}</span>
                 <span><strong>Supervisor:</strong> {assignedSupervisor ? `${assignedSupervisor.fname} ${assignedSupervisor.lname} ( Reg No: ${assignedSupervisor.reg_num})` : 'Not assigned'}</span>
@@ -451,8 +457,9 @@ const ProjectBlogPage = () => {
             <hr className="text-secondary my-4" />
             <div className="project-description">
               <h5><strong>Abstract:</strong></h5>
-              <p>{project.abstract}</p>
+              <p dangerouslySetInnerHTML={{ __html: project.abstract }} />
             </div>
+
           </div>
         </div>
         <div className="action-buttons">
