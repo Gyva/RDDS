@@ -25,11 +25,12 @@ const CreateProject = () => {
         try {
             const response = await api.post('http://127.0.0.1:8000/api/projects/', projectData);
             if (response.status === 201) {
-                setSuccessMessage('Project created successfully!');
+                
                 setTitle('');
                 setCaseStudy('');
                 setAbstract('');
-            }
+                setSuccessMessage('Project created successfully!');
+            }            
         } catch (error) {
             setErrorMessage('An error occurred while creating the project.');
         }

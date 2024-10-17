@@ -28,6 +28,7 @@ import PDFViewer from './components/PDFViewer';
 import ManageRegistrar from './components/ManageRegistrar';
 import DepartmentReport from './components/DepartmentReport';
 import StudentAssignedProject from './components/StudentAssignedProject';
+import SupervisorAssignedProjects from './components/SupervisorAssignedProjects';
 
 function App() {
     return (
@@ -64,7 +65,11 @@ function App() {
                     <Route path="/view-pdf" element={<ProtectedRoute><Dashboard><PDFViewer /></Dashboard></ProtectedRoute>} />{/*for supervisor/HOD/student */}
                     <Route path="/manage-registrar" element={<ProtectedRoute><Dashboard><ManageRegistrar /></Dashboard></ProtectedRoute>} />{/*for admin */}
                     <Route path="/my-department" element={<ProtectedRoute><Dashboard><DepartmentReport /></Dashboard></ProtectedRoute>} />{/*for admin */}
-                    <Route path="/my-projects/:regno" element={<ProtectedRoute><Dashboard><StudentAssignedProject /></Dashboard></ProtectedRoute>} />{/*for admin */}
+                    <Route path="/my-projects/:regno" element={<ProtectedRoute><Dashboard><StudentAssignedProject /></Dashboard></ProtectedRoute>} />{/*for student */}
+                    
+                    <Route path="/supervisor/projects/:regno" element={<ProtectedRoute><Dashboard><SupervisorAssignedProjects /></Dashboard></ProtectedRoute>} />{/*for student */}
+
+
                     
 
                     

@@ -30,11 +30,12 @@ const Sidebar = ({ isVisible, role }) => {
         console.log(studentId)
         studentId = studentId.st_id
 
-        console.log("Student ID: " + students)
+        console.log(studentId)
 
         const projectsResponse = await api.get(`http://127.0.0.1:8000/api/projects/`);
-        projectId = projectsResponse.data?.find((project) => project.student_id === studentId);
+        projectId = projectsResponse.data?.find((project) => (project.student_id === studentId || project.collaborators.includes(studentId)) && project.approval_status === 'Approved');
         projectId = projectId.project_id
+        console.log(projectId)
 
       } else if (auth.role?.toUpperCase() === 'SUPERVISOR' || auth.role?.toUpperCase() === 'HOD') {
         console.log("The logged User role is: " + auth.role)
@@ -48,12 +49,13 @@ const Sidebar = ({ isVisible, role }) => {
         projectId = projectsResponse.data?.find((project) => project.supervisor_id === supervisorId);
         projectId = projectId.project_id
       }
-      console.log("Supervisor ID: " + supervisorId)
       // Fetch the conversation ID for the project
-      const conversationResponse = await api.get(`http://127.0.0.1:8000/api/conversations/?project_id=${projectId}`);
-      conversationId = conversationResponse.data[0].id;
+      const conversationResponse = await api.get(`http://127.0.0.1:8000/api/conversations/`);
+      const conversation = await conversationResponse.data.find((c)=>c.project === projectId)
+      console.log("Consoling: ",conversation)
+      conversationId = conversation.id;
 
-      console.log("Conversation ID: " + conversationId)
+      // console.log("Conversation ID: " + conversationId)
       // console.log(`Student ID: ${studentId} Project ID: ${projectId} Conversation ID: ${conversationId}`)
 
       // Navigate to the chat component, passing IDs through navigation state
@@ -96,7 +98,7 @@ const Sidebar = ({ isVisible, role }) => {
         </li>
         <li className="nav-item">
           <a href="/my-department" className="nav-link">
-            <i className="nav-icon fas fa-sitemap me-2"></i> Manage Departments
+            <i className="nav-icon fas fa-sitemap me-2"></i> Departments Report
           </a>
         </li>
         {/* Chat menu item for supervisor */}
@@ -163,6 +165,11 @@ const Sidebar = ({ isVisible, role }) => {
             Manage Levels
           </a>
         </li>
+        <li className="nav-item">
+          <a href="/my-department" className="nav-link">
+            <i className="nav-icon fas fa-sitemap me-2"></i> Departments Report
+          </a>
+        </li>
 
         <li className="nav-item">
           <a href="/change-password" className="nav-link">
@@ -181,7 +188,7 @@ const Sidebar = ({ isVisible, role }) => {
           </a>
         </li>
         <li className="nav-item">
-          <a href="/supervisor/projects" className="nav-link">
+          <a href={`/supervisor/projects/${auth.user}`} className="nav-link">
             <i className="nav-icon fas fa-tasks me-2"></i> Assigned Projects
           </a>
         </li>
@@ -192,8 +199,8 @@ const Sidebar = ({ isVisible, role }) => {
         </li>
         {/* Chat menu item for supervisor */}
         <li className="nav-item">
-          <a href="#!" onClick={handleChatClick} className="nav-link">
-            <i className="nav-icon fas fa-comments me-2"></i> Chat
+          <a href="/conversations"  className="nav-link">
+            <i className="nav-icon fas fa-comments me-2"></i> Conversations
           </a>
         </li>
       </>

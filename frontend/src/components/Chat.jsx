@@ -7,6 +7,7 @@ const Chat = () => {
   const [messages, setMessages] = useState([]); // List of messages in the conversation
   const [messageText, setMessageText] = useState(''); // Message input field
   const [userNames, setUserNames] = useState({}); // Store usernames here
+  const [projectTitle, setProjectTitle] = useState(''); // Store project title here
   const { auth, api } = useContext(AuthContext); // Auth context values
   const location = useLocation(); // Get state from the navigation
   const { studentId, projectId, conversationId } = location.state || {};
@@ -32,6 +33,16 @@ const Chat = () => {
     }
   };
 
+  // Function to fetch the project title
+  const fetchProjectTitle = async (projectId) => {
+    try {
+      const response = await api.get(`http://127.0.0.1:8000/api/projects/${projectId}/`);
+      setProjectTitle(response.data.title); // Set the project title
+    } catch (error) {
+      console.error("Failed to fetch project title: ", error);
+    }
+  };
+
   // Scroll to bottom function
   const scrollToBottom = () => {
     if (messageContainerRef.current) {
@@ -39,12 +50,15 @@ const Chat = () => {
     }
   };
 
-  // Fetch messages when conversationId is available
+  // Fetch messages and project title when conversationId and projectId are available
   useEffect(() => {
     if (conversationId) {
       getMessages(conversationId);
     }
-  }, [conversationId]);
+    if (projectId) {
+      fetchProjectTitle(projectId);
+    }
+  }, [conversationId, projectId]);
 
   // Scroll to bottom whenever messages are updated
   useEffect(() => {
@@ -82,7 +96,7 @@ const Chat = () => {
       {/* Chat header */}
       <div className='chat-display-sect'>
         <p className='border p-1 d-flex align-items-center fixed-top header-text' style={{ marginTop: '53px' }}>
-          Chat with Supervisor
+          Chats: {projectTitle || 'Loading...'} {/* Display the project title here */}
         </p>
 
         {/* Messages display section */}

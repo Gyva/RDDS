@@ -136,6 +136,7 @@ const LevelsDisplay = () => {
             fetchFaculties(); // Consider calling fetchLevels here instead
         } catch (error) {
             setErrorAlerts('Failed to add level');
+            console.log(error)
         }
     };
 

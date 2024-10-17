@@ -44,7 +44,6 @@ const SupervisorRegistrationForm = ({ contextValues }) => {
                 }
             });
             console.log(response.data);
-            alert(response.data.message)
             setAfterSubmitMessage(response.data.message)
             data = {};
 

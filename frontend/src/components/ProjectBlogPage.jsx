@@ -27,6 +27,8 @@ const ProjectBlogPage = () => {
   const [projectStudentInfo, setProjectStudentInfo] = useState(null)
   const [projectSupervisorInfo, setProjectSupervisorInfo] = useState(null)
   const [dissertationFile, setDissertationFile] = useState(null)
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
 
   //for upload modal
@@ -64,6 +66,7 @@ const ProjectBlogPage = () => {
           setDepartmentSupervisors(supervisorsResponse.data);
           setDepartmentStudents(studentsResponse.data);
         }
+        
 
         // Fetch department name
         const departments = await axios.get(`http://127.0.0.1:8000/api/departments/`);
@@ -77,12 +80,26 @@ const ProjectBlogPage = () => {
           setProjectStudentInfo(student.data)
           console.log(student.data)
         }
+        const collaboratorsDetails = await Promise.all(
+          project.collaborators?.map(async (collaborator) => await getUserDetails(collaborator, 'students')) || []
+        );
         //fetching the info about the supervisor on this project
         if (response.data.supervisor_id !== null) {
           const supervisor = await axios.get(`http://127.0.0.1:8000/api/supervisors/${response.data.supervisor_id}`)
           setProjectSupervisorInfo(supervisor.data)
           console.log("supervisor on this project: " + supervisor.data)
         }
+
+        
+        console.log("Coolb details ", collaboratorsDetails)
+        setProject((prevProject) => ({
+          ...prevProject,
+          collaborators: collaboratorsDetails.map(collaborator => ({
+            name: collaborator.name,
+            regNo: collaborator.regNo,
+          })),
+        }));
+        // }
 
         if (response.data.completion_status === true) {
           const projectsFiles = await api.get("http://127.0.0.1:8000/api/project-files/");
@@ -92,22 +109,18 @@ const ProjectBlogPage = () => {
           console.log("id:", id);
           const fileData = projectsFiles.data.find((projectFile) => {
             console.log("projectFile.project:", projectFile.project, typeof projectFile.project);
-            return projectFile.project === parseInt(id); // Ensure both are integers
+            return projectFile.project === id; // Ensure both are integers
           });
           // for collaborators retrieve
 
-          const collaboratorsDetails = await Promise.all(
-            response.data.collaborators.map((collaborator) => getUserDetails(collaborator, 'students'))
-          );
-          console.log("Coolb details ", collaboratorsDetails)
+          // Fetch collaborator details
+          // if (response.data.collaborators.length > 0) {
+          // console.log("Collaborators:", response.data.collaborators);
 
-          setProject((prevProject) => ({
-            ...prevProject,
-            collaborators: collaboratorsDetails.map(collaborator => ({
-              name: collaborator.name,
-              regNo: collaborator.regNo,
-            })),
-          }));
+          
+
+
+
 
           setDissertationFile(fileData?.file);
           console.log("fileData:", fileData);
@@ -166,21 +179,23 @@ const ProjectBlogPage = () => {
         const response = await api.post(`http://127.0.0.1:8000/api/projects/${id}/assign-supervisor/`, requestBody, {
           headers: { 'Content-Type': 'application/json' },
         });
-        if(response.ok){
-          alert("Supervisor added.")
+        if (response.ok) {
+          setSuccessMessage("Supervisor added.")
         }
 
 
       }
-      
 
+      const response2 = await api.post(`http://127.0.0.1:8000/api/conversations/`, {project_id: id});
       // Now approve the project
       await handleApprovalChange('Approved');
+      
+
 
       window.$('#approveModal').modal('hide');
     } catch (error) {
       console.error('Error during approval:', error);
-      alert('Error during approval process.');
+      setErrorMessage('Error during approval process.');
     }
   };
 
@@ -198,11 +213,11 @@ const ProjectBlogPage = () => {
       });
 
 
-      alert(response.data.message);
+      setSuccessMessage("Collaborator added successfully.")
       window.$('#addCollaboratorModal').modal('hide');
     } catch (error) {
       console.error('Error adding collaborator:', error);
-      alert('Error adding collaborator.');
+      setErrorMessage('Error adding collaborator.');
     }
   };
 
@@ -217,12 +232,12 @@ const ProjectBlogPage = () => {
           'Content-Type': 'application/json',
         },
       });
-      alert(response.data.message);
+      setSuccessMessage("Feedback is sent.");
       setFeedbackText('');
       window.$('#feedbackModal').modal('hide');
     } catch (error) {
       console.error('Error submitting feedback:', error);
-      alert('Error submitting feedback.');
+      setErrorMessage('Error submitting feedback.');
     }
   };
 
@@ -237,70 +252,17 @@ const ProjectBlogPage = () => {
           'Content-Type': 'application/json',
         },
       });
-      err_or = response.data.detail
-      if (response.data.detail !== null) {
-        alert(response.data.detail)
-      }
-      alert(response.data.message);
+      alert("Status changed successfully")
+      // alert(response.data.message);
       setProject({ ...project, approval_status: status });
     } catch (error) {
       console.error('Error changing approval status:', error);
-      alert(err_or);
+      setErrorMessage('Error changing approval status');
     }
 
 
   };
 
-  // Assign supervisor or student
-  const handleAssignSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const requestBody = {};
-      if (selectedSupervisor) {
-        console.log("supervisor :", selectedSupervisor)
-        requestBody.supervisor_id = selectedSupervisor;
-        const response = await api.post(`http://127.0.0.1:8000/api/project/${id}/assign_supervisor/`, requestBody, {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
-        alert("Supervisor Assignment done successfully")
-        setProject(response.data);
-        console.log(response.data);
-        window.$('#assignModal').modal('hide');
-
-        alert(response.data.error)
-
-
-      }
-      if (selectedStudent) {
-        requestBody.student_id = selectedStudent;
-        console.log(requestBody);
-        const response = await api.post(`http://127.0.0.1:8000/api/projects/${id}/assign-student/`, requestBody, {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (!response.data.error) {
-          alert("Student Assignment done successfully")
-          setProject(response.data);
-          console.log(response.data);
-          window.$('#assignModal').modal('hide');
-        }
-        else {
-          alert(response.data.error)
-        }
-      }
-
-
-    } catch (error) {
-      console.error('Error assigning users:', error);
-      console.log(error)
-      alert('Error assigning supervisor/student.');
-    }
-  };
 
   // Handle delete project
   const handleDeleteProject = async () => {
@@ -310,11 +272,11 @@ const ProjectBlogPage = () => {
           'Content-Type': 'application/json',
         },
       });
-      alert('Project deleted successfully.');
+      setSuccessMessage('Project deleted successfully.');
       window.location.href = '/'; // Redirect after delete
     } catch (error) {
       console.error('Error deleting project:', error);
-      alert('Error deleting project.');
+      setErrorMessage('Error deleting project.');
     }
   };
 
@@ -331,12 +293,12 @@ const ProjectBlogPage = () => {
           'Content-Type': 'application/json',
         },
       });
-      alert('Project updated successfully.');
+      setSuccessMessage('Project updated successfully.');
       setProject(response.data);
       window.$('#updateModal').modal('hide');
     } catch (error) {
       console.error('Error updating project:', error.message);
-      alert('Error updating project.', error.message);
+      setErrorMessage('Error updating project.', error.message);
     }
   };
 
@@ -355,12 +317,12 @@ const ProjectBlogPage = () => {
           'Content-Type': 'application/json',
         },
       });
-      alert('Project updated successfully.');
+      setSuccessMessage('Improval request sent successfully.');
       setProject(response.data);
       window.$('#improveModal').modal('hide');
     } catch (error) {
       console.error('Error improving project:', error);
-      alert('Error submit the form data. Try again?', error);
+      setErrorMessage('Error submit the form data. Try again?', error);
     }
   };
 
@@ -380,27 +342,35 @@ const ProjectBlogPage = () => {
 
   const handleUpload = async () => {
     if (!file) {
-      alert("Please select a file first!");
+      setUploadMessage("Please select a file first!");
       return;
     }
-
+  
     const formData = new FormData();
+    console.log(file)
     formData.append('file', file); // Add the file to the form data
-
+    formData.append('project', id); // Include project ID or other data if needed
+  
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/project-files/', formData, {
+      const response = await api.post('http://127.0.0.1:8000/api/project-files/', formData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          'Content-Type': 'multipart/form-data', // Let Axios handle boundary
         },
       });
-
+  
       setUploadMessage('File uploaded successfully!');
       setFile(null); // Clear the file input
     } catch (error) {
       console.error("Error uploading file:", error);
-      setUploadMessage('Failed to upload file. Please try again.');
+      if (error.response) {
+        setUploadMessage(`Failed to upload file: ${error.response.data.detail || error.message}`);
+      } else {
+        setUploadMessage('Error: Please check your network and try again.');
+      }
     }
   };
+  
+  
 
   const handleClose = () => {
     setShowModal(false);
@@ -426,6 +396,9 @@ const ProjectBlogPage = () => {
 
   return (
     <div className="container mt-5" style={{ paddingBottom: '100px' }}>
+      {successMessage && <div className="alert alert-success">{successMessage}</div>}
+      {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
+
       <div >
         <div className='d-flex flex-column mb-3'>
           <div className="row">
@@ -463,28 +436,28 @@ const ProjectBlogPage = () => {
           </div>
         </div>
         <div className="action-buttons">
-          {project.approval_status === 'Pending' && project.completion_status !== true && (project.student_id || project.supervisor_id) && (auth.role.toUpperCase() === 'HOD') && (
+          {project.approval_status === 'Pending' && project.completion_status !== true && (project.student_id || project.supervisor_id) && (auth.role?.toUpperCase() === 'HOD') && (
             <button className="btn btn-success ml-2" data-toggle="modal" data-target="#approveModal">
               Approve
             </button>
           )}
-          {project.approval_status === 'Pending' && project.completion_status !== true && (project.student_id || project.supervisor_id) && (auth.role.toUpperCase() === 'HOD') && (
+          {project.approval_status === 'Pending' && project.completion_status !== true && (project.student_id || project.supervisor_id) && (auth.role?.toUpperCase() === 'HOD') && (
             <button className="btn btn-danger ml-2" onClick={() => handleApprovalChange('Reject')}>
-              Delete
+              Reject
             </button>
           )}
 
-          {project.approval_status === 'Pending' && project.completion_status !== true && (project.student_id || project.supervisor_id) && (auth.role.toUpperCase() === 'HOD') && (
+          {project.approval_status === 'Pending' && project.completion_status !== true && (project.student_id || project.supervisor_id) && (auth.role?.toUpperCase() === 'HOD') && (
             <button className="btn btn-info ml-2" data-toggle="modal" data-target="#feedbackModal">
               Give Feedback
             </button>
           )}
-          {project.approval_status === 'Pending' && project.completion_status !== true && (project.student_id || project.supervisor_id) && (auth.role.toUpperCase() === 'HOD') && (
+          {project.approval_status === 'Approved' && project.completion_status !== true && (project.student_id && project.supervisor_id) && (auth.role?.toUpperCase() === 'HOD') && (
             <button className="btn btn-info ml-2" data-toggle="modal" data-target="#addCollaboratorModal">
               Add Collaborator
             </button>
           )}
-          {project.approval_status === 'Pending' && project.completion_status !== true && (project.student_id || project.supervisor_id) && (projectStudentInfo?.reg_no.toUpperCase() === auth.user.toUpperCase() || projectSupervisorInfo?.reg_num.toUpperCase() === auth.user.toUpperCase()) && (
+          {project.approval_status === 'Pending' && project.completion_status !== true && (project.student_id || project.supervisor_id) && (projectStudentInfo?.reg_no?.toUpperCase() === auth.user?.toUpperCase() || projectSupervisorInfo?.reg_num?.toUpperCase() === auth.user?.toUpperCase()) && (
             <button className="btn btn-info ml-2" onClick={handleUpdateContent} data-toggle="modal" data-target="#updateModal">
               Update This Project
             </button>
@@ -496,17 +469,17 @@ const ProjectBlogPage = () => {
               </button>
             </div>
           )}
-          {project.completion_status === true && (project.student_id || project.supervisor_id) && (auth.role.toUpperCase() === 'STUDENT' || auth.role.toUpperCase() === 'SUPERVISOR' || auth.role.toUpperCase() === 'HOD') && (
+          {project.completion_status === true && (project.student_id || project.supervisor_id) && (auth.role?.toUpperCase() === 'STUDENT' || auth.role?.toUpperCase() === 'SUPERVISOR' || auth.role?.toUpperCase() === 'HOD') && (
             <button className="btn btn-info ml-2" onClick={handleImproveContent} data-toggle="modal" data-target="#improveModal">
               Request Improvement On This Project
             </button>
           )}
-          {dissertationFile === null && project.completion_status === true && (projectStudentInfo?.reg_no.toUpperCase() === auth.user.toUpperCase()) && (
+          {dissertationFile === null && project.completion_status === true && (projectStudentInfo?.reg_no?.toUpperCase() === auth.user?.toUpperCase()) && (
             <button className="btn btn-info ml-2" onClick={handleUpdateContent} data-toggle="modal" data-target="#upldModal">
               Upload project dissertation
             </button>
           )}
-          {project.completion_status === true && dissertationFile !== null && (projectStudentInfo?.reg_no.toUpperCase() === auth.user.toUpperCase()) && (
+          {project.completion_status === true && dissertationFile !== null && (projectStudentInfo?.reg_no?.toUpperCase() === auth.user?.toUpperCase()) && (
             <button className="btn btn-info ml-2" onClick={loadDissertationContent}>
               View Project Dissertation
             </button>
@@ -601,57 +574,6 @@ const ProjectBlogPage = () => {
                   />
                 </div>
                 <button type="submit" className="btn btn-primary">Submit Feedback</button>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Assign Modal */}
-      <div className="modal fade" id="assignModal" tabIndex="-1" role="dialog" aria-labelledby="assignModalLabel" aria-hidden="true">
-        <div className="modal-dialog" role="document">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title" id="assignModalLabel">Assign Users</h5>
-              <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div className="modal-body">
-              <form onSubmit={handleAssignSubmit}>
-                <div className="form-group">
-                  <label htmlFor="supervisorSelect">Supervisor</label>
-                  <select
-                    className="form-control"
-                    id="supervisorSelect"
-                    value={selectedSupervisor || ''}
-                    onChange={(e) => setSelectedSupervisor(e.target.value)}
-                  >
-                    <option value="">Select Supervisor</option>
-                    {departmentSupervisors.map(supervisor => (
-                      <option key={supervisor.sup_id} value={supervisor.sup_id}>
-                        {supervisor.fname} {supervisor.lname}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label htmlFor="studentSelect">Student</label>
-                  <select
-                    className="form-control"
-                    id="studentSelect"
-                    value={selectedStudent || ''}
-                    onChange={(e) => setSelectedStudent(e.target.value)}
-                  >
-                    <option value="">Select Student</option>
-                    {departmentStudents.map(student => (
-                      <option key={student.st_id} value={student.st_id}>
-                        {student.fname} {student.lname}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <button type="submit" className="btn btn-primary">Assign</button>
               </form>
             </div>
           </div>
@@ -822,7 +744,7 @@ const ProjectBlogPage = () => {
                     className="form-control"
                     id="fileInput"
                     onChange={handleFileChange}
-                    accept=".pdf,.doc,.docx,.txt"
+                    accept=".pdf"
                     required
                   />
                 </div>

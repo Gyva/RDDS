@@ -511,7 +511,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
             return Response({"detail": "Unauthorized"}, status=status.HTTP_403_FORBIDDEN)
 
         # Ensure the project is approved
-        if not project.check_status or project.approval_status != 'Approved':
+        if not project.check_status or project.approval_status == 'Approved':
             return Response({'error': 'Project must pass AI uniqueness check and be approved before assigning a student.'}, 
                             status=status.HTTP_400_BAD_REQUEST)
 
@@ -525,7 +525,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
                             status=status.HTTP_400_BAD_REQUEST)
 
         # Ensure the student belongs to the same department and is in Level 6 Year 3 or Level 7 B-Tech
-        if student.dpt_id != project.department or student.l_id.l_name not in ['Level 6 Year 3', 'Level 7 B-Tech']:
+        if student.dpt_id != project.department or student.l_id.l_name not in ['Level 7 Year 3', 'Level 7', 'B-Tech']:
             return Response({'error': 'Student is not eligible for assignment.'}, status=status.HTTP_400_BAD_REQUEST)
 
         # Assign the student to the project
@@ -586,7 +586,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
             'Collaborator Added',
             f'Collaborator {collaborator.fname} {collaborator.lname} has been added to your project.',
             settings.DEFAULT_FROM_EMAIL,
-            [primary_student.account.email, collaborator.account.email],
+            [primary_student.account.email, collaborator.email],
             fail_silently=False,
         )
 
@@ -617,7 +617,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
             supervisor = Supervisor.objects.get(account=request.user)
 
         # Assign the supervisor to the project
-        project.supervisor = supervisor.account
+        project.supervisor = supervisor
         project.save()
 
         # Send email to the supervisor
@@ -906,12 +906,23 @@ class ConversationViewSet(viewsets.ModelViewSet):
         conversation, created = Conversation.objects.get_or_create(project=project)
         
         # Add participants (student, supervisor, collaborators, HoD)
+        # Assuming this is within a method or function that handles project participants and related data
         participants = [
-            project.student.account,
-            project.supervisor.account,
-            *[collaborator.account for collaborator in project.collaborators.all()],
-            project.department.hod.account
+            project.student.account,  # Main student
+            project.supervisor.account,  # Assigned supervisor
+            *[collaborator.account for collaborator in project.collaborators.all()],  # Collaborators (students)
         ]
+
+        # Fetch the HOD for the project's department
+        hod = Supervisor.objects.filter(dpt_id=project.department, role='HoD').first()
+
+        # If the HOD exists, add their account to the participants list
+        if hod:
+            participants.append(hod.account)
+
+        # You can now use the `participants` list as needed
+        # Example: Sending notifications or processing something with participants
+
         conversation.participants.add(*participants)
 
         serializer = self.get_serializer(conversation)

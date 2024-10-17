@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { useForm } from 'react-hook-form';
 import DataTable from 'react-data-table-component';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -11,15 +10,15 @@ const ManageRegistrar = () => {
     const [registrars, setRegistrars] = useState([]);
     const [selectedRegistrar, setSelectedRegistrar] = useState(null);
     const [showModal, setShowModal] = useState(false);
-    const [showRegistrationForm, setShowRegistrationForm] = useState(false); // Toggle form visibility
+    const [showRegistrationForm, setShowRegistrationForm] = useState(false);
     const { register, handleSubmit, formState: { errors }, reset } = useForm();
-    const { auth, api } = useContext(AuthContext); // To get the authenticated user
+    const { auth, api } = useContext(AuthContext);
     const [afterSubmitMessage, setAfterSubmitMessage] = useState(null);
-    const navigate = useNavigate()
+    const [errorMessage, setErrorMessage] = useState(null);
+    const [successMessage, setSuccessMessage] = useState(null);
+    const navigate = useNavigate();
 
-    const user = auth.user
-
-
+    const user = auth.user;
 
     useEffect(() => {
         const fetchData = async () => {
@@ -31,22 +30,21 @@ const ManageRegistrar = () => {
     const fetchRegistrars = async () => {
         try {
             const response = await api.get('http://127.0.0.1:8000/api/users/');
-            console.log('Fetched registrars:', response.data);
             const filteredRegistrars = response.data.filter(user => user.role === 'REGISTER');
             setRegistrars(filteredRegistrars);
         } catch (error) {
-            console.error('Error fetching registrars:', error);
+            setErrorMessage('Error fetching registrars.');
         }
     };
 
     const handleUpdate = async (data) => {
-        console.log('Update data:', data);
         try {
             await api.patch(`http://127.0.0.1:8000/api/users/${selectedRegistrar.id}/`, data);
             fetchRegistrars();
+            setSuccessMessage('Registrar updated successfully.');
             handleCloseModal();
         } catch (error) {
-            console.error('Error updating registrar:', error);
+            setErrorMessage('Error updating registrar.');
         }
     };
 
@@ -55,9 +53,27 @@ const ManageRegistrar = () => {
             try {
                 await api.delete(`http://127.0.0.1:8000/api/users/${id}/`);
                 fetchRegistrars();
+                setSuccessMessage('Registrar deleted successfully.');
             } catch (error) {
-                console.error('Error deleting registrar:', error);
+                setErrorMessage('Error deleting registrar.');
             }
+        }
+    };
+
+    const handleRegisterSubmit = async (data) => {
+        const URL = 'http://127.0.0.1:8000/api/users/create-register-user/';
+        try {
+            const response = await api.post(URL, { ...data, user: auth.user }, {
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            setAfterSubmitMessage(response.data.message);
+            setSuccessMessage('Registrar created successfully.');
+            reset();
+            fetchRegistrars();
+        } catch (error) {
+            setErrorMessage('Error occurred while creating registrar.');
         }
     };
 
@@ -72,24 +88,6 @@ const ManageRegistrar = () => {
         setSelectedRegistrar(null);
         reset();
     };
-    
-    // Handle Registrar Registration Form submission
-    const handleRegisterSubmit = async (data) => {
-        const URL = 'http://127.0.0.1:8000/api/users/create-register-user/';
-        try {
-            const response = await api.post(URL, { ...data, user: auth.user }, {
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            });
-            setAfterSubmitMessage(response.data.message);
-            alert("Registrar created.");
-            reset();
-            fetchRegistrars(); // Refresh the list after registration
-        } catch (error) {
-            console.error('Error occurred', error);
-        }
-    };
 
     const columns = [
         { name: 'Reg Number', selector: row => row.username, sortable: true },
@@ -99,23 +97,26 @@ const ManageRegistrar = () => {
         {
             name: 'Actions',
             cell: row => (
-                <div>
+                <div className='d-flex'>
                     <button className="btn btn-warning me-2" onClick={() => handleOpenModal(row)}>
-                        <i className="fas fa-pencil-alt"></i> {/* Edit Icon */}
+                        <i className="fas fa-pencil-alt"></i>
                     </button>
                     <button className="btn btn-danger" onClick={() => handleDelete(row.id)}>
-                        <i className="fas fa-trash"></i> {/* Trash Icon */}
+                        <i className="fas fa-trash"></i>
                     </button>
                 </div>
             ),
         },
     ];
-    
+
     return (
         <div className="container-fluid">
             <h2 className="my-4 text-center">Manage Registrars</h2>
 
-            {/* Toggle between Registration Form and Registrar List */}
+            {/* Display success and error messages */}
+            {successMessage && <div className="alert alert-success">{successMessage}</div>}
+            {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
+
             <div className="d-flex justify-content-between mb-4">
                 <h4>{showRegistrationForm ? 'Register a new Registrar' : 'Registrars List'}</h4>
                 <button
@@ -127,7 +128,6 @@ const ManageRegistrar = () => {
             </div>
 
             {showRegistrationForm ? (
-                // Registration Form
                 <div className="card w-100 rounded-top-4 rounded-bottom-4" style={{ maxWidth: '800px' }}>
                     <span className='text-primary ml-5'>{afterSubmitMessage}</span>
                     <div className="card-header bg-primary text-white rounded-top-4">
@@ -178,9 +178,8 @@ const ManageRegistrar = () => {
                     </div>
                 </div>
             ) : (
-                // Registrars List Table
                 <DataTable
-                    title="Registrars List"
+                    
                     columns={columns}
                     data={registrars}
                     pagination
@@ -190,7 +189,6 @@ const ManageRegistrar = () => {
                 />
             )}
 
-            {/* Update Modal */}
             {showModal && (
                 <div className="modal show" style={{ display: 'block', marginTop: '28px' }} onClick={handleCloseModal}>
                     <div className="modal-dialog" onClick={(e) => e.stopPropagation()}>
@@ -222,6 +220,22 @@ const ManageRegistrar = () => {
                                             {...register('last_name', { required: 'Last name is required' })}
                                         />
                                         {errors.last_name && <div className="invalid-feedback">{errors.last_name.message}</div>}
+                                    </div>
+                                    <div className="mb-3">
+                                        <label htmlFor="email" className="form-label">Email:</label>
+                                        <input
+                                            type="email"
+                                            id="email"
+                                            className={`form-control ${errors.email ? 'is-invalid' : ''}`}
+                                            {...register('email', {
+                                                required: 'Email is required',
+                                                pattern: {
+                                                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                                                    message: 'Invalid email address'
+                                                }
+                                            })}
+                                        />
+                                        {errors.email && <div className="invalid-feedback">{errors.email.message}</div>}
                                     </div>
                                     <button type="submit" className="btn btn-primary w-100">Update</button>
                                 </form>

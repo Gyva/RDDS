@@ -4,102 +4,83 @@ import { AuthContext } from '../contexts/AuthProvider';
 import './Conversations.css'; // Add any styling you need here
 
 const ConversationsList = () => {
-    const navigate = useNavigate()
-    const [students,setStudents] = useState()
-    const [supervisors, setSupervisors] = useState() 
-  const { auth, api } = useContext(AuthContext); // Use the authenticated user
-  const [conversations, setConversations] = useState([]);
+    const navigate = useNavigate();
+    const [projects, setProjects] = useState({});
+    const { auth, api } = useContext(AuthContext); // Use the authenticated user
+    const [conversations, setConversations] = useState([]);
 
-  // Fetch all conversations for the supervisor/HoD
-  const fetchConversations = async () => {
-    try {
-      const url = `http://127.0.0.1:8000/api/conversations/?participant_id=${auth.id}`; // Adjust the API route accordingly
-      const response = await api.get(url);
-      setConversations(response.data); // Set conversations data
-    } catch (error) {
-      console.error('Failed to fetch conversations:', error);
-    }
-  };
-  const handleChatClick = async () => {
-    try {
-      let studentId,supervisorId, projectId, conversationId;
+    // Fetch all conversations for the supervisor/HoD
+    const fetchConversations = async () => {
+        try {
+            const url = `http://127.0.0.1:8000/api/conversations/?participant_id=${auth.id}`; // Adjust the API route accordingly
+            const response = await api.get(url);
+            setConversations(response.data); // Set conversations data
 
-      // Check user role and fetch the necessary IDs
-      if (auth.role?.toUpperCase() === 'STUDENT') {
-        const studentResponse = await api.get(`http://127.0.0.1:8000/api/students/`);
-        console.log(studentResponse.data)
-        studentId = studentResponse.data?.find((student) => student.reg_num === auth.user)
-        studentId = studentId.st_id
-        
-        console.log("Student ID: "+students)
+            // Fetch project details for each conversation
+            const projectPromises = response.data.map(async (conversation) => {
+                const projectResponse = await api.get(`http://127.0.0.1:8000/api/projects/${conversation.project}`);
+                return { id: conversation.project, title: projectResponse.data.title };
+            });
 
-        const projectsResponse = await api.get(`http://127.0.0.1:8000/api/projects/?student=${studentId}`);
-        projectId = projectsResponse.data[0].project_id;
-        console.log("Project ID: "+projectId)
+            const projectData = await Promise.all(projectPromises);
 
-      } else if (auth.role?.toUpperCase() === 'SUPERVISOR' || auth.role?.toUpperCase() === 'HOD' ) {
-        console.log("The logged User role is: "+auth.role)
-        const supervisorResponse = await api.get(`http://127.0.0.1:8000/api/supervisors/`);
-        setSupervisors(supervisorResponse.data);
-        console.log(supervisorResponse.data)
-        supervisorId = supervisorResponse.data?.find((supervisor) => supervisor.reg_num  === auth.user)
-        supervisorId = supervisorId.sup_id
-        
-        const projectsResponse = await api.get(`http://127.0.0.1:8000/api/projects/?supervisor=${supervisorId}`);
-        projectId = projectsResponse.data[0].project_id;
-        console.log("Project ID: "+projectId)
+            // Convert the project array to an object where the key is the project ID
+            const projectMap = projectData.reduce((acc, project) => {
+                acc[project.id] = project.title;
+                return acc;
+            }, {});
+
+            setProjects(projectMap); // Store projects with titles in state
+        } catch (error) {
+            console.error('Failed to fetch conversations or projects:', error);
+        }
+    };
+
+    const handleChatClick = async (projectId, conversationId) => {
+      try {
+        navigate('/chat', { state: {projectId, conversationId } });
+  
+      } catch (error) {
+        console.error('Error fetching chat data:', error);
       }
-      console.log("Supervisor ID: "+ supervisorId)
-      // Fetch the conversation ID for the project
-      const conversationResponse = await api.get(`http://127.0.0.1:8000/api/conversations/?project_id=${projectId}`);
-      conversationId = conversationResponse.data[0].id;
+    };
 
-      console.log("Conversation ID: "+conversationId)
-      // console.log(`Student ID: ${studentId} Project ID: ${projectId} Conversation ID: ${conversationId}`)
+    // Fetch conversations on component mount
+    useEffect(() => {
+        fetchConversations();
+    }, []);
 
-      // Navigate to the chat component, passing IDs through navigation state
-      navigate('/chat', { state: { studentId, projectId, conversationId } });
+    return (
+        <div className='container'>
+            <h1 className="mt-4">Your Conversations</h1>
+            <div className="conversation-list">
+                {conversations.length === 0 ? (
+                    <p>No conversations found.</p>
+                ) : (
+                    conversations.map((conversation) => (
+                        <div key={conversation.id} className="conversation-card p-3 mb-3 border">
+                            {/* Display project title or ID if title is not yet available */}
+                            <h3>{projects[conversation.project] || conversation.project}</h3>
 
-    } catch (error) {
-      console.error('Error fetching chat data:', error);
-    }
-  };
+                            {/* Display participants
+                            <p className="mb-1">
+                                <strong>Participants:</strong> {conversation.participants.map(p => p.full_name).join(', ')}
+                            </p> */}
 
-  // Fetch conversations on component mount
-  useEffect(() => {
-    fetchConversations();
-  }, []);
-
-  return (
-    <div className='container'>
-      <h1 className="mt-4">Your Conversations</h1>
-      <div className="conversation-list">
-        {conversations.length === 0 ? (
-          <p>No conversations found.</p>
-        ) : (
-          conversations.map((conversation) => (
-            <div key={conversation.id} className="conversation-card p-3 mb-3 border">
-              {/* Display project name as heading */}
-              <h3>{conversation.project}</h3>
-
-              {/* Display participants */}
-              <p className="mb-1">
-                <strong>Participants:</strong> {conversation.participants.map(p => p.full_name).join(', ')}
-              </p>
-
-              {/* Link to conversation with conversationId passed in state */}
-              <button
-                onClick={handleChatClick}
-                className="btn btn-primary"
-              >
-                Enter Conversation
-              </button>
+                            {/* Link to conversation with conversationId passed in state */}
+                            <button
+                  
+                                onClick={()=>handleChatClick(conversation.project,conversation.id)}
+                                className="btn btn-primary"
+                            >
+                                Enter Conversation
+                            </button>
+                        </div>
+                    ))
+                )}
             </div>
-          ))
-        )}
-      </div>
-    </div>
-  );
+        </div>
+    );
 };
 
 export default ConversationsList;

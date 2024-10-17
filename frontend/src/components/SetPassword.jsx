@@ -2,14 +2,14 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { useLocation, useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css'; // Import Bootstrap CSS
-import axios from 'axios'
+import axios from 'axios';
 
 const SetPassword = () => {
     const { register, handleSubmit, formState: { errors }, watch, setError } = useForm();
     const password = watch('password', ''); // Get the value of the password field
     const navigate = useNavigate();
     const location = useLocation(); // Get passed data
-    const { reg_no,email } = location.state || {}; // Destructure the received data, including role
+    const { reg_no, email } = location.state || {}; // Destructure the received data
 
     const onSubmit = async (data) => {
         try {
@@ -36,7 +36,6 @@ const SetPassword = () => {
                 alert("Account created successfully!");
                 navigate('/'); // Redirect after successful creation
             } else {
-                // Handle API errors and display them
                 const errorMessage = response.data.error || 'An unknown error occurred.';
                 setError('server', { type: 'server', message: errorMessage });
             }
@@ -47,89 +46,95 @@ const SetPassword = () => {
                 setError('server', { type: 'server', message: error.message });
             }
         }
-    }    
+    };
 
     return (
-        
-        <div className="d-flex align-items-center justify-content-center vh-100">
-           {/* { console.log(location.state)} */}
+        <div className="d-flex align-items-center justify-content-center vh-100 bg-light">
             <div className="container">
-                <button onClick={() => navigate(-1)}>{`<`}Back</button>
                 <div className="row justify-content-center">
-                    <div className="col-md-6 col-lg-4">
-                        <h2 className="text-center mb-4">Set your password</h2>
-                        {/* Form for setting password */}
-                        <form onSubmit={handleSubmit(onSubmit)} className="d-flex flex-column">
-                            {/* Reg_no Field */}
-                            <div className="form-group mb-3">
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    name="reg_no"
-                                    value={reg_no}
-                                    readOnly
-                                />
+                    <div className="col-md-8 col-lg-6">
+                        <div className="card shadow-lg rounded-4">
+                            <div className="card-body p-4">
+                                <button 
+                                    onClick={() => navigate(-1)} 
+                                    className="btn btn-outline-secondary mb-3"
+                                    style={{ fontSize: '14px' }}
+                                >
+                                    &#x2190; Back
+                                </button>
+                                <h2 className="text-center mb-4">Set your password</h2>
+
+                                <form onSubmit={handleSubmit(onSubmit)} className="d-flex flex-column">
+                                    {/* Registration Number */}
+                                    <div className="form-group mb-3">
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="reg_no"
+                                            value={reg_no}
+                                            readOnly
+                                        />
+                                    </div>
+
+                                    {/* Email */}
+                                    <div className="form-group mb-3">
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="email"
+                                            value={email}
+                                            readOnly
+                                        />
+                                    </div>
+
+                                    {/* Password */}
+                                    <div className="form-group mb-3">
+                                        <input
+                                            type="password"
+                                            className={`form-control ${errors.password ? 'is-invalid' : ''}`}
+                                            {...register('password', {
+                                                required: 'Password is required',
+                                                minLength: {
+                                                    value: 6,
+                                                    message: 'Password must be at least 6 characters long'
+                                                }
+                                            })}
+                                            placeholder="Enter Password"
+                                        />
+                                        {errors.password && <div className="invalid-feedback">{errors.password.message}</div>}
+                                    </div>
+
+                                    {/* Confirm Password */}
+                                    <div className="form-group mb-3">
+                                        <input
+                                            type="password"
+                                            className={`form-control ${errors.confirmPassword ? 'is-invalid' : ''}`}
+                                            {...register('confirmPassword', {
+                                                required: 'Please confirm your password',
+                                                validate: value => value === password || 'Passwords do not match'
+                                            })}
+                                            placeholder="Confirm Password"
+                                        />
+                                        {errors.confirmPassword && (
+                                            <div className="invalid-feedback">{errors.confirmPassword.message}</div>
+                                        )}
+                                    </div>
+
+                                    {/* Display server errors */}
+                                    {errors.server && <div className="alert alert-danger">{errors.server.message}</div>}
+
+                                    {/* Submit Button */}
+                                    <button type="submit" className="btn btn-primary w-100 py-2">
+                                        Register
+                                    </button>
+                                </form>
                             </div>
-
-                            {/* Email Field */}
-                            <div className="form-group mb-3">
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    name="email"
-                                    value={email}
-                                    readOnly
-                                />
-                            </div>
-
-                            {/* Password Field */}
-                            <div className="form-group mb-3">
-                                <input
-                                    type="password"
-                                    className={`form-control ${errors.password ? 'is-invalid' : ''}`}
-                                    name="password"
-                                    {...register('password', {
-                                        required: 'Password is required',
-                                        minLength: {
-                                            value: 6,
-                                            message: 'Password must be at least 6 characters long'
-                                        }
-                                    })}
-                                    placeholder="Enter Password"
-                                />
-                                {errors.password && <div className="invalid-feedback">{errors.password.message}</div>}
-                            </div>
-
-                            {/* Confirm Password Field */}
-                            <div className="form-group mb-3">
-                                <input
-                                    type="password"
-                                    className={`form-control ${errors.confirmPassword ? 'is-invalid' : ''}`}
-                                    name="confirmPassword"
-                                    {...register('confirmPassword', {
-                                        required: 'Please confirm your password',
-                                        validate: value =>
-                                            value === password || 'Passwords do not match'
-                                    })}
-                                    placeholder="Confirm Password"
-                                />
-                                {errors.confirmPassword && (
-                                    <div className="invalid-feedback">{errors.confirmPassword.message}</div>
-                                )}
-                            </div>
-
-                            {/* Display server errors */}
-                            {errors.server && <div className="alert alert-danger">{errors.server.message}</div>}
-
-                            {/* Submit Button */}
-                            <button type="submit" className="btn btn-primary w-100">Register</button>
-                        </form>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     );
 };
-
 
 export default SetPassword;

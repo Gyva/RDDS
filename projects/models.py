@@ -7,6 +7,7 @@ from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 from django.utils.text import slugify
 
+
 class User(AbstractUser):
     ROLE_CHOICES = (
         ('SUPERVISOR', 'Supervisor'),
@@ -206,8 +207,18 @@ class Message(models.Model):
 
     def __str__(self):
         return f"Message from {self.sender.email} at {self.timestamp}"
+#upload file
+class ProjectFile(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    file = models.FileField(upload_to='documents/', validators=[FileExtensionValidator(['pdf'])])
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    
+    # Track the uploader
+    uploader = models.ForeignKey(Student, on_delete=models.CASCADE)
 
-# ProjectFile model  
+    def __str__(self):
+        return f"File for Project: {self.project.title} uploaded by {self.uploader.reg_no}"
+
 def project_file_upload_path(instance, filename):
     main_student_reg_no = instance.project.student.reg_no if instance.project.student else ''
     # Get the registration numbers of all collaborators
@@ -228,15 +239,5 @@ def project_file_upload_path(instance, filename):
     # Construct the new filename using all students' reg_no and slugified filename
     new_filename = f"{reg_no_part}_{filename_slug}{extension}"
     
-    # Return the full path to store the file, e.g., "static/documents/24rp00001_24rp00002_final-report.pdf"
-    return f"static/documents/{new_filename}"  
-class ProjectFile(models.Model):
-    project = models.ForeignKey(Project, on_delete=models.CASCADE)
-    file = models.FileField(upload_to=project_file_upload_path, validators=[FileExtensionValidator(['pdf'])])
-    uploaded_at = models.DateTimeField(auto_now_add=True)
-    
-    # Track the uploader
-    uploader = models.ForeignKey(Student, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return f"File for Project: {self.project.title} uploaded by {self.uploader.reg_no}"
+    # Return the full path to store the file, e.g., "media/documents/24rp00001_24rp00002_final-report.pdf"
+    return os.path.join('documents', new_filename)  # Store in the 'documents' directory under MEDIA_ROOT
