@@ -3,6 +3,7 @@ import * as XLSX from 'xlsx';
 import DataTable from 'react-data-table-component'; // Importing DataTable
 import { AuthContext } from '../contexts/AuthProvider';
 import 'bootstrap/dist/css/bootstrap.min.css'; // Importing Bootstrap for styling
+import { useNavigate } from 'react-router-dom';
 
 const DepartmentReport = () => {
     const [data, setData] = useState({});
@@ -12,9 +13,14 @@ const DepartmentReport = () => {
     const [viewMode, setViewMode] = useState('both');
     const [userDepartment, setUserDepartment] = useState(null);
     const { auth, api } = useContext(AuthContext);
+    const navigate = useNavigate()
 
     useEffect(() => {
         const fetchData = async () => {
+            if(auth.role === 'STUDENT' ){
+                navigate('/dashboard')
+            }
+
             try {
                 let departmentId = null;
 
@@ -48,8 +54,8 @@ const DepartmentReport = () => {
                 const students = responseStudents.data;
 
                 // Filter students and supervisors based on department for HOD
-                const filteredStudents = auth.role === 'HOD' ? students.filter(student => student.department === departmentId) : students;
-                const filteredSupervisors = auth.role === 'HOD' ? supervisors.filter(supervisor => supervisor.department === departmentId) : supervisors;
+                const filteredStudents = auth.role === 'HOD' ? students.filter(student => student.dpt_id === departmentId) : students;
+                const filteredSupervisors = auth.role === 'HOD' ? supervisors.filter(supervisor => supervisor.dpt_id === departmentId) : supervisors;
 
                 // Add student count to each supervisor
                 const supervisorsWithStudentCount = filteredSupervisors.map(supervisor => {

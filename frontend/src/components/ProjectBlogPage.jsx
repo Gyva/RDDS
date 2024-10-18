@@ -52,6 +52,7 @@ const ProjectBlogPage = () => {
         if (response.data.department_id !== null) {
           const [supervisorsResponse, studentsResponse] = await Promise.all([
             axios.get(`http://127.0.0.1:8000/api/supervisors/?dpt_id=${response.data.department_id}`, {
+
               headers: {
                 'Content-Type': 'application/json',
               },
@@ -63,10 +64,11 @@ const ProjectBlogPage = () => {
             }),
           ]);
 
+
           setDepartmentSupervisors(supervisorsResponse.data);
           setDepartmentStudents(studentsResponse.data);
         }
-        
+
 
         // Fetch department name
         const departments = await axios.get(`http://127.0.0.1:8000/api/departments/`);
@@ -90,7 +92,7 @@ const ProjectBlogPage = () => {
           console.log("supervisor on this project: " + supervisor.data)
         }
 
-        
+
         console.log("Coolb details ", collaboratorsDetails)
         setProject((prevProject) => ({
           ...prevProject,
@@ -117,7 +119,7 @@ const ProjectBlogPage = () => {
           // if (response.data.collaborators.length > 0) {
           // console.log("Collaborators:", response.data.collaborators);
 
-          
+
 
 
 
@@ -186,10 +188,10 @@ const ProjectBlogPage = () => {
 
       }
 
-      const response2 = await api.post(`http://127.0.0.1:8000/api/conversations/`, {project_id: id});
+      const response2 = await api.post(`http://127.0.0.1:8000/api/conversations/`, { project_id: id });
       // Now approve the project
       await handleApprovalChange('Approved');
-      
+
 
 
       window.$('#approveModal').modal('hide');
@@ -339,38 +341,37 @@ const ProjectBlogPage = () => {
   const handleFileChange = (e) => {
     setFile(e.target.files[0]); // Set the selected file to state
   };
+  // Function to convert a file to Base64 format
+  const fileToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+    });
+  };
 
-  const handleUpload = async () => {
-    if (!file) {
-      setUploadMessage("Please select a file first!");
-      return;
-    }
-  
+
+  const handleUpload = async (file, projectId) => {
     const formData = new FormData();
-    console.log(file)
-    formData.append('file', file); // Add the file to the form data
-    formData.append('project', id); // Include project ID or other data if needed
+    formData.append('file', file); // The file itself
+    formData.append('project', id); // The project ID
   
     try {
-      const response = await api.post('http://127.0.0.1:8000/api/project-files/', formData, {
+      const response = await axios.post('http://127.0.0.1:8000/api/project-files/', formData, {
         headers: {
-          'Content-Type': 'multipart/form-data', // Let Axios handle boundary
+          'Content-Type': 'application/json',
         },
       });
   
-      setUploadMessage('File uploaded successfully!');
-      setFile(null); // Clear the file input
+      console.log('File uploaded successfully:', response.data);
     } catch (error) {
-      console.error("Error uploading file:", error);
-      if (error.response) {
-        setUploadMessage(`Failed to upload file: ${error.response.data.detail || error.message}`);
-      } else {
-        setUploadMessage('Error: Please check your network and try again.');
-      }
+      console.error('Error uploading file:', error.response ? error.response.data : error.message);
     }
   };
   
-  
+
+
 
   const handleClose = () => {
     setShowModal(false);
@@ -469,7 +470,7 @@ const ProjectBlogPage = () => {
               </button>
             </div>
           )}
-          {project.completion_status === true && (project.student_id || project.supervisor_id) && (auth.role?.toUpperCase() === 'STUDENT' || auth.role?.toUpperCase() === 'SUPERVISOR' || auth.role?.toUpperCase() === 'HOD') && (
+          {project.completion_status === true && !(projectStudentInfo?.reg_no?.toUpperCase() === auth.user?.toUpperCase()) && (project.student_id || project.supervisor_id) && (auth.role?.toUpperCase() === 'STUDENT' || auth.role?.toUpperCase() === 'SUPERVISOR' || auth.role?.toUpperCase() === 'HOD') && (
             <button className="btn btn-info ml-2" onClick={handleImproveContent} data-toggle="modal" data-target="#improveModal">
               Request Improvement On This Project
             </button>
@@ -510,7 +511,7 @@ const ProjectBlogPage = () => {
                       required
                     >
                       <option value="">Select Student</option>
-                      {departmentStudents.map(student => (
+                      {departmentStudents.map(student => student.dpt_id === (
                         <option key={student.st_id} value={student.st_id}>
                           {student.fname} {student.lname}
                         </option>

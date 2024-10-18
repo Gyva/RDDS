@@ -11,6 +11,7 @@ const Chat = () => {
   const { auth, api } = useContext(AuthContext); // Auth context values
   const location = useLocation(); // Get state from the navigation
   const { studentId, projectId, conversationId } = location.state || {};
+  const [completionStatus, setCompletionStatus] = useState();
   const messageContainerRef = useRef(null); // Reference for the messages container
 
   // Function to fetch messages for a conversation
@@ -38,6 +39,7 @@ const Chat = () => {
     try {
       const response = await api.get(`http://127.0.0.1:8000/api/projects/${projectId}/`);
       setProjectTitle(response.data.title); // Set the project title
+      setCompletionStatus(response.data.completion_status)
     } catch (error) {
       console.error("Failed to fetch project title: ", error);
     }
@@ -133,7 +135,9 @@ const Chat = () => {
       </div>
 
       {/* Message input section */}
-      <div className='message-send-sect rounded-top-1 fixed-bottom'>
+      {console.log(completionStatus)}
+      {!completionStatus && (
+        <div className='message-send-sect rounded-top-1 fixed-bottom'>
         <form className='d-flex ml-3 mr-3' onSubmit={handleSendMessage}>
           <textarea
             className='form-group form-control'
@@ -148,6 +152,7 @@ const Chat = () => {
           </button>
         </form>
       </div>
+      )}
     </div>
   );
 };

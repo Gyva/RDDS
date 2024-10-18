@@ -961,21 +961,33 @@ class MessageViewSet(viewsets.ModelViewSet):
         return queryset.order_by('timestamp')  # Order by newest first
 
 class ProjectFileViewSet(viewsets.ModelViewSet):
-    queryset = ProjectFile.objects.all()
     serializer_class = ProjectFileSerializer
-    permission_classes = [IsAuthenticated]
 
-    def perform_create(self, serializer):
-        # Retrieve the user who is uploading the file
-        user = self.request.user
-        
-        # Ensure the user is a Student and associated with the project
-        student = user.student  # Assuming 'student' is linked to the user
-        project = serializer.validated_data['project']
-        
-        # Check if the student is the main project student or a collaborator
-        if project.student == student or project.collaborators.filter(st_id=student.st_id).exists():
-            # Save the file, with the uploader being the current student
-            serializer.save(uploader=student)
-        else:
-            raise PermissionDenied("You are not authorized to upload files for this project.")
+    def get_queryset(self):
+        # Optionally filter by project_id or other criteria, e.g., only return files for a specific project
+        project_id = self.request.query_params.get('project_id', None)
+        if project_id:
+            return ProjectFile.objects.filter(project_id=project_id)
+        return ProjectFile.objects.all()
+
+
+    def post(self, request, *args, **kwargs):
+        try:
+            # Extract the file and project_id from the request
+            file = request.FILES.get('file')
+            project_id = request.data.get('project')
+
+            # Get the project instance
+            project = Project.objects.get(id=project_id)
+
+            # Save the file in the ProjectFile model
+            project_file = ProjectFile.objects.create(
+                project=project,
+                file=file,  # Save the uploaded file directly
+                uploader= request.user.student  # Assuming user is a student
+            )
+
+            return Response({'message': 'File uploaded successfully!'}, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)

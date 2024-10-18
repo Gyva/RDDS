@@ -33,7 +33,7 @@ const Sidebar = ({ isVisible, role }) => {
         console.log(studentId)
 
         const projectsResponse = await api.get(`http://127.0.0.1:8000/api/projects/`);
-        projectId = projectsResponse.data?.find((project) => (project.student_id === studentId || project.collaborators.includes(studentId)) && project.approval_status === 'Approved');
+        projectId = projectsResponse.data?.find((project) => (project.student_id === studentId || project.collaborators.includes(studentId)));
         projectId = projectId.project_id
         console.log(projectId)
 
@@ -51,9 +51,12 @@ const Sidebar = ({ isVisible, role }) => {
       }
       // Fetch the conversation ID for the project
       const conversationResponse = await api.get(`http://127.0.0.1:8000/api/conversations/`);
-      const conversation = await conversationResponse.data.find((c)=>c.project === projectId)
-      console.log("Consoling: ",conversation)
-      conversationId = conversation.id;
+      const conversation = await conversationResponse.data.find((c) => c.project === projectId)
+      console.log("Consoling: ", conversation)
+      conversationId = conversation?.id;
+      if (conversationId === null) {
+        alert("You have no ongoing chats")
+      }
 
       // console.log("Conversation ID: " + conversationId)
       // console.log(`Student ID: ${studentId} Project ID: ${projectId} Conversation ID: ${conversationId}`)
@@ -63,6 +66,7 @@ const Sidebar = ({ isVisible, role }) => {
 
     } catch (error) {
       console.error('Error fetching chat data:', error);
+      alert('You have no ongoing chats.')
     }
   };
 
@@ -92,6 +96,11 @@ const Sidebar = ({ isVisible, role }) => {
     hod: (
       <>
         <li className="nav-item">
+          <a href="/create-project" className="nav-link">
+            <i className="nav-icon fas fa-clipboard-list me-2"></i> Register a project
+          </a>
+        </li>
+        <li className="nav-item">
           <a href="/manage-projects" className="nav-link">
             <i className="nav-icon fas fa-file-alt me-2"></i> Submitted projects
           </a>
@@ -110,6 +119,7 @@ const Sidebar = ({ isVisible, role }) => {
         <li className="nav-item">
           <a href="/change-password" className="nav-link">
             <i className="nav-icon fas fa-lock me-2"></i> Change Password
+
           </a>
         </li>
       </>
@@ -199,7 +209,7 @@ const Sidebar = ({ isVisible, role }) => {
         </li>
         {/* Chat menu item for supervisor */}
         <li className="nav-item">
-          <a href="/conversations"  className="nav-link">
+          <a href="/conversations" className="nav-link">
             <i className="nav-icon fas fa-comments me-2"></i> Conversations
           </a>
         </li>
@@ -209,21 +219,26 @@ const Sidebar = ({ isVisible, role }) => {
       <>
         <li className="nav-item">
           <a href="/create-project" className="nav-link">
-            <i className="nav-icon fas fa-money-check-alt me-2"></i> Register a project
+            <i className="nav-icon fas fa-money-check-alt me-2"></i> Register a Project
           </a>
         </li>
         <li className="nav-item">
           <a href={`/my-projects/${auth.user}`} className="nav-link">
-            <i className="nav-icon fas fa-tasks me-2"></i> My project(s)
+            <i className="nav-icon fas fa-tasks me-2"></i> My Project(s)
           </a>
-
         </li>
         <li className="nav-item">
           <a href="#!" onClick={handleChatClick} className="nav-link">
             <i className="nav-icon fas fa-comments me-2"></i> Chat
           </a>
         </li>
+        <li className="nav-item">
+          <a href="/change-password" className="nav-link">
+            <i className="nav-icon fas fa-lock me-2"></i> Change Password
+          </a>
+        </li>
       </>
+
     ),
     admin: (
       <>

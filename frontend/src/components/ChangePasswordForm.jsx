@@ -29,6 +29,7 @@ const ChangePasswordForm = () => {
             const response = await api.post(URL, {
                 old_password: data.old_password,
                 new_password: data.new_password,
+                confirm_new_password: data.confirm_new_password,
                 user: auth.user
             });
             
@@ -36,8 +37,14 @@ const ChangePasswordForm = () => {
             setErrorMessage('');
             reset(); // Reset form fields after successful submission
         } catch (error) {
-            setErrorMessage('Failed to change password. Please try again.');
+            
             console.error('Error:', error);
+            if(error.status === 500){
+                setErrorMessage('The password is too similar to your names. Try another one?');
+            }
+            if(error.status === 400){
+                setErrorMessage('Failed to change password. Please try again.');
+            }
         }
     };
 

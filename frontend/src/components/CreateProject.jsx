@@ -32,7 +32,7 @@ const CreateProject = () => {
                 setSuccessMessage('Project created successfully!');
             }            
         } catch (error) {
-            setErrorMessage('An error occurred while creating the project.');
+            setErrorMessage('A project with a high similarity to yours was submitted earlier. Please improve your submission and try your best to make it unique.');
         }
     };
 
