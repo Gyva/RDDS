@@ -48,6 +48,10 @@ const ProjectBlogPage = () => {
 
         setProject(response.data);
 
+        const collaboratorsDetails = await Promise.all(
+          response.data.collaborators?.map(async (collaborator) => await getUserDetails(collaborator, 'students')) || []
+        );
+
         // Fetch department supervisors and students
         if (response.data.department_id !== null) {
           const [supervisorsResponse, studentsResponse] = await Promise.all([
@@ -64,10 +68,20 @@ const ProjectBlogPage = () => {
             }),
           ]);
 
+          const students = studentsResponse.data.filter((s) => s.dpt_id === response.data.department_id);
+          const supervisors = supervisorsResponse.data.filter((s) => s.dpt_id === response.data.department_id);
 
-          setDepartmentSupervisors(supervisorsResponse.data);
-          setDepartmentStudents(studentsResponse.data);
+          if (supervisors.length > 0) {
+            console.log("Department supervisors: ", supervisors)
+            setDepartmentSupervisors(supervisors);
+          }
+          if (students.length > 0) {
+            console.log("Department students: ", students)
+            setDepartmentStudents(students);
+          }
+
         }
+
 
 
         // Fetch department name
@@ -82,9 +96,7 @@ const ProjectBlogPage = () => {
           setProjectStudentInfo(student.data)
           console.log(student.data)
         }
-        const collaboratorsDetails = await Promise.all(
-          project.collaborators?.map(async (collaborator) => await getUserDetails(collaborator, 'students')) || []
-        );
+
         //fetching the info about the supervisor on this project
         if (response.data.supervisor_id !== null) {
           const supervisor = await axios.get(`http://127.0.0.1:8000/api/supervisors/${response.data.supervisor_id}`)
@@ -132,8 +144,11 @@ const ProjectBlogPage = () => {
 
       } catch (error) {
         console.error('Error fetching project:', error);
+        setErrorMessage(error.response.data.detail || error.response.data.detail);
       }
     };
+
+
 
     fetchProject();
   }, [api, id]);
@@ -197,7 +212,7 @@ const ProjectBlogPage = () => {
       window.$('#approveModal').modal('hide');
     } catch (error) {
       console.error('Error during approval:', error);
-      setErrorMessage('Error during approval process.');
+      setErrorMessage(error.response.data.detail || error.response.data.detail);
     }
   };
 
@@ -219,7 +234,7 @@ const ProjectBlogPage = () => {
       window.$('#addCollaboratorModal').modal('hide');
     } catch (error) {
       console.error('Error adding collaborator:', error);
-      setErrorMessage('Error adding collaborator.');
+      setErrorMessage(error.response.data.detail || error.response.data.detail);
     }
   };
 
@@ -299,13 +314,21 @@ const ProjectBlogPage = () => {
       setProject(response.data);
       window.$('#updateModal').modal('hide');
     } catch (error) {
-      console.error('Error updating project:', error.message);
-      setErrorMessage('Error updating project.', error.message);
+      console.error('Error updating project:', error);
+      setErrorMessage(error.response.data.detail || error.response.data.detail || error.response.data.message);
     }
   };
 
   // Handle request for project improvement
   const handleImproveProject = async (e) => {
+
+    console.log({
+      "title": updatedTitle,
+      "case_study": updatedCaseStudy,
+      "abstract": updatedAbstract,
+      "accademic_year": getAcademicYear(),
+      "collaborators": []
+    })
     e.preventDefault();
     try {
       const response = await api.post(`http://127.0.0.1:8000/api/projects/${id}/improve-project/`, {
@@ -320,11 +343,21 @@ const ProjectBlogPage = () => {
         },
       });
       setSuccessMessage('Improval request sent successfully.');
+      // console.log('Improval request sent successfully.')
       setProject(response.data);
       window.$('#improveModal').modal('hide');
     } catch (error) {
       console.error('Error improving project:', error);
-      setErrorMessage('Error submit the form data. Try again?', error);
+      if (error.status === 403) {
+        setErrorMessage(error.response.data.error);
+      }
+      if (error.status === 400) {
+        setErrorMessage(error.response.data.error);
+      }
+      if (error.status === 500) {
+        setErrorMessage(error.response.data.error);
+      }
+      window.$('#improveModal').modal('hide');
     }
   };
 
@@ -356,20 +389,21 @@ const ProjectBlogPage = () => {
     const formData = new FormData();
     formData.append('file', file); // The file itself
     formData.append('project', id); // The project ID
-  
+
     try {
       const response = await axios.post('http://127.0.0.1:8000/api/project-files/', formData, {
         headers: {
           'Content-Type': 'application/json',
         },
       });
-  
+
       console.log('File uploaded successfully:', response.data);
     } catch (error) {
       console.error('Error uploading file:', error.response ? error.response.data : error.message);
+      setErrorMessage(error.response.data.detail || error.response.data.detail);
     }
   };
-  
+
 
 
 

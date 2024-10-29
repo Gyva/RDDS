@@ -251,6 +251,11 @@ const Sidebar = ({ isVisible, role }) => {
           <a href="/manage-registrar" className="nav-link">
             <i className="nav-icon fas fa-tasks me-2"></i> Manage registrar
           </a>
+          <li className="nav-item">
+          <a href="/my-department" className="nav-link">
+            <i className="nav-icon fas fa-sitemap me-2"></i> Departments Report
+          </a>
+        </li>
 
         </li>
         <li className="nav-item">
@@ -259,11 +264,7 @@ const Sidebar = ({ isVisible, role }) => {
           </a>
 
         </li>
-        <li className="nav-item">
-          <a href="/re" onClick={handleChatClick} className="nav-link">
-            <i className="nav-icon fas fa-comments me-2"></i> Chat
-          </a>
-        </li>
+        
       </>
     )
 
@@ -271,10 +272,10 @@ const Sidebar = ({ isVisible, role }) => {
   };
 
   return (
-    <aside className={`main-sidebar ${isVisible ? '' : 'd-none'}`}>
+    <aside className={`main-sidebar ${isVisible ? '' : 'd-none'} fixed-top`}>
       {/* {console.log(user)} */}
       <a href="/" className="brand-link">
-        <span className="brand-text">{auth.user?.toUpperCase()}</span>
+        <span className="brand-text">{auth.user?.toUpperCase() || "NGOMA's " +role}</span>
       </a>
 
       <div className="sidebar">

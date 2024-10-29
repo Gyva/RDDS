@@ -1,9 +1,10 @@
 import spacy
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
-from nltk import word_tokenize, sent_tokenize
 from .models import Project
 import torch
+
+
 
 
 # Load an NLP model for Named Entity Recognition (NER)
@@ -123,15 +124,19 @@ def check_improvement_similarity(original_project, improved_title, improved_abst
         print(f"Abstract similarity too high: {abstract_similarity}")
         return False
 
-    original_sentences = sent_tokenize(original_abstract)
-    improved_sentences = sent_tokenize(improved_abstract)
+    # Use spaCy to count sentences and words in the abstracts
+    original_doc = nlp(original_abstract)
+    improved_doc = nlp(improved_abstract)
 
-    if len(improved_sentences) <= len(original_sentences):
+    original_sentence_count = len(list(original_doc.sents))
+    improved_sentence_count = len(list(improved_doc.sents))
+
+    if improved_sentence_count <= original_sentence_count:
         print("Improved abstract has no significant structural changes.")
         return False
 
-    original_word_count = len(word_tokenize(original_abstract))
-    improved_word_count = len(word_tokenize(improved_abstract))
+    original_word_count = len([token for token in original_doc if not token.is_punct])
+    improved_word_count = len([token for token in improved_doc if not token.is_punct])
 
     if improved_word_count <= original_word_count:
         print("Improved abstract word count is not greater than the original.")
@@ -139,6 +144,7 @@ def check_improvement_similarity(original_project, improved_title, improved_abst
 
     print("Project improvement is significant.")
     return True
+
 
 #Update existing project
 def backup_project_data(project):

@@ -10,8 +10,8 @@ const ManageSubmittedProjects = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeSection, setActiveSection] = useState('All Submitted'); // Default to 'All Submitted'
-  const [departmentId, setDepartmentId] = useState(null); // Add state for department ID
   const { auth, api, logout, refreshToken } = useContext(AuthContext);
+  const [departmentId, setDepartmentId] = useState(null); // Add state for department ID
 
   const fetchProjectsWithNames = async () => {
     try {
@@ -24,7 +24,7 @@ const ManageSubmittedProjects = () => {
       const projectsWithNames = await Promise.all(response.data.map(async (project) => {
         const studentDetails = project.student_id ? await getUserDetails(project.student_id, 'students') : { name: 'N/A', regNo: 'N/A' };
         const supervisorDetails = project.supervisor_id ? await getUserDetails(project.supervisor_id, 'supervisors') : { name: 'N/A', regNo: 'N/A' };
-
+        
         // Fetch collaborators if any
         const collaboratorsDetails = await Promise.all(
           project.collaborators?.map(async (collaborator) => await getUserDetails(collaborator, 'students')) || []
@@ -76,9 +76,9 @@ const ManageSubmittedProjects = () => {
     { name: 'Supervisor Name', selector: (row) => row.supervisor_name, sortable: true, width: '200px' },
     { name: 'Supervisor Reg No', selector: (row) => row.supervisor_reg, sortable: true, width: '150px' },
     {
-      name: 'Collaborators',
-      selector: (row) => row.collaborators?.map(collab => `${collab.name} (Reg No: ${collab.regNo})`).join(', '),
-      sortable: false,
+      name: 'Collaborators', 
+      selector: (row) => row.collaborators?.map(collab => `${collab.name} (Reg No: ${collab.regNo})`).join(', '), 
+      sortable: false, 
       width: '250px',
       cell: (row) => (
         <div title={row.collaborators.map(c => c.name).join(', ')}>
@@ -147,25 +147,25 @@ const ManageSubmittedProjects = () => {
         }
       }
 
-      if (auth.role?.toUpperCase() === 'HOD') {
+      // Fetch the department ID for HOD
+      if (auth.role === 'HOD') {
         try {
-          const response = await api.get(`http://127.0.0.1:8000/api/supervisors/`);
-          const supervisor = await response.data.find((sup) => sup.reg_num.toLowerCase() === auth.user?.toLowerCase())
+          const response = await api.get(`http://127.0.0.1:8000/api/supervisors/?reg_num=${auth.user}`);
+          const supervisor = response.data[0]; // Assuming reg_num is unique
           setDepartmentId(supervisor.dpt_id);
         } catch (error) {
           console.error('Error fetching supervisor details:', error);
         }
       }
+
       fetchProjectsWithNames();
     };
 
     fetchData();
   }, [auth.accessToken, refreshToken, logout]);
 
-  const filteredDepartmentProjects = () => {
-    return departmentId ? projects.filter(project => project.department_id === departmentId) : projects;
-  };
-
+  // Filter projects based on the department for HOD
+  
   const generateReport = (status) => {
     const reportTitle = `${status} Projects Report`;
 
@@ -206,51 +206,31 @@ const ManageSubmittedProjects = () => {
             className={`btn ${activeSection === status ? 'btn-primary' : 'btn-secondary'} me-2`}
             onClick={() => setActiveSection(status)}
           >
-            {status} Projects
+            {status}
           </button>
         ))}
       </div>
 
-      <div className="project-section">
-        <h3>{activeSection} Projects</h3>
-        <button className="btn btn-success mb-3" onClick={() => generateReport(activeSection)}>
-          Generate {activeSection} Projects Report
-        </button>
+      {loading ? (
+        <p>Loading projects...</p>
+      ) : (
         <DataTable
           columns={columns}
-          data={
-            auth.role?.toUpperCase() === 'HOD' // If the user is an HOD, show department projects only
-              ? filteredDepartmentProjects().filter((project) =>
-                activeSection === 'Completed'
-                  ? project.completion_status === true
-                  : ['Approved', 'Pending', 'Rejected'].includes(activeSection)
-                    ? project.approval_status === activeSection
-                    : true // For "All Submitted" section
-              )
-              : activeSection === 'Completed'
-                ? completedProjects
-                : activeSection === 'All Submitted'
-                  ? allSubmittedProjects
-                  : filteredProjects(activeSection)
-          }
-          progressPending={loading}
+          data={activeSection === 'All Submitted' ? filteredDepartmentProjects() : filteredProjects(activeSection)}
           pagination
-          responsive
-          highlightOnHover
-          noDataComponent={`No ${activeSection.toLowerCase()} projects available`}
-          customStyles={{
-            cells: {
-              style: {
-                maxWidth: '150px',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-              },
-            },
-          }}
         />
+      )}
 
-
+      <div className="report-buttons mt-4">
+        {['Approved', 'Pending', 'Rejected', 'Completed'].map((status) => (
+          <button
+            key={status}
+            className="btn btn-success me-2"
+            onClick={() => generateReport(status)}
+          >
+            Generate {status} Projects Report
+          </button>
+        ))}
       </div>
     </div>
   );

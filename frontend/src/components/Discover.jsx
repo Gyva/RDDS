@@ -124,7 +124,7 @@ const Discover = () => {
               {project.collaborators && project.collaborators.length > 0 && (
                 <p><strong>Collaborators:</strong> {project.collaborators.map((collab, index) => (
                   <span key={index}>
-                    {collab.name} (Reg No: {collab.regNo}){index < project.collaborators.length - 1 && ', '}
+                    {collab.name} {index < project.collaborators.length - 1 && ', '}
                   </span>
                 ))}</p>
               )}

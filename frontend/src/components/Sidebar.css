@@ -69,8 +69,9 @@
 }
 
 @media (max-width: 768px) {
-  .sidebar-footer {
-    display: none;
+  .main-sidebar {
+    position: fixed;
+    transition: left 0.3s ease-in-out;
   }
   .brand-link {
     padding: 23px;

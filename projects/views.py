@@ -714,16 +714,18 @@ class ProjectViewSet(viewsets.ModelViewSet):
                                 status=status.HTTP_400_BAD_REQUEST)
 
             # Ensure the requesting user is a student
-            if not hasattr(request.user, 'student'):
+            if not (request.user.role == 'STUDENT'):
                 return Response({"error": "Only students can submit improved projects."},
                                 status=status.HTTP_403_FORBIDDEN)
 
-            student = request.user.student  # Access student instance linked to the user
+              # Access student instance linked to the user
+            student_info = Student.objects.get(account=request.user.id)
+            student= student_info.st_id
 
             # Check if the student is eligible (Level 6 Year 3 or Level 7 B-Tech)
-            if student.l_id.l_name not in ['Level 6 Year 3', 'Level 7 B-Tech']:
-                return Response({"error": "You are not eligible to submit an improved project."},
-                                status=status.HTTP_400_BAD_REQUEST)
+            # if student.l_name not in ['Level 7', 'B-Tech']:
+            #     return Response({"error": "You are not eligible to submit an improved project."},
+            #                     status=status.HTTP_400_BAD_REQUEST)
 
             # Ensure the student has no other approved project
             if Project.objects.filter(student=student, approval_status='Approved').exists():
@@ -731,7 +733,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
                                 status=status.HTTP_400_BAD_REQUEST)
 
             # Check that the student's department matches the project's department
-            if student.dpt_id != original_project.department:
+            if student_info.dpt_id != original_project.department:
                 return Response({"error": "You can only improve projects from your own department."},
                                 status=status.HTTP_400_BAD_REQUEST)
 
@@ -751,7 +753,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
             supervisor = original_project.supervisor
 
             # Run the improvement similarity check (from utils.py)
-            improvement_valid = check_improvement_similarity(original_project.abstract, abstract)
+            improvement_valid = check_improvement_similarity(original_project, improved_abstract=abstract, improved_title=title)
             if not improvement_valid:
                 return Response({"error": "The improvement is insufficient or too similar to the original project."},
                                 status=status.HTTP_400_BAD_REQUEST)
@@ -779,8 +781,8 @@ class ProjectViewSet(viewsets.ModelViewSet):
                     abstract=abstract,
                     case_study=case_study,
                     supervisor=supervisor,  # Keep the original supervisor
-                    student=student,
-                    improvement_of=original_project,
+                    student=student_info,
+                    improved_project=original_project,
                     department=original_project.department,  # Same department
                     check_status=False,  # New project must go through the approval process
                     approval_status='Pending',  # HoD must approve it
