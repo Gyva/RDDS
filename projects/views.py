@@ -682,6 +682,7 @@ class ProvideFeedbackView(APIView):
         """
         try:
             project = Project.objects.get(project_id=project_id)
+            #check JJ
         except Project.DoesNotExist:
             return Response({'error': 'Project not found.'}, status=status.HTTP_404_NOT_FOUND)
 
