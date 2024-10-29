@@ -1,0 +1,80 @@
+/* General layout */
+.app-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.content-wrapper {
+    display: flex;
+    flex: 1;
+    transition: margin-left 0.9s ease-in-out;
+    padding-top: 60px; /* To account for the fixed navbar */
+}
+
+/* Adjust for visible sidebar */
+.sidebar-visible .main-content {
+    margin-left: 230px;
+}
+
+/* Adjust for hidden sidebar */
+.sidebar-hidden .main-content {
+    margin-left: 10px;
+}
+
+/* Main content styling */
+.main-content {
+    flex: 1;
+    padding: 15px;
+    background-color: #f1f1f1;
+    min-height: calc(100vh - 60px); /* Adjust for the fixed navbar */
+    align-items: center;
+}
+
+/* Sidebar styles */
+.sidebar-visible .content-wrapper {
+    margin-top: 60px; /* Align below navbar */
+}
+.sidebar-visible .message-send-sect {
+    margin-left: 250px; /* Align besides sidebar */
+    transition: margin-left 0.1s ease-in-out;
+}
+.sidebar-visible .header-text {
+    margin-left: 249px; /* Align besides sidebar */
+    transition: margin-left 0.1s ease-in-out;
+}
+
+.sidebar-hidden .content-wrapper {
+    margin-left: 0;
+}
+
+/* Navbar adjustments */
+.main-header.navbar {
+    width: 100%;
+}
+
+/* Sidebar and navbar behavior for small screens */
+@media (max-width: 768px) {
+    .content-wrapper {
+        flex-direction: column;
+        margin-left: 0px;
+    }
+
+    /* Sidebar should be below the navbar on smaller screens */
+    .sidebar-visible .main-content {
+        margin-left: 10px; /* Small margin on mobile */
+    }
+
+    .sidebar-hidden .main-content {
+        margin-left: 2px;
+    }
+}
+
+/* Toggler button margin when sidebar is visible/hidden */
+.with-sidebar .toggler-button {
+    margin-left: 250px; /* When sidebar is visible */
+}
+
+.without-sidebar .toggler-button {
+    margin-left: 10px; /* When sidebar is hidden */
+}

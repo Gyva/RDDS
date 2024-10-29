@@ -4,9 +4,37 @@ from django.db import models
 from django.core.validators import FileExtensionValidator
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+from django.utils import timezone
+from django.utils.text import slugify
 
 
+class User(AbstractUser):
+    ROLE_CHOICES = (
+        ('SUPERVISOR', 'Supervisor'),
+        ('STUDENT', 'Student'),
+        ('REGISTER', 'Register'),
+        ('ADMIN', 'Admin'),
+        ('HOD', 'Hod')
+    )
+
+    role = models.CharField(max_length=25, choices=ROLE_CHOICES, default='STUDENT')
+    groups = models.ManyToManyField(
+        "auth.Group",
+        related_name="custom_user_set",  # Custom related_name to avoid conflict
+        blank=True,
+        verbose_name="groups",
+        help_text="The groups this user belongs to.",
+    )
+    
+    user_permissions = models.ManyToManyField(
+        "auth.Permission",
+        related_name="custom_user_set",  # Custom related_name to avoid conflict
+        blank=True,
+        verbose_name="user permissions",
+        help_text="Specific permissions for this user.",
+    )
 # Function to generate a unique profile picture filename
+
 def unique_image_path(instance, filename):
     ext = filename.split('.')[-1]
     unique_filename = f"{uuid.uuid4().hex}.{ext}"
@@ -36,13 +64,13 @@ class Supervisor(models.Model):
     lname = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
     phone = models.CharField(unique=True, max_length=15)
-    profile_pic = models.ImageField(upload_to=unique_image_path, validators=[FileExtensionValidator(['jpg', 'jpeg', 'png'])])
+    profile_pic = models.ImageField(upload_to=unique_image_path, validators=[FileExtensionValidator(['jpg', 'jpeg', 'png'])], default='static/supervisor/ef7f1db6dc4f4b148121cbfdad0d32be.jpg')
     specialization = models.CharField(max_length=255)
     dpt_id = models.ForeignKey(Department, on_delete=models.CASCADE)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
     
     # New field to link Supervisor to a user account
-    account = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+    account = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         if not self.reg_num:
@@ -92,47 +120,124 @@ class Student(models.Model):
     dpt_id = models.ForeignKey(Department, on_delete=models.CASCADE)
     f_id = models.ForeignKey(Faculty, on_delete=models.CASCADE)
     l_id = models.ForeignKey(Level, on_delete=models.CASCADE)
-    profile_pic = models.ImageField(upload_to=unique_image_path, validators=[FileExtensionValidator(['jpg', 'jpeg', 'png'])])
+    profile_pic = models.ImageField(upload_to=unique_image_path, validators=[FileExtensionValidator(['jpg', 'jpeg', 'png'])], default='static/supervisor/ef7f1db6dc4f4b148121cbfdad0d32be.jpg')
     
     # New field to link Student to a user account
-    account = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+    account = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
     
     def save(self, *args, **kwargs):
         if not self.reg_no:
-            last_student = Student.objects.all().order_by('st_id').last()
-            if last_student:
-                num_part = int(last_student.reg_no[2:7]) + 1
+            last_stu = Student.objects.all().order_by('st_id').last()
+            if last_stu:
+                stud_num = int(last_stu.reg_no[4:]) + 1
             else:
-                num_part = 0
-            self.reg_no = f"24rp{num_part:05d}"
+                stud_num = 0
+            self.reg_no = f"24rp{stud_num:05d}"
         super(Student, self).save(*args, **kwargs)
     
     def __str__(self):
         return f'{self.fname} {self.lname}'
 
+#project model
+class Project(models.Model):
+    APPROVAL_STATUS_CHOICES = [
+        ('Approved', 'Approved'),
+        ('Rejected', 'Rejected'),
+        ('Pending', 'Pending'),
+    ]
+    project_id = models.AutoField(primary_key=True)
+    student = models.ForeignKey(Student, on_delete=models.SET_NULL, null=True, blank=True)  # Student submitting the project
+    title = models.CharField(max_length=200, unique=True, editable=True)
+    case_study = models.CharField(max_length=200)
+    abstract = models.TextField()
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)  # Automatically set from student or supervisor
+    supervisor = models.ForeignKey(Supervisor, on_delete=models.SET_NULL, null=True, blank=True)  # Supervisor's project won't have a student
+    check_status = models.BooleanField(default=False)  # AI uniqueness test
+    approval_status = models.CharField(max_length=10, choices=APPROVAL_STATUS_CHOICES, default='Pending')  # Approval by supervisor/admin
+    completion_status = models.BooleanField(default=False)
+    collaborators = models.ManyToManyField(Student, related_name='collaborated_projects', blank=True)  # Collaborators can join after approval
+    improved_project = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='improvements')
+    accademic_year = models.CharField(max_length=10, null=False, default= None)
 
+    def can_student_submit(self, student):
+        has_approved_project = Project.objects.filter(student=student, approval_status=True).exists()
+        return not has_approved_project
 
-class User(AbstractUser):
-    ROLE_CHOICES = (
-        ('SUPERVISOR', 'Supervisor'),
-        ('STUDENT', 'Student'),
-        ('REGISTER', 'Register'),
-        ('ADMIN', 'Admin'),
-    )
-
-    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='STUDENT')
-    groups = models.ManyToManyField(
-        "auth.Group",
-        related_name="custom_user_set",  # Custom related_name to avoid conflict
-        blank=True,
-        verbose_name="groups",
-        help_text="The groups this user belongs to.",
-    )
+    def is_unique(self):
+        # AI uniqueness check logic
+        from .utils import check_project_uniqueness
+        return check_project_uniqueness(self.title, self.abstract)
     
-    user_permissions = models.ManyToManyField(
-        "auth.Permission",
-        related_name="custom_user_set",  # Custom related_name to avoid conflict
-        blank=True,
-        verbose_name="user permissions",
-        help_text="Specific permissions for this user.",
-    )
+
+    def save(self, *args, **kwargs):
+        if self.is_unique():
+            self.check_status = True
+        super().save(*args, **kwargs)
+
+#Feedback model
+class Feedback(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    feedback_text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Feedback'
+        verbose_name_plural = 'Feedbacks'
+        ordering = ['created_at']
+
+    def __str__(self):
+        return f"Feedback from {self.user} on {self.project.title}"
+
+#Conversation model   
+class Conversation(models.Model):
+    project = models.ForeignKey('Project', on_delete=models.CASCADE, related_name='conversations')
+    participants = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='conversations')
+    created_at = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return f"Conversation for project: {self.project.title}"
+
+#Message model
+class Message(models.Model):
+    conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='messages')
+    sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    text = models.TextField()
+    timestamp = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return f"Message from {self.sender.email} at {self.timestamp}"
+#upload file
+class ProjectFile(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    file = models.FileField(upload_to='documents/', validators=[FileExtensionValidator(['pdf'])])
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    
+    # Track the uploader
+    uploader = models.ForeignKey(Student, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"File for Project: {self.project.title} uploaded by {self.uploader.reg_no}"
+
+def project_file_upload_path(instance, filename):
+    main_student_reg_no = instance.project.student.reg_no if instance.project.student else ''
+    # Get the registration numbers of all collaborators
+    collaborator_reg_nos = instance.project.collaborators.values_list('reg_no', flat=True)
+    
+    # Combine the main student's reg_no with all collaborator reg_nos
+    all_reg_nos = [main_student_reg_no] + list(collaborator_reg_nos)
+    
+    # Join all reg_nos with underscores
+    reg_no_part = '_'.join(all_reg_nos)
+    
+    # Slugify the filename to avoid issues with special characters
+    filename_slug = slugify(os.path.splitext(filename)[0])
+    
+    # Get the file extension (e.g., '.pdf', '.docx')
+    extension = os.path.splitext(filename)[1]
+    
+    # Construct the new filename using all students' reg_no and slugified filename
+    new_filename = f"{reg_no_part}_{filename_slug}{extension}"
+    
+    # Return the full path to store the file, e.g., "media/documents/24rp00001_24rp00002_final-report.pdf"
+    return os.path.join('documents', new_filename)  # Store in the 'documents' directory under MEDIA_ROOT
